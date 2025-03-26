@@ -10,3 +10,5 @@ service.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+export {service as axios};
