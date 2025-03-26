@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
-    "commit": "cross-env-shell git add . && git commit -m '%npm_config_msg%' && git push",
+    "commit": "cross-env-shell git add . && git commit -m %npm_config_msg% && git push",
     "submit": "git add . && git commit -m \"%npm_config_msg%\" && git push"
   },
   "dependencies": {
