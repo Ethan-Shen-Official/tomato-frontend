@@ -18,7 +18,7 @@ const loginDisabled = computed(() => {
 })
 
 // 登录按钮触发
-function HandleLogin() {
+function handleLogin() {
   handlelogin({
     username: username.value,
     password: password.value
@@ -70,7 +70,7 @@ function HandleLogin() {
           </el-form-item>
 
           <span class="button-group">
-              <el-button @click.prevent="" :disabled="loginDisabled"
+              <el-button @click.prevent="handleLogin" :disabled="loginDisabled"
                          type="primary">登入</el-button>
               <router-link to="/register" v-slot="{navigate}">
                 <el-button @click="navigate">去注册</el-button>
