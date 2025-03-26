@@ -8,12 +8,12 @@ const routes = createRouter({
   },
   {
     path: '/login',
-    component: () => import('../views/Login.vue'),
+    component: () => import('../views/user/Login.vue'),
     meta: { title : 'Login' }
   },
   {
     path: '/register',
-    component: () => import('../views/Register.vue'),
+    component: () => import('../views/user/Register.vue'),
     meta: { title : 'Register' }
   }
   ],
