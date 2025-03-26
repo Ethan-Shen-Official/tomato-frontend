@@ -18,3 +18,5 @@ const routes = createRouter({
   }
   ],
 })
+
+export { routes }
