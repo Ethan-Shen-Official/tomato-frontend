@@ -3,7 +3,7 @@
 
 <template>
   <el-container type="vertical">
-  <router-view />
+    <router-view />
   </el-container>
 </template>
 
