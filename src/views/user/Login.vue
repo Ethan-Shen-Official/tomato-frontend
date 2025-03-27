@@ -49,50 +49,73 @@ function handleLogin() {
 </script>
 
 <template>
-  <el-main class="main">
-    <el-card class="box-card">
-      <div>
-        <h1>登录</h1>
-        <el-form>
-          <el-form-item>
-            <label for="username">用户名</label>
-            <el-input id="tele" type="text" v-model="username"
-                      required
-                      placeholder="请输入手机号"/>
-          </el-form-item>
+  <div class="login-page">
+    <div class="login-container">
+      <el-card class="box-card">
+        <div>
+          <h1>登录</h1>
+          <el-form>
+            <el-form-item>
+              <label for="username">用户名</label>
+              <el-input id="tele" type="text" v-model="username"
+                        required
+                        placeholder="请输入用户名"/>
+            </el-form-item>
 
-          <el-form-item>
-            <label for="password">账户密码</label>
-            <el-input id="password" type="password" v-model="password"
-                      required
-                      placeholder="••••••••••••••"/>
-          </el-form-item>
+            <el-form-item>
+              <label for="password">账户密码</label>
+              <el-input id="password" type="password" v-model="password"
+                        required
+                        placeholder="••••••••••••••"/>
+            </el-form-item>
 
-          <span class="button-group">
+            <span class="button-group">
               <el-button @click.prevent="handleLogin" :disabled="loginDisabled"
                          type="primary">登入</el-button>
               <router-link to="/register" v-slot="{navigate}">
                 <el-button @click="navigate">去注册</el-button>
               </router-link>
-          </span>
-        </el-form>
-      </div>
-    </el-card>
-  </el-main>
+            </span>
+          </el-form>
+        </div>
+      </el-card>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.main {
+/* 重置全局样式 */
+.login-page {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
+}
+
+.login-container {
   width: 100%;
-  height: 80vh;
+  height: 100%;
+  background-image: url('../../assets/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .box-card {
-  width: 60%;
-  padding: 10px;
+  width: 400px;
+  max-width: 80%;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
 }
 
 .error-input {
@@ -105,6 +128,14 @@ function handleLogin() {
   flex-direction: row;
   gap: 30px;
   align-items: center;
-  justify-content: right;
+  justify-content: flex-end;
+}
+
+/* 添加响应式调整 */
+@media (max-width: 768px) {
+  .box-card {
+    width: 90%;
+    padding: 15px;
+  }
 }
 </style>
