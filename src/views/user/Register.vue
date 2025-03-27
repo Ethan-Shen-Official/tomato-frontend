@@ -42,7 +42,7 @@ const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const emailLegal = computed(() => emailRegex.test(email.value))
 
 const registerDisabled = computed(() => {
-  return !(hasUsernameInput.value && hasNameInput.value && hasIdentityChosen.value && hasPasswordInput.value && hasConfirmPasswordInput.value && isPasswordIdentical.value && (!hasEmail || emailLegal) && (!hasTelInput || telLegal))
+  return !(hasUsernameInput.value && hasNameInput.value && hasIdentityChosen.value && hasPasswordInput.value && hasConfirmPasswordInput.value && isPasswordIdentical.value && (!hasEmail.value || emailLegal.value) && (!hasTelInput.value || telLegal.value))
 })
 
 
