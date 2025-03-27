@@ -74,7 +74,7 @@ function handleRegister() {
     location: location.value,
     username: username.value,
     email: email.value,
-    avatar: avatar.value
+    avatar_url: avatar.value
   }).then(res => {
     if (res.data.code === '000') {  //类型守卫，它检查 res.data 对象中是否存在名为 code 的属性
       ElMessage({

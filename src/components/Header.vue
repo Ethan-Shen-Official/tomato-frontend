@@ -25,7 +25,7 @@
         <router-link to="/dashboard" class="header-icon-link user-link">
           <div class="avatar-container">
             <img v-if="avatar_url" :src="avatar_url" alt="用户头像" class="user-avatar">
-            <el-icon v-else :size="24" color="white"><User /></el-icon>
+            <img v-else src="../assets/avatar-default.jpg" alt="用户头像" class="user-avatar">
           </div>
           <span class="user-name">{{ username }}</span>
         </router-link>
@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getUserInfo } from '../api/user'
+//import { getUserInfo } from '../api/user'
 import { ShoppingCart, User } from '@element-plus/icons-vue'
 
 // 用户信息
@@ -44,7 +44,7 @@ const avatar_url = ref(null)
 const username = ref('admin')
 
 // 购物车商品数量
-const cartCount = ref(0)
+const cartCount = ref(99)
 
 // 在组件挂载后获取用户信息
 

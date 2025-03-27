@@ -15,6 +15,7 @@ const loginDisabled = computed(() => {
   return !(hasUsernameInput.value && hasPasswordInput.value)
 })
 
+//something to fix: 需要先得到username才能调用getUserInfo
 function handleLogin() {
   handlelogin({
     username: username.value,
@@ -28,9 +29,9 @@ function handleLogin() {
       })
       const token = res.data.result
       sessionStorage.setItem('token', token)
+      sessionStorage.setItem('username', username.value)
 
-      getUserInfo().then(res => {
-        sessionStorage.setItem('name', res.data.result.name)
+      getUserInfo(username.value).then(res => {
         sessionStorage.setItem('role', res.data.result.role)
         routes.push({path: "/dashboard"})
       })
@@ -44,6 +45,7 @@ function handleLogin() {
     }
   })
 }
+
 </script>
 
 <template>
