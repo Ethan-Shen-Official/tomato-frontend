@@ -63,7 +63,7 @@ function handleLogin() {
             <label for="password">账户密码</label>
             <el-input id="password" type="password" v-model="password"
                       required
-                      placeholder="••••••••"/>
+                      placeholder="••••••••••••••"/>
           </el-form-item>
 
           <span class="button-group">
