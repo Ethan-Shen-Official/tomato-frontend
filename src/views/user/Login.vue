@@ -82,7 +82,7 @@ function handleLogin() {
 <style scoped>
 .main {
   width: 100%;
-  height: 70vh;
+  height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
