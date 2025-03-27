@@ -18,10 +18,6 @@ type LoginReq = {
     password: string;
 }
 
-/** headers的cookie是login接口获取所获取的，下面同理。期望由未鉴权返回的错误状态码为401
-- 方法: GET
-- 路径: /api/accounts/{username}
-- Headers: token: xxx */
 export const getUserInfo = () => {
     //TODO GET request
 }

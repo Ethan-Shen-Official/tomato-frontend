@@ -7,23 +7,20 @@ import {handlelogin, getUserInfo} from "../../api/user.ts"
 const username = ref('')
 const password = ref('')
 
-// 用户名是否为空
-const hasTelInput = computed(() => username.value != '')
-// 密码是否为空
+const hasUsernameInput = computed(() => username.value != '')
+
 const hasPasswordInput = computed(() => password.value != '')
 
-// 登录按钮可用性
 const loginDisabled = computed(() => {
-  return !(hasTelInput.value && hasPasswordInput.value)
+  return !(hasUsernameInput.value && hasPasswordInput.value)
 })
 
-// 登录按钮触发
-function HandleLogin() {
+function handleLogin() {
   handlelogin({
     username: username.value,
     password: password.value
   }).then(res => {
-    if (res.data.code === '000') {
+    if (res.data.code === '200') {
       ElMessage({
         message: "登录成功！",
         type: 'success',
@@ -66,11 +63,11 @@ function HandleLogin() {
             <label for="password">账户密码</label>
             <el-input id="password" type="password" v-model="password"
                       required
-                      placeholder="••••••••"/>
+                      placeholder="••••••••••••••"/>
           </el-form-item>
 
           <span class="button-group">
-              <el-button @click.prevent="" :disabled="loginDisabled"
+              <el-button @click.prevent="handleLogin" :disabled="loginDisabled"
                          type="primary">登入</el-button>
               <router-link to="/register" v-slot="{navigate}">
                 <el-button @click="navigate">去注册</el-button>
