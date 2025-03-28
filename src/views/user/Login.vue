@@ -99,7 +99,7 @@ function handleLogin() {
 .login-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/bg.png');
+  background-image: url('../../assets/bg.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

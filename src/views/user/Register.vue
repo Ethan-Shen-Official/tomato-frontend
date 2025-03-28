@@ -76,7 +76,7 @@ function handleRegister() {
     email: email.value,
     avatar_url: avatar.value
   }).then(res => {
-    if (res.data.code === '000') {  //类型守卫，它检查 res.data 对象中是否存在名为 code 的属性
+    if (res.data.code === '200') {  
       ElMessage({
         message: "注册成功！请登录账号",
         type: 'success',
@@ -95,143 +95,162 @@ function handleRegister() {
 </script>
 
 <template>
-  <el-main class="main">
-    <el-card class="box-card">
-      <div>
-        <h1>
-          注册
-        </h1>
+  <div class="register-page">
+    <div class="register-container">
+      <el-card class="box-card">
+        <div>
+          <h1>注册</h1>
+          
+          <el-form>
+            <el-row>
+              <el-col :span="7">
+                <el-form-item>
+                  <label for="username">用户名（必填）</label>
+                  <el-input id="username" v-model="username" placeholder="请输入用户名"/>
+                </el-form-item>
+              </el-col>
 
-        <el-form>
-          <el-row>
-            <el-col :span="7">
-              <el-form-item>
-                <label for="username">用户名（必填）</label>
-                <el-input id="username" v-model="username" placeholder="请输入用户名"/>
-              </el-form-item>
-            </el-col>
+              <el-col :span="1"></el-col>
 
-            <el-col :span="1"></el-col>
+              <el-col :span="7">
+                <el-form-item>
+                  <label for="name">真实姓名（必填）</label>
+                  <el-input id="name" v-model="name" placeholder="请输入真实姓名"/>
+                </el-form-item>
+              </el-col>
 
-            <el-col :span="7">
-              <el-form-item>
-                <label for="username">真实姓名（必填）</label>
-                <el-input id="name" v-model="name" placeholder="请输入真实姓名"/>
-              </el-form-item>
-            </el-col>
+              <el-col :span="1"></el-col>
 
-            <el-col :span="1"></el-col>
+              <el-col :span="8">
+                <el-form-item>
+                  <label for="role">身份（必选）</label>
+                  <el-select id="role" v-model="role" placeholder="请选择身份" style="width: 100%">
+                    <el-option value="CUSTOMER" label="普通用户"/>
+                    <el-option value="MANAGER" label="管理员"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
-            <el-col :span="8">
-              <el-form-item>
-                <label for="role">身份（必选）</label>
-                <el-select id="role" v-model="role" placeholder="请选择身份" style="width: 100%">
-                  <el-option value="CUSTOMER" label="普通用户"/>
-                  <el-option value="MANAGER" label="管理员"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
+            <!-- 第二行 -->
+            <el-row>
+              <el-col :span="15">
+                <el-form-item>
+                  <label v-if="!hasEmail" for="email">邮箱</label>
+                  <label v-else-if="!emailLegal" for="email" class="error">邮箱不合法</label>
+                  <label v-else for="email">邮箱</label>
+                  <el-input id="email" v-model="email" :class="{'error-input' :(hasEmail && !emailLegal)}" placeholder="请输入邮箱" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="1"></el-col>
+              <el-col :span="8">
+                <el-form-item label="头像上传">
+                  <el-upload
+                      class="avatar-uploader"
+                      action="#"
+                      :show-file-list="false"
+                      accept="image/*"
+                      :before-upload="beforeUpload"
+                      @change="handleUploadChange"
+                  >
+                    <img v-if="avatar" :src="avatar" alt="Avatar Preview" class="avatar-preview" />
+                    <el-button v-if="!avatar">选择头像</el-button>
+                  </el-upload>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
-          <!-- 第二行 -->
-          <el-row>
-            <el-col :span="15">
-              <el-form-item>
-                <label v-if="!hasEmail" for="email">邮箱</label>
-                <label v-else-if="!emailLegal" for="email" class="error">邮箱不合法</label>
-                <label v-else for="email">邮箱</label>
-                <el-input id="email" v-model="email" :class="{'error-input' :(hasEmail && !emailLegal)}" placeholder="请输入邮箱" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="1"></el-col>
-            <el-col :span="8">
-              <el-form-item label="头像上传">
-                <el-upload
-                    class="avatar-uploader"
-                    action="#"
-                    :show-file-list="false"
-                    accept="image/*"
-                    :before-upload="beforeUpload"
-                    @change="handleUploadChange"
-                >
-                  <img v-if="avatar" :src="avatar" alt="Avatar Preview" class="avatar-preview" />
-                  <el-button v-if="!avatar">选择头像</el-button>
-                </el-upload>
-              </el-form-item>
-            </el-col>
-          </el-row>
+            <el-row>
+              <el-col :span="8">
+                <el-form-item>
+                  <label v-if="!hasTelInput" for="tele">手机号</label>
+                  <label v-else-if="!telLegal" for="tele" class="error">手机号不合法</label>
+                  <label v-else for="tele">手机号</label>
+                  <el-input id="tele" v-model="tele" :class="{'error-input' :(hasTelInput && !telLegal)}" placeholder="请输入手机号"/>
+                </el-form-item>
+              </el-col>
 
-          <el-row>
-            <el-col :span="8">
-              <el-form-item>
-                <label v-if="!hasTelInput" for="tele">手机号</label>
-                <label v-else-if="!telLegal" for="tele" class="error">手机号不合法</label>
-                <label v-else for="tele">手机号</label>
-                <el-input id="tele" v-model="tele" :class="{'error-input' :(hasTelInput && !telLegal)}" placeholder="请输入手机号"/>
-              </el-form-item>
-            </el-col>
+              <el-col :span="1"></el-col>
 
-            <el-col :span="1"></el-col>
+              <el-col :span="15">
+                <el-form-item>
+                  <label for="location">地址</label>
+                  <el-input id="location" v-model="location" placeholder="请输入地址"/>
+                </el-form-item>
+              </el-col>
+            </el-row>
 
-            <el-col :span="15">
-              <el-form-item>
-                <label for="location">地址</label>
-                <el-input id="location" v-model="location" placeholder="请输入地址"/>
-              </el-form-item>
-            </el-col>
-          </el-row>
+            <el-form-item>
+              <label for="password">密码（必填）</label>
+              <el-input type="password" id="password" v-model="password" placeholder="••••••••"/>
+            </el-form-item>
 
-          <el-form-item>
-            <label for="password">密码（必填）</label>
-            <el-input type="password" id="password" v-model="password" placeholder="••••••••"/>
-          </el-form-item>
+            <el-form-item>
+              <label v-if="!hasConfirmPasswordInput">确认密码（必填）</label>
+              <label v-else-if="!isPasswordIdentical" class="error">密码不一致</label>
+              <label v-else>确认密码（必填）</label>
+              <el-input type="password" id="confirm-password" v-model="confirmPassword" :class="{'error-input' :(hasConfirmPasswordInput && !isPasswordIdentical)}" placeholder="••••••••"/>
+            </el-form-item>
 
-          <el-form-item>
-            <label v-if="!hasConfirmPasswordInput">确认密码（必填）</label>
-            <label v-else-if="!isPasswordIdentical" class="error">密码不一致</label>
-            <label v-else>确认密码（必填）</label>
-            <el-input type="password" id="confirm-password" v-model="confirmPassword" :class="{'error-input' :(hasConfirmPasswordInput && !isPasswordIdentical)}" placeholder="••••••••"/>
-          </el-form-item>
-
-          <span class="button-group">
-            <el-button @click.prevent="handleRegister"
-                       :disabled="registerDisabled"
-                       type="primary">
-              创建账户
-            </el-button>
-
-            <router-link to="/login" v-slot="{navigate}">
-              <el-button @click="navigate">
-                去登录
+            <span class="button-group">
+              <el-button @click.prevent="handleRegister"
+                        :disabled="registerDisabled"
+                        type="primary">
+                创建账户
               </el-button>
-            </router-link>
-          </span>
-        </el-form>
-      </div>
-    </el-card>
-  </el-main>
 
+              <router-link to="/login" v-slot="{navigate}">
+                <el-button @click="navigate">
+                  去登录
+                </el-button>
+              </router-link>
+            </span>
+          </el-form>
+        </div>
+      </el-card>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.main {
-  width: 100%;
-  height: 90vh;
+/* 重置全局样式 */
+.register-page {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
+}
 
+.register-container {
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/bg.jpg'); /* 使用与登录页相同的背景图 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .box-card {
-  width: 60%;
-  padding: 10px;
+  width: 70%;
+  max-width: 900px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
 }
 
 .avatar-uploader {
   display: flex;
-  flex-direction: column; /* 让上传按钮垂直排列 */
-  align-items: center; /* 内容居中 */
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   width: 100px;
   height: 100px;
@@ -241,10 +260,10 @@ function handleRegister() {
 }
 
 .avatar-preview {
-  width: 100px; /* 根据需要调整大小 */
-  height: 100px; /* 根据需要调整大小 */
-  border-radius: 50%; /* 圆形效果 */
-  margin-top: 10px; /* 与上方元素间的间距 */
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-top: 10px;
 }
 
 .error {
@@ -262,5 +281,13 @@ function handleRegister() {
   gap: 30px;
   align-items: center;
   justify-content: right;
+}
+
+/* 添加响应式调整 */
+@media (max-width: 768px) {
+  .box-card {
+    width: 90%;
+    padding: 15px;
+  }
 }
 </style>

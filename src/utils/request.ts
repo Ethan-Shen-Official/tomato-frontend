@@ -17,10 +17,11 @@ service.interceptors.request.use(config => {
         config.headers['token'] = token
     }
     return config
-},error => {
+  },error => {
    console.log(error)
     return Promise.reject(error)
-})
+  }
+)
 
 service.interceptors.response.use(
   (response) => {

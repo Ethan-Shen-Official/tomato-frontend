@@ -16,7 +16,6 @@ const routes = createRouter({
         component: () => import('../views/user/Dashboard.vue'),
         meta: { title : 'Dashboard' }
       }
-      
       ],
   },
   {
