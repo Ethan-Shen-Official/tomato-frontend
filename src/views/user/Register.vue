@@ -47,7 +47,7 @@ const registerDisabled = computed(() => {
 
 
 // 处理文件上传
-function beforeUpload(file) {
+function beforeUpload(file: any) {
   const isImage = file.type.startsWith('image/');
   const isLt2M = file.size / 1024 / 1024 < 2; // 限制文件大小为2MB
 
@@ -60,7 +60,7 @@ function beforeUpload(file) {
   return isImage && isLt2M;
 }
 
-function handleUploadChange(file) {
+function handleUploadChange(file: any) {
   avatar.value = URL.createObjectURL(file.raw); // 创建预览
 }
 

@@ -15,7 +15,7 @@ const loginDisabled = computed(() => {
   return !(hasUsernameInput.value && hasPasswordInput.value)
 })
 
-//something to fix: 需要先得到username才能调用getUserInfo
+
 function handleLogin() {
   handlelogin({
     username: username.value,
