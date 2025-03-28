@@ -47,7 +47,7 @@ const registerDisabled = computed(() => {
 
 
 // 处理文件上传
-function beforeUpload(file) {
+function beforeUpload(file: any) {
   const isImage = file.type.startsWith('image/');
   const isLt2M = file.size / 1024 / 1024 < 2; // 限制文件大小为2MB
 
@@ -60,7 +60,7 @@ function beforeUpload(file) {
   return isImage && isLt2M;
 }
 
-function handleUploadChange(file) {
+function handleUploadChange(file: any) {
   avatar.value = URL.createObjectURL(file.raw); // 创建预览
 }
 
@@ -74,7 +74,7 @@ function handleRegister() {
     location: location.value,
     username: username.value,
     email: email.value,
-    avatar: avatar.value
+    avatar_url: avatar.value
   }).then(res => {
     if (res.data.code === '000') {  //类型守卫，它检查 res.data 对象中是否存在名为 code 的属性
       ElMessage({
