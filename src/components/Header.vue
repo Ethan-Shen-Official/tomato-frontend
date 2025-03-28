@@ -12,10 +12,12 @@
       <div class="header-right">
         <!-- 购物车图标 -->
         <router-link to="/cart" class="header-icon-link">
-          <el-badge :value="cartCount" :max="99" class="cart-badge" v-if="cartCount > 0">
-            <el-icon :size="22" color="white"><ShoppingCart /></el-icon>
-          </el-badge>
-          <el-icon v-else :size="22" color="white"><ShoppingCart /></el-icon>
+          <div class="icon-container">
+            <el-badge :value="cartCount" :max="99" class="cart-badge" v-if="cartCount > 0">
+              <el-icon :size="24" color="white"><ShoppingCart /></el-icon>
+            </el-badge>
+            <el-icon v-else :size="24" color="white"><ShoppingCart /></el-icon>
+          </div>
           <span class="icon-text">购物车</span>
         </router-link>
 
@@ -23,7 +25,7 @@
         <router-link to="/dashboard" class="header-icon-link user-link">
           <div class="avatar-container">
             <img v-if="avatar_url" :src="avatar_url" alt="用户头像" class="user-avatar">
-            <el-icon v-else :size="22" color="white"><User /></el-icon>
+            <img v-else src="../assets/avatar-default.jpg" alt="用户头像" class="user-avatar">
           </div>
           <span class="user-name">{{ username }}</span>
         </router-link>
@@ -34,7 +36,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getUserInfo } from '../api/user'
+//import { getUserInfo } from '../api/user'
 import { ShoppingCart, User } from '@element-plus/icons-vue'
 
 // 用户信息
@@ -42,7 +44,7 @@ const avatar_url = ref(null)
 const username = ref('admin')
 
 // 购物车商品数量
-const cartCount = ref(0)
+const cartCount = ref(99)
 
 // 在组件挂载后获取用户信息
 
@@ -110,7 +112,7 @@ const cartCount = ref(0)
 .icon-text {
   color: white;
   margin-left: 5px;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .user-link {
@@ -118,16 +120,25 @@ const cartCount = ref(0)
   align-items: center;
 }
 
+.icon-container {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 5px;
+}
+
 .avatar-container {
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .user-avatar {
@@ -138,7 +149,13 @@ const cartCount = ref(0)
 
 .user-name {
   color: white;
-  font-size: 0.9rem;
+  font-size: 1rem;
+}
+
+.icon-text, .user-name {
+  color: white;
+  margin-left: 5px;
+  font-size: 1rem;
 }
 
 /* 购物车徽章样式覆盖 */
