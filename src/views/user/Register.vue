@@ -3,7 +3,6 @@ import {ref,computed} from "vue";
 import {newUser} from "../../api/user.ts";
 import {routes} from '../../router'
 
-
 const username = ref('')
 const name = ref('')
 const role = ref('')
@@ -64,17 +63,22 @@ function handleUploadChange(file: any) {
   avatar.value = URL.createObjectURL(file.raw); // 创建预览
 }
 
+function handleHttpRequest() {
+  return new XMLHttpRequest();
+}
+
 // 注册按钮触发
 function handleRegister() {
+  try {
   newUser({
     role: role.value,
     name: name.value,
-    tele: tele.value,
+    telephone: tele.value,
     password: password.value,
     location: location.value,
     username: username.value,
     email: email.value,
-    avatar_url: avatar.value
+    avatar: '',
   }).then(res => {
     if (res.data.code === '200') {  
       ElMessage({
@@ -91,6 +95,13 @@ function handleRegister() {
       })
     }
   })
+} catch (error) {
+    ElMessage({
+      message: "出现网络问题！",
+      type: 'error',
+      center: true,
+    })
+  }
 }
 </script>
 
@@ -125,8 +136,8 @@ function handleRegister() {
                 <el-form-item>
                   <label for="role">身份（必选）</label>
                   <el-select id="role" v-model="role" placeholder="请选择身份" style="width: 100%">
-                    <el-option value="CUSTOMER" label="普通用户"/>
-                    <el-option value="MANAGER" label="管理员"/>
+                    <el-option value='USER' label="用户"/>
+                    <el-option value='ADMIN' label="管理员"/>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -151,6 +162,7 @@ function handleRegister() {
                       :show-file-list="false"
                       accept="image/*"
                       :before-upload="beforeUpload"
+                      :http-request="handleHttpRequest"
                       @change="handleUploadChange"
                   >
                     <img v-if="avatar" :src="avatar" alt="Avatar Preview" class="avatar-preview" />
@@ -213,7 +225,6 @@ function handleRegister() {
 </template>
 
 <style scoped>
-/* 重置全局样式 */
 .register-page {
   margin: 0;
   padding: 0;
@@ -228,7 +239,7 @@ function handleRegister() {
 .register-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/bg.jpg'); /* 使用与登录页相同的背景图 */
+  background-image: url('../../assets/bg.jpg'); 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -6,9 +6,9 @@ type UserInfo = {
     username: string;
     password: string;
     name: string;
-    avatar_url?: string;
+    avatar?: string;
     role: string;
-    tele?: string;
+    telephone?: string;
     email?: string;
     location?: string;
 }
@@ -22,9 +22,9 @@ type UpdateInfo = {
     username: string;
     password?: string;
     name?: string;
-    avatar_url?: string;
+    avatar?: string;
     role?: string;
-    tele?: string;
+    telephone?: string;
     email?: string;
     location?: string;
 }
@@ -37,8 +37,7 @@ type UpdateInfo = {
 - Headers: token: xxx
  */
 export const getUserInfo = (username: String) => {
-    return axios.get(`${API_USER_MODULE_PREFIX}/${username}`,
-    )
+    return axios.get(`${API_USER_MODULE_PREFIX}/${username}`)
     .then(res => {
         return res
     })
@@ -63,8 +62,9 @@ export const newUser = (userinfo : UserInfo) => {
  * 路径: /api/accounts/login
  * @param loginreq 
  */
-export const handlelogin = (loginreq : LoginReq) => {
-    return axios.post(`${API_USER_MODULE_PREFIX}/login`,loginreq,
+export const handlelogin = async (loginreq : LoginReq) => {
+    return axios.post(`${API_USER_MODULE_PREFIX}/login`,
+        loginreq,
         {headers: { 'Content-Type': 'application/json' }})
     .then(res => {
         return res
@@ -82,5 +82,17 @@ export const updateInfo = (userinfo : UpdateInfo) => {
         {headers: { 'Content-Type': 'application/json' }})
     .then(res => {
         return res
+    })
+}
+
+//test用的接口，后续会删除
+export const corstest = () => {
+    return axios.get(`/api/test`)
+    .then(res => {
+        return res
+    })
+    .catch(err => {
+        ElMessage.error("请求失败")
+        console.log(err)
     })
 }

@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getUserInfo, updateInfo } from '../../api/user.ts';
+import { corstest, getUserInfo, updateInfo } from '../../api/user.ts';
 import { ElMessage } from 'element-plus';
 import { routes } from '../../router';
 import { parseRole } from '../../utils';
+import { pa } from 'element-plus/es/locales.mjs';
 
 // 登录状态
-const isLoggedIn = ref(false);
+const isLoggedIn = ref(true);
+
+function checkLogin() {
+  const token = sessionStorage.getItem('token');
+  if (!token) {
+    isLoggedIn.value = false;
+  }
+}
 
 // 用户信息
-const username = ref('');
+const username = sessionStorage.getItem('username');
 const name = ref('');
 const role = ref('');
 const tele = ref('');
@@ -17,27 +25,21 @@ const location = ref('');
 const email = ref('');
 const avatar_url = ref('');
 
-// 控制右侧显示内容
-const activePanel = ref('profile'); // 'profile', 'updateInfo', 'changePassword'
+// 控制右侧显示内容value 为{'profile', 'updateInfo'}中的一个, 默认为'profile'
+const activePanel = ref('profile'); 
 
-// 更新信息表单
+// 统一更新表单
 const updateForm = ref({
-  username: '',
   name: '',
   tele: '',
   email: '',
   location: '',
-  avatar_url: ''
-});
-
-// 更改密码表单
-const passwordForm = ref({
+  avatar: '',
   oldPassword: '',
   newPassword: '',
   confirmPassword: ''
 });
 
-// 密码确认校验
 const passwordsMatch = ref(true);
 
 // 前往登录页面
@@ -45,99 +47,135 @@ const ToLogin = () => {
   routes.push('/login');
 };
 
+// 前往注册页面
+const ToRegister = () => {
+  routes.push('/register');
+};
+
 // 加载用户信息
 onMounted(async () => {
   try {
-    // 检查用户是否登录
-    const storedUsername = sessionStorage.getItem('username');
-    const token = sessionStorage.getItem('token');
-    
-    if (isLoggedIn.value = true) {
-      // 可以在这里加载真实用户数据
-      // 这里使用模拟数据
-      username.value = "admin";
-      name.value = '张三';
-      role.value = 'admin';
-      tele.value = '13800138000';
-      location.value = '南京市栖霞区仙林大道163号';
-      email.value = 'zhangsan@example.com';
-      avatar_url.value = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png';
-      
-      // 初始化更新表单
-      updateForm.value = {
-        username: username.value,
-        name: name.value,
-        tele: tele.value,
-        email: email.value,
-        location: location.value,
-        avatar_url: avatar_url.value
-      };
+    checkLogin();
+    if (isLoggedIn.value === true) {
+        getCurUser();
+        // 初始化更新表单
+        updateForm.value = {
+          name: name.value,
+          tele: tele.value,
+          email: email.value,
+          location: location.value,
+          avatar: avatar_url.value,
+          oldPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
     }
   } catch (error) {
     console.error('获取用户信息失败', error);
-    ElMessage.error('获取用户信息失败');
+    ElMessage.error('连接失败');
   }
 });
 
-const handleUpdateInfo = async () => {
-  try {
-    const response = await updateInfo({
-      username: username.value,
-      name: updateForm.value.name,
-      tele: updateForm.value.tele,
-      email: updateForm.value.email,
-      location: updateForm.value.location,
-      avatar_url: updateForm.value.avatar_url,
+function getCurUser() {
+  corstest()
+  getUserInfo(username || '').then(res => {
+      if (res.data.code === '200') {
+        name.value = res.data.data.name;
+        tele.value = res.data.data.tele;
+        email.value = res.data.data.email;
+        location.value = res.data.data.location;
+        avatar_url.value = res.data.data.avatar;
+        role.value = res.data.data.role;
+      } else if (res.data.code === '400') {
+        ElMessage.error(res.data.msg);
+      }
     });
+}
 
-    if (response.data && response.data.code === '200') {
-      ElMessage.success('信息更新成功');
-      
-      // 更新显示的用户信息
-      name.value = updateForm.value.name;
-      tele.value = updateForm.value.tele;
-      email.value = updateForm.value.email;
-      location.value = updateForm.value.location;
-      avatar_url.value = updateForm.value.avatar_url;
-      
-      activePanel.value = 'profile'; // 返回个人资料页
-    } else {
-      ElMessage.error(response.data.msg || '更新失败');
+const handleUpdate = async () => {
+  // 检查密码是否匹配（如果有输入新密码）
+  if (updateForm.value.newPassword && updateForm.value.newPassword !== updateForm.value.confirmPassword) {
+    passwordsMatch.value = false;
+    ElMessage.error('两次输入的密码不一致');
+    return;
+  }
+  passwordsMatch.value = true;
+  try {
+    // 准备更新数据，使用当前值作为未填写字段的默认值
+    const updateData = {
+      username: username || '',
+      role: role || 'USER',
+      name: updateForm.value.name || name.value,
+      telephone: updateForm.value.tele || tele.value,
+      email: updateForm.value.email || email.value,
+      location: updateForm.value.location || location.value,
+      avatar: updateForm.value.avatar || avatar_url.value,
+      password: updateForm.value.newPassword || '123456'
+    };
+
+    // 如果没有更改任何内容，则提示用户
+    if (
+      updateData.name === name.value &&
+      updateData.telephone === tele.value &&
+      updateData.email === email.value &&
+      updateData.location === location.value &&
+      updateData.avatar === avatar_url.value &&
+      !updateData.password
+    ) {
+      ElMessage({
+        message: "未检测到任何修改",
+        type: 'info',
+        center: true
+      });
+      return;
     }
+
+    updateInfo({
+        username: username || '',
+        name: updateData.name,
+        role: role.value,
+        telephone: updateData.telephone,
+        email: updateData.email,
+        location: updateData.location,
+        avatar: updateData.avatar,
+        password: updateData.password,
+      }
+    ).then(res => {
+      if (res.data.code === '200') {
+        ElMessage({
+          message: res.data.msg,
+          type: 'success',
+          center: true,
+        });
+        
+        getUserInfo(username || '').then(res => {
+          if (res.data.code === '200') {
+            name.value = res.data.data.name;
+            tele.value = res.data.data.tele;
+            email.value = res.data.data.email;
+            location.value = res.data.data.location;
+            avatar_url.value = res.data.data.avatar;
+            
+            updateForm.value.oldPassword = '';
+            updateForm.value.newPassword = '';
+            updateForm.value.confirmPassword = '';
+          } else if (res.data.code === '400') {
+            ElMessage.error(res.data.msg);
+          }
+        });
+        
+        activePanel.value = 'profile';
+      } else if (res.data.code === '400') {
+        ElMessage({
+          message: res.data.msg,
+          type: 'error',
+          center: true,
+        });
+      }
+    });
   } catch (error) {
     console.error('更新用户信息失败', error);
     ElMessage.error('更新用户信息失败');
-  }
-};
-
-const handleChangePassword = async () => {
-  // 校验两次输入的密码是否一致
-  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    passwordsMatch.value = false;
-    return;
-  }
-  
-  passwordsMatch.value = true;
-  
-  try {
-    const response = await updateInfo({
-      username: username.value,
-      password: passwordForm.value.newPassword
-    });
-
-    if (response.data && response.data.code === '200') {
-      ElMessage.success('密码修改成功');
-      // 清空密码表单
-      passwordForm.value.oldPassword = '';
-      passwordForm.value.newPassword = '';
-      passwordForm.value.confirmPassword = '';
-      activePanel.value = 'profile'; // 返回个人资料页
-    } else {
-      ElMessage.error(response.data.msg || '密码修改失败');
-    }
-  } catch (error) {
-    console.error('修改密码失败', error);
-    ElMessage.error('修改密码失败');
   }
 };
 
@@ -159,7 +197,7 @@ const formatRole = (role: string) => {
           <h2>{{ name }}</h2>
           <div class="user-info">
             <p><strong>用户名:</strong> {{ username }}</p>
-            <p><strong>角色:</strong> {{ formatRole(role) }}</p>
+            <p><strong>身份:</strong> {{ formatRole(role || '') }}</p>
             <p v-if="email"><strong>邮箱:</strong> {{ email }}</p>
             <p v-if="tele"><strong>电话:</strong> {{ tele }}</p>
             <p v-if="location"><strong>地址:</strong> {{ location }}</p>
@@ -172,15 +210,7 @@ const formatRole = (role: string) => {
               type="primary" 
               @click="activePanel = 'updateInfo'"
               :class="{ active: activePanel === 'updateInfo' }">
-              更新信息
-            </el-button>
-          </el-row>
-          <el-row>
-            <el-button 
-              type="warning" 
-              @click="activePanel = 'changePassword'"
-              :class="{ active: activePanel === 'changePassword' }">
-              更改密码
+              更新个人信息
             </el-button>
           </el-row>
         </div>
@@ -208,38 +238,35 @@ const formatRole = (role: string) => {
         
         <div class="login-benefits">
           <el-card class="box-card">
-            <template #header>
-              <div class="card-header">
+            <el-header class="card-header">
                 <span>会员特权</span>
-              </div>
-            </template>
-            <div class="text item">
+            </el-header>
+            <div class="text-item">
               <ul>
-                <li>收藏喜欢的图书</li>
-                <li>享受会员折扣价</li>
-                <li>查看购买历史</li>
-                <li>获取专属推荐</li>
+                <li>购买中意的图书</li>
+                <li>查看订单状态</li>
+                <li>查看购物车</li>
+                <li>更多个性化推荐</li>
               </ul>
             </div>
           </el-card>
           
           <el-card class="box-card">
-            <template #header>
-              <div class="card-header">
+            <el-header class="card-header">
                 <span>快速登录</span>
-              </div>
-            </template>
-            <div class="text item">
-              点击下方按钮快速前往登录页面，如果没有账号，可以选择注册新账户。
-            </div>
-            <div class="button-area">
-              <el-button type="primary" @click="ToLogin">
-                立即登录
-              </el-button>
-              <el-button @click="routes.push('/register')">
-                注册账户
-              </el-button>
-            </div>
+            </el-header>
+            <ul class="text-item">
+                <li>
+              请
+              <span class="text-link" @click="ToLogin">登录</span>
+              以享受更多功能
+            </li>
+                <li>
+                如果您还没有账号，可以点击此处
+              <span class="text-link" @click="ToRegister">注册</span>
+              新账户。
+            </li>
+        </ul>
           </el-card>
         </div>
       </div>
@@ -249,47 +276,31 @@ const formatRole = (role: string) => {
         <!-- 默认页面 - 欢迎信息 -->
         <div v-if="activePanel === 'profile'" class="welcome-panel">
           <h1>欢迎回来，{{ name }}！</h1>
-          <p>您可以在左侧选择操作来更新您的个人信息或更改密码。</p>
+          <p>您可以在左侧选择操作来更新您的个人信息。</p>
           
           <div class="feature-cards">
             <el-card class="box-card">
-              <template #header>
-                <div class="card-header">
-                  <span>账户安全</span>
-                </div>
-              </template>
-              <div class="text item">
-                定期更改您的密码可以提高账户安全性。
-              </div>
-              <div class="button-area">
-                <el-button type="primary" plain @click="activePanel = 'changePassword'">
-                  更改密码
-                </el-button>
-              </div>
-            </el-card>
-            
-            <el-card class="box-card">
-              <template #header>
-                <div class="card-header">
-                  <span>个人资料</span>
-                </div>
-              </template>
-              <div class="text item">
-                保持您的个人信息更新，以获得更好的服务体验。
-              </div>
+              <el-header class="card-header">
+                  <span>账户管理</span>
+              </el-header>
+              <ul class="text-item">
+                <li>您可以更新您的基本信息，如姓名、电话、邮箱等。</li>
+                <li>定期更改您的密码可以提高账户安全性。</li>
+              </ul>
               <div class="button-area">
                 <el-button type="primary" plain @click="activePanel = 'updateInfo'">
-                  更新信息
+                  更新个人信息
                 </el-button>
               </div>
             </el-card>
           </div>
         </div>
         
-        <!-- 更新信息表单 -->
+        <!-- 统一的更新信息表单 -->
         <div v-if="activePanel === 'updateInfo'" class="form-panel">
-          <h2>更新个人信息</h2>
+          <h2>个人信息管理</h2>
           <el-form label-position="top">
+            <h3>基本信息</h3>
             <el-form-item label="用户名">
               <el-input v-model="username" disabled />
               <div class="form-tip">用户名不可更改</div>
@@ -297,57 +308,55 @@ const formatRole = (role: string) => {
             
             <el-form-item label="姓名">
               <el-input v-model="updateForm.name" placeholder="请输入您的真实姓名" />
+              <div class="form-tip">不填写则保持当前值: {{ name }}</div>
             </el-form-item>
             
             <el-form-item label="电话号码">
               <el-input v-model="updateForm.tele" placeholder="请输入您的电话号码" />
+              <div class="form-tip">不填写则保持当前值: {{ tele || '暂无' }}</div>
             </el-form-item>
             
             <el-form-item label="邮箱">
               <el-input v-model="updateForm.email" placeholder="请输入您的邮箱地址" />
+              <div class="form-tip">不填写则保持当前值: {{ email || '暂无' }}</div>
             </el-form-item>
             
             <el-form-item label="地址">
               <el-input v-model="updateForm.location" placeholder="请输入您的地址" />
+              <div class="form-tip">不填写则保持当前值: {{ location || '暂无' }}</div>
             </el-form-item>
             
             <el-form-item label="头像URL">
-              <el-input v-model="updateForm.avatar_url" placeholder="请输入头像图片URL" />
+              <el-input v-model="updateForm.avatar" placeholder="请输入头像图片URL" />
+              <div class="form-tip">不填写则保持当前值</div>
             </el-form-item>
             
-            <el-form-item>
-              <el-button type="primary" @click="handleUpdateInfo">保存更改</el-button>
-              <el-button @click="activePanel = 'profile'">取消</el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-        
-        <!-- 更改密码表单 -->
-        <div v-if="activePanel === 'changePassword'" class="form-panel">
-          <h2>更改密码</h2>
-          <el-form label-position="top">
+            <el-divider>密码管理</el-divider>
+            
+            <h3>修改密码 (可选)</h3>
+            <div class="form-tip password-tip">如需修改密码，请填写以下字段，否则可以留空</div>
+            
             <el-form-item label="当前密码">
-              <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" show-password />
+              <el-input v-model="updateForm.oldPassword" type="password" placeholder="请输入当前密码" show-password />
             </el-form-item>
             
             <el-form-item label="新密码">
-              <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password />
+              <el-input v-model="updateForm.newPassword" type="password" placeholder="请输入新密码" show-password />
             </el-form-item>
             
             <el-form-item label="确认新密码" :error="!passwordsMatch ? '两次输入的密码不一致' : ''">
               <el-input 
-                v-model="passwordForm.confirmPassword" 
+                v-model="updateForm.confirmPassword" 
                 type="password" 
                 placeholder="请再次输入新密码" 
                 show-password
-                @input="passwordsMatch = passwordForm.newPassword === passwordForm.confirmPassword" />
+                @input="passwordsMatch = updateForm.newPassword === updateForm.confirmPassword" />
             </el-form-item>
             
             <el-form-item>
               <el-button 
                 type="primary" 
-                @click="handleChangePassword"
-                :disabled="!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword">
+                @click="handleUpdate">
                 保存更改
               </el-button>
               <el-button @click="activePanel = 'profile'">取消</el-button>
@@ -437,27 +446,25 @@ const formatRole = (role: string) => {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  width: calc(100% - 340px); /* 300px侧边栏 + 40px总padding */
-  min-height: calc(95vh - 60px); /* 与dashboard-container高度一致 */
+  width: calc(100% - 340px); 
+  min-height: calc(95vh - 60px); 
   box-sizing: border-box;
   display: flex;
-  justify-content: center; /* 所有面板内容居中 */
+  justify-content: center; 
 }
 
-/* 所有面板的通用样式 - 使用固定宽度 */
 .welcome-panel, .form-panel {
-  width: 800px; /* 固定宽度，确保一致性 */
+  width: 800px; 
   max-width: 90%;
-  margin: 0;  /* 移除外边距，由content-area的flex居中控制 */
+  margin: 0;  
   padding: 30px;
   background-color: white;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
-  min-height: calc(95vh - 120px); /* 确保足够高度 */
+  min-height: calc(95vh - 120px); 
 }
 
-/* 调整卡片容器宽度 */
 .feature-cards {
   display: flex;
   justify-content: center;
@@ -466,9 +473,8 @@ const formatRole = (role: string) => {
   width: 100%;
 }
 
-/* 调整卡片大小，使用百分比宽度 */
 .box-card {
-  width: 45%; /* 改为百分比宽度 */
+  width: 45%; 
   max-width: 320px;
 }
 
@@ -492,8 +498,8 @@ const formatRole = (role: string) => {
   }
 
   .content-area {
-    width: 100%; /* 在小屏幕上占据全宽 */
-    min-height: 500px; /* 确保小屏幕上仍有足够高度 */
+    width: 100%; 
+    min-height: 500px; 
   }
 
   .feature-cards {
@@ -502,7 +508,6 @@ const formatRole = (role: string) => {
   }
 }
 
-/* 添加未登录状态的样式 */
 .not-logged-in {
   display: flex;
   flex-direction: column;
@@ -558,7 +563,6 @@ const formatRole = (role: string) => {
   color: #606266;
 }
 
-/* 确保样式在登录状态下也有一致性 */
 .welcome-panel, .form-panel {
   width: 800px; /* 固定宽度，确保一致性 */
   max-width: 90%;
@@ -568,6 +572,75 @@ const formatRole = (role: string) => {
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
-  min-height: calc(95vh - 120px); /* 确保足够高度 */
+  min-height: calc(95vh - 120px); 
+}
+
+.text-link {
+  color: #409EFF;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.text-link:hover {
+  color: #66b1ff;
+  text-decoration: underline;
+}
+
+.button-area {
+  margin-top: 15px;
+  text-align: right;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.text-item {
+  margin-bottom: 12px;
+  color: #606266;
+  line-height: 1.6;
+}
+
+.text-item:last-child {
+  margin-bottom: 0;
+}
+
+.text-item ul {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.text-item li {
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+.form-tip {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.password-tip {
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: #303133;
+  font-weight: 500;
+}
+
+.el-divider {
+  margin: 30px 0;
 }
 </style>
