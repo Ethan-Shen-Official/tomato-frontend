@@ -84,15 +84,3 @@ export const updateInfo = (userinfo : UpdateInfo) => {
         return res
     })
 }
-
-//test用的接口，后续会删除
-export const corstest = () => {
-    return axios.get(`/api/test`)
-    .then(res => {
-        return res
-    })
-    .catch(err => {
-        ElMessage.error("请求失败")
-        console.log(err)
-    })
-}

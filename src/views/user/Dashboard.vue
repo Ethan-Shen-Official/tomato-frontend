@@ -77,7 +77,6 @@ onMounted(async () => {
 });
 
 function getCurUser() {
-  corstest()
   getUserInfo(username || '').then(res => {
       if (res.data.code === '200') {
         name.value = res.data.data.name;
