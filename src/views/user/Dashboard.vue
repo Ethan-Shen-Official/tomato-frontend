@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { corstest, getUserInfo, updateInfo } from '../../api/user.ts';
+import { getUserInfo, updateInfo } from '../../api/user.ts';
 import { ElMessage } from 'element-plus';
 import { routes } from '../../router';
 import { parseRole } from '../../utils';
-import { pa } from 'element-plus/es/locales.mjs';
 
 // 登录状态
 const isLoggedIn = ref(true);
@@ -327,13 +326,13 @@ const formatRole = (role: string) => {
             
             <el-form-item label="头像URL">
               <el-input v-model="updateForm.avatar" placeholder="请输入头像图片URL" />
-              <div class="form-tip">不填写则保持当前值</div>
+              <div class="form-tip">不填写则保持当前头像</div>
             </el-form-item>
             
             <el-divider>密码管理</el-divider>
             
             <h3>修改密码 (可选)</h3>
-            <div class="form-tip password-tip">如需修改密码，请填写以下字段，否则可以留空</div>
+            <div class="form-tip password-tip">修改密码，如不想修改请填写原本密码，不得留空</div>
             
             <el-form-item label="当前密码">
               <el-input v-model="updateForm.oldPassword" type="password" placeholder="请输入当前密码" show-password />
