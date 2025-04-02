@@ -1,15 +1,22 @@
 import { API_PRODUCT_MODULE_PREFIX } from "./_prefix";
 import { axios } from "../utils/request";
 
+type Specification = {
+    id: string;
+    item: string;
+    value: string;
+    productId: string;
+}
+
 type ProductInfo = {
     id: string;
     title: string;
-    //price: BigDecimal;
-    //rate: Double;
-    //description?
-    //cover?
-    //detail?
-    //specifications?   
+    // price: BigDecimal;
+    // rate: Double;
+    // description?
+    // cover?
+    // detail?
+    // specifications?
 }
 
 /**

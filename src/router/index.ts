@@ -27,7 +27,12 @@ const routes = createRouter({
     path: '/register',
     component: () => import('../views/user/Register.vue'),
     meta: { title : 'Register' }
-  }
+  },
+    {
+      path: '/create',
+      component: () => import('../views/product/CreateProduct.vue'),
+      meta: { title : 'Create Product' }
+    }
   ],
 })
 
