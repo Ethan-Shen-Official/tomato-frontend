@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { getUserInfo, updateInfo } from '../../api/user.ts';
 import { ElMessage } from 'element-plus';
 import { routes } from '../../router';
@@ -23,6 +23,25 @@ const tele = ref('');
 const location = ref('');
 const email = ref('');
 const avatar_url = ref('');
+
+const teleNumberRegex = /^1\d{10}$/;
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+// 修改为计算属性，使其能动态监测输入值
+const hasTeleInput = computed(() => updateForm.value.tele !== '');
+const hasEmailInput = computed(() => updateForm.value.email !== '');
+
+// 电话号码合法性检验
+const telLegal = computed(() => {
+  if (!hasTeleInput.value) return true;
+  return teleNumberRegex.test(updateForm.value.tele);
+});
+
+// 邮箱合法性检验
+const emailLegal = computed(() => {
+  if (!hasEmailInput.value) return true;
+  return emailRegex.test(updateForm.value.email);
+});
 
 // 控制右侧显示内容value 为{'profile', 'updateInfo'}中的一个, 默认为'profile'
 const activePanel = ref('profile'); 
@@ -310,12 +329,24 @@ const formatRole = (role: string) => {
             </el-form-item>
             
             <el-form-item label="电话号码">
-              <el-input v-model="updateForm.tele" placeholder="请输入您的电话号码" />
+              <label v-if="!hasTeleInput">电话号码</label>
+              <label v-else-if="!telLegal" class="error">电话号码不合法（请输入1开头的11位数字）</label>
+              <label v-else>电话号码</label>
+              <el-input 
+                v-model="updateForm.tele" 
+                :class="{'error-input': (hasTeleInput && !telLegal)}"
+                placeholder="请输入您的电话号码" />
               <div class="form-tip">不填写则保持当前值: {{ tele || '暂无' }}</div>
             </el-form-item>
-            
+
             <el-form-item label="邮箱">
-              <el-input v-model="updateForm.email" placeholder="请输入您的邮箱地址" />
+              <label v-if="!hasEmailInput">邮箱</label>
+              <label v-else-if="!emailLegal" class="error">邮箱格式不正确</label>
+              <label v-else>邮箱</label>
+              <el-input 
+                v-model="updateForm.email" 
+                :class="{'error-input': (hasEmailInput && !emailLegal)}"
+                placeholder="请输入您的邮箱地址" />
               <div class="form-tip">不填写则保持当前值: {{ email || '暂无' }}</div>
             </el-form-item>
             
@@ -354,7 +385,8 @@ const formatRole = (role: string) => {
             <el-form-item>
               <el-button 
                 type="primary" 
-                @click="handleUpdate">
+                @click="handleUpdate"
+                :disabled="(hasTeleInput && !telLegal) || (hasEmailInput && !emailLegal) || (updateForm.newPassword && !passwordsMatch)">
                 保存更改
               </el-button>
               <el-button @click="activePanel = 'profile'">取消</el-button>
@@ -640,5 +672,14 @@ h3 {
 
 .el-divider {
   margin: 30px 0;
+}
+
+.error {
+  color: red;
+}
+
+.error-input {
+  --el-input-focus-border-color: red;
+  border-color: red;
 }
 </style>
