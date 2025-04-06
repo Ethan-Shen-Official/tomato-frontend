@@ -20,7 +20,7 @@ type AddInfo = {
     cover?: string;
     detail?: string;
     specifications?: specification[];
-}
+} 
 
 type specification = {
     id: string;
