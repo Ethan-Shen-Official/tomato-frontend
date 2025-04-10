@@ -40,6 +40,33 @@
               </el-upload>
             </el-form-item>
 
+            <!-- 添加规格部分 -->
+            <el-form-item label="商品规格">
+              <div class="specifications-container">
+                <div v-for="(spec, index) in specifications" :key="index" class="spec-item">
+                  <el-input
+                      v-model="spec.item"
+                      placeholder="规格名称"
+                      style="width: 200px; margin-right: 10px"
+                  />
+                  <el-input
+                      v-model="spec.value"
+                      placeholder="规格值"
+                      style="width: 200px; margin-right: 10px"
+                  />
+                  <el-button
+                      type="danger"
+                      circle
+                      :icon="Delete"
+                      @click="removeSpec(index)"
+                  />
+                </div>
+                <el-button type="primary" @click="addSpec" style="margin-top: 10px">
+                  添加规格
+                </el-button>
+              </div>
+            </el-form-item>
+
             <span class="button-group">
               <el-button @click.prevent="handleCreateProduct()" :disabled="createDisabled"
                          type="primary">
@@ -63,6 +90,23 @@
 import {computed, ref} from 'vue'
 import {UploadFilled} from "@element-plus/icons-vue"
 import {addProduct} from "../../api/product.ts";
+import {uploadimg} from "../../api/tool.ts";
+
+// 新增导入
+import { Delete } from '@element-plus/icons-vue'
+
+// 在原有响应式变量后添加
+const specifications = ref<Array<{ item: string; value: string }>>([])
+
+// 添加规格方法
+const addSpec = () => {
+  specifications.value.push({ item: '', value: '' })
+}
+
+// 删除规格方法
+const removeSpec = (index: number) => {
+  specifications.value.splice(index, 1)
+}
 
 // 输入框值
 const title = ref('')
@@ -87,7 +131,8 @@ function handleCreateProduct() {
     price: price.value,
     rate: rate.value,
     description: description.value,
-    cover: image.value
+    cover: image.value,
+    specifications: specifications.value,
   };
   addProduct(newProduct).then(res => {
     if (res.data.code === '000') {
@@ -102,6 +147,7 @@ function handleCreateProduct() {
       description.value = ''
       image.value = ''
       imageFileList.value.splice(0)
+      specifications.value.splice(0)
     } else if (res.data.code === '400') {
       ElMessage({
         message: res.data.msg,
@@ -116,7 +162,7 @@ function handleChange(file: any, fileList: any) {
   imageFileList.value = fileList
   let formData = new FormData()
   formData.append('file', file.raw)
-  uploadImage(formData).then(res => {
+  uploadimg(formData).then(res => {
     image.value = res.data.result
   })
 }
@@ -172,5 +218,17 @@ function uploadHttpRequest() {
   gap: 30px;
   align-items: center;
   justify-content: right;
+}
+
+.specifications-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 </style>

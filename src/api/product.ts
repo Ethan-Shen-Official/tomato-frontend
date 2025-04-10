@@ -4,7 +4,7 @@ import { axios } from "../utils/request";
 type ProductInfo = {
     id: string;
     title?: string;
-    price?: string;
+    price?: bigint;
     rate?: number;
     description?: string;
     cover?: string;
@@ -14,7 +14,7 @@ type ProductInfo = {
 
 type AddInfo = {
     title: string;
-    price: string;
+    price: bigint;
     rate: number;
     description?: string;
     cover?: string;
@@ -23,10 +23,10 @@ type AddInfo = {
 } 
 
 type specification = {
-    id: string;
+    id?: string;
     item: string;
     value: string;
-    productId: string;
+    productId?: string;
 }
 
 type productAmount = {

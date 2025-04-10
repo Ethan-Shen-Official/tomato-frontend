@@ -8,13 +8,17 @@ const routes = createRouter({
   },
   {
     path: '/home',
-    redirect: '/dashboard',
+    redirect: '/all',
     component: () => import('../views/Home.vue'),
     children: [
       {
         path: '/dashboard',
         component: () => import('../views/user/Dashboard.vue'),
         meta: { title : 'Dashboard' }
+      }, {
+        path: '/all',
+        component: () => import('../views/product/AllProducts.vue'),
+        meta: { title : 'All Product' }
       }
       ],
   },
@@ -27,12 +31,11 @@ const routes = createRouter({
     path: '/register',
     component: () => import('../views/user/Register.vue'),
     meta: { title : 'Register' }
-  },
-    {
+  }, {
       path: '/create',
       component: () => import('../views/product/CreateProducts.vue'),
       meta: { title : 'Create Product' }
-    }
+  }
   ],
 })
 
