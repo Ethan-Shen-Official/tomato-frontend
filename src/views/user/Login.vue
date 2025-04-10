@@ -27,14 +27,10 @@ function handleLogin() {
         type: 'success',
         center: true,
       })
-      const token = res.data.result
+      const token = res.data.data
       sessionStorage.setItem('token', token)
       sessionStorage.setItem('username', username.value)
-
-      getUserInfo(username.value).then(res => {
-        sessionStorage.setItem('role', res.data.result.role)
-        routes.push({path: "/dashboard"})
-      })
+      routes.push({path: "/dashboard"})
     } else if (res.data.code === '400') {
       ElMessage({
         message: res.data.msg,
@@ -44,6 +40,14 @@ function handleLogin() {
       password.value = ''
     }
   })
+  .catch(() => {
+    ElMessage({
+      message: "登录失败，请稍后再试",
+      type: 'error',
+      center: true,
+    })
+  })
+  
 }
 
 </script>
@@ -66,7 +70,7 @@ function handleLogin() {
               <label for="password">账户密码</label>
               <el-input id="password" type="password" v-model="password"
                         required
-                        placeholder="••••••••••••••"/>
+                        placeholder="•••••••••••••"/>
             </el-form-item>
 
             <span class="button-group">
@@ -84,7 +88,6 @@ function handleLogin() {
 </template>
 
 <style scoped>
-/* 重置全局样式 */
 .login-page {
   margin: 0;
   padding: 0;
@@ -99,7 +102,7 @@ function handleLogin() {
 .login-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/bg.png');
+  background-image: url('../../assets/background.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

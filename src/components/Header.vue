@@ -25,10 +25,18 @@
         <router-link to="/dashboard" class="header-icon-link user-link">
           <div class="avatar-container">
             <img v-if="avatar_url" :src="avatar_url" alt="用户头像" class="user-avatar">
-            <img v-else src="../assets/avatar-default.jpg" alt="用户头像" class="user-avatar">
+            <el-icon v-else size="24" color="white"><User /></el-icon>
           </div>
           <span class="user-name">{{ username }}</span>
         </router-link>
+        
+        <!-- 登出图标 -->
+        <div class="header-icon-link" @click="handleLogout">
+          <div class="icon-container">
+            <el-icon :size="24" color="white"><SwitchButton /></el-icon>
+          </div>
+          <span class="icon-text">退出</span>
+        </div>
       </div>
     </div>
   </el-header>
@@ -37,17 +45,41 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 //import { getUserInfo } from '../api/user'
-import { ShoppingCart, User } from '@element-plus/icons-vue'
+import { ShoppingCart, User, SwitchButton } from '@element-plus/icons-vue'
+//import { useRouter } from 'vue-router'
+import { getUserInfo } from '../api/user'
+import { routes } from '../router'
 
 // 用户信息
-const avatar_url = ref(null)
-const username = ref('admin')
+const avatar_url = ref('')
+const username = sessionStorage.getItem('username')
 
 // 购物车商品数量
 const cartCount = ref(99)
 
-// 在组件挂载后获取用户信息
+// 处理登出
+const handleLogout = () => {
+  // 清除token
+  sessionStorage.removeItem('token')
+  sessionStorage.removeItem('username')
+  sessionStorage.removeItem('role')
+  //刷新页面
+  window.location.reload()
+}
 
+// 在组件挂载后获取用户信息
+onMounted (() => {
+  /*
+  getUserInfo(username || '').then(res => {
+    if (res.data.code === '200') {
+      avatar_url.value = res.data.data.avatar
+    } else if (res.data.code === '400') {
+      console.error('获取用户信息失败')
+    }
+  }).catch(err => {
+    console.error('连接失败', err)
+  })*/
+})
 </script>
 
 <style scoped>
