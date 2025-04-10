@@ -1,10 +1,10 @@
 import { API_PRODUCT_MODULE_PREFIX } from "./_prefix";
 import { axios } from "../utils/request";
 
-type UpdateInfo = {
+type ProductInfo = {
     id: string;
     title?: string;
-    price?: string;
+    price?: number;
     rate?: number;
     description?: string;
     cover?: string;
@@ -14,7 +14,7 @@ type UpdateInfo = {
 
 type AddInfo = {
     title: string;
-    price: string;
+    price: number;
     rate: number;
     description?: string;
     cover?: string;
@@ -23,10 +23,10 @@ type AddInfo = {
 } 
 
 type specification = {
-    id: string;
+    id?: string;
     item: string;
     value: string;
-    productId: string;
+    productId?: string;
 }
 
 type productAmount = {
@@ -43,7 +43,8 @@ type productAmount = {
  * @returns products
  */
 export const getProducts = () => {
-    return axios.get(`${API_PRODUCT_MODULE_PREFIX}`)
+    return axios.get(`${API_PRODUCT_MODULE_PREFIX}`,
+    )
     .then(res => {
         return res
     })
@@ -56,7 +57,7 @@ export const getProducts = () => {
     config: none
     params: id: string
  * @param id
- * @returns productinfo[]
+ * @returns product
  */
 export const getProduct = (id: String) => {
     return axios.get(`${API_PRODUCT_MODULE_PREFIX}/${id}`,
@@ -71,7 +72,7 @@ export const getProduct = (id: String) => {
     方法: GET
     路径: /api/products/{id}
     config: none
- * @param id 
+ * @param id
  * @returns productinfo
  */
 export const getProductById = (id: string) => {
@@ -86,7 +87,7 @@ export const getProductById = (id: string) => {
     方法: PUT
     路径: /api/products
     config: application/json
- * @param UpdateInfo 
+ * @param UpdateInfo
  * @returns update result
  */
 export const updateProduct = (productinfo : UpdateInfo) => {
@@ -118,7 +119,7 @@ export const addProduct = (productinfo : AddInfo) => {
     方法: DELETE
     路径: /api/products/{id}
     config: none
- * @param id 
+ * @param id
  * @returns delete result
  */
 export const deleteProduct = (id: string) => {

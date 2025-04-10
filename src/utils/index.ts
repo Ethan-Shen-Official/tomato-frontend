@@ -1,8 +1,8 @@
 export function parseRole(role: string | null) {
-    if (role === "ADMIN") {
+    if (role === "admin") {
         return '管理员';
     }
-    else if (role === "USER") {
+    else if (role === "user") {
         return '会员';
     }
 }
