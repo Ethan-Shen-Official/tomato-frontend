@@ -119,9 +119,9 @@ const image = ref('')
 const hasTitleInput = computed(() => title.value !== '')
 const hasPriceInput = computed(() => price.value !== '')
 const hasRateInput = computed(() => rate.value >= 0 && rate.value <= 10)
-const hasImageFile = computed(() => image.value !== '')
+// const hasImageFile = computed(() => image.value !== '')
 const createDisabled = computed(() => {
-  return !(hasTitleInput.value && hasPriceInput.value && hasRateInput.value && hasImageFile.value)
+  return !(hasTitleInput.value && hasPriceInput.value && hasRateInput.value)
 })
 
 // 创建商品按钮触发
@@ -135,7 +135,7 @@ function handleCreateProduct() {
     specifications: specifications.value,
   };
   addProduct(newProduct).then(res => {
-    if (res.data.code === '000') {
+    if (res.data.code === '200') {
       ElMessage({
         message: '创建商品成功！',
         type: 'success',
