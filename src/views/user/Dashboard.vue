@@ -386,7 +386,7 @@ const formatRole = (role: string) => {
               <el-button 
                 type="primary" 
                 @click="handleUpdate"
-                :disabled="(hasTeleInput && !telLegal) || (hasEmailInput && !emailLegal) || (updateForm.newPassword && !passwordsMatch)">
+                :disabled="!!((hasTeleInput && !telLegal) || (hasEmailInput && !emailLegal) || (updateForm.newPassword && !passwordsMatch))">
                 保存更改
               </el-button>
               <el-button @click="activePanel = 'profile'">取消</el-button>

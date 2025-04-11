@@ -1,7 +1,7 @@
 import { API_PRODUCT_MODULE_PREFIX } from "./_prefix";
 import { axios } from "../utils/request";
 
-type ProductInfo = {
+type UpdateInfo = {
     id: string;
     title?: string;
     price?: number;
