@@ -21,6 +21,13 @@
                   :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
                   class="product-rating"
               />
+              <el-button
+                  type="primary"
+                  @click="goToEditPage"
+                  class="edit-btn"
+              >
+                编辑商品
+              </el-button>
             </div>
 
             <div class="detail-content">
@@ -78,10 +85,21 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getProductById } from '../../api/product.ts'
 import { ElMessage } from 'element-plus'
-
+import {routes} from '../../router'
 const route = useRoute()
 const loading = ref(true)
 const product = ref<any>(null)
+
+
+// 添加路由跳转方法
+
+
+const goToEditPage = () => {
+  routes.push({
+    name: 'UpdateProduct',
+    params: { id: product.value.id }
+  })
+}
 
 // 复用价格格式化逻辑
 const formatPrice = (price?: number) => {
@@ -191,6 +209,10 @@ onMounted(() => {
 .description {
   margin-top: 30px;
   line-height: 1.8;
+}
+
+.edit-btn {
+  margin-left: 20px;
 }
 
 h3 {

@@ -15,52 +15,76 @@
                     :lg="6"
                     class="product-col"
                 >
-                  <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }"style="text-decoration: none; color: inherit;">
-                    <el-card class="product-card" shadow="hover">
-                      <div class="product-content">
-                        <!-- 商品封面 -->
-                        <div class="product-image">
-                          <el-image
-                              v-if="product.cover"
-                              :src="product.cover"
-                              fit="cover"
-                              class="cover-image"
-                          />
-                          <div v-else class="image-placeholder">
-                            <el-icon :size="50"><Picture /></el-icon>
-                          </div>
-                        </div>
+                  <div class="product-wrapper">
+                    <!-- 新增删除按钮 -->
+                    <div class="delete-wrapper">
+                      <el-popconfirm
+                          title="确认要删除该商品吗？"
+                          @confirm="handleDelete(product.id)"
+                      >
+                        <template #reference>
+                          <el-button
+                              type="danger"
+                              size="small"
+                              circle
+                              class="delete-btn"
+                              @click.stop
+                          >
+                            <el-icon><Delete /></el-icon>
+                          </el-button>
+                        </template>
+                      </el-popconfirm>
+                    </div>
 
-                        <!-- 商品基本信息 -->
-                        <div class="product-info">
-                          <h3 class="product-title">{{ product.title }}</h3>
-                          <div class="price-rate">
-                            <span class="product-price">¥{{ formatPrice(product.price) }}</span>
-                            <el-rate
-                                v-model="product.rate"
-                                disabled
-                                :max="10"
-                                :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                                class="product-rate"
+                    <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }"style="text-decoration: none; color: inherit;">
+                      <el-card class="product-card" shadow="hover">
+
+                        <div class="product-content">
+                          <!-- 商品封面 -->
+                          <div class="product-image">
+                            <el-image
+                                v-if="product.cover"
+                                :src="product.cover"
+                                fit="cover"
+                                class="cover-image"
                             />
+                            <div v-else class="image-placeholder">
+                              <el-icon :size="50"><Picture /></el-icon>
+                            </div>
                           </div>
-                          <p class="product-desc">{{ product.description }}</p>
 
-                          <!-- 商品规格 -->
-                          <div v-if="product.specifications?.length" class="specifications">
-                            <div
-                                v-for="(spec, index) in product.specifications"
-                                :key="index"
-                                class="spec-item"
-                            >
-                              <span class="spec-label">{{ spec.item }}：</span>
-                              <span class="spec-value">{{ spec.value }}</span>
+                          <!-- 商品基本信息 -->
+                          <div class="product-info">
+                            <h3 class="product-title">{{ product.title }}</h3>
+                            <div class="price-rate">
+                              <span class="product-price">¥{{ formatPrice(product.price) }}</span>
+                              <el-rate
+                                  v-model="product.rate"
+                                  disabled
+                                  :max="10"
+                                  :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                                  class="product-rate"
+                              />
+                            </div>
+                            <p class="product-desc">{{ product.description }}</p>
+
+                            <!-- 商品规格 -->
+                            <div v-if="product.specifications?.length" class="specifications">
+                              <div
+                                  v-for="(spec, index) in product.specifications"
+                                  :key="index"
+                                  class="spec-item"
+                              >
+                                <span class="spec-label">{{ spec.item }}：</span>
+                                <span class="spec-value">{{ spec.value }}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </el-card>
-                  </router-link>
+                      </el-card>
+                    </router-link>
+                  </div>
+
 
                 </el-col>
 
@@ -84,6 +108,26 @@
 import { ref, onMounted } from 'vue'
 import { getProducts } from '../../api/product.ts'
 import { Picture } from '@element-plus/icons-vue'
+
+// 新增导入
+import { Delete } from '@element-plus/icons-vue'
+import { deleteProduct } from '../../api/product.ts'
+
+// 在原有代码基础上增加删除逻辑
+const handleDelete = async (id: string) => {
+  try {
+    const res = await deleteProduct(id)
+    if (res.data.code === '200') {
+      ElMessage.success('删除成功')
+      // 删除后重新获取列表
+      await fetchProducts()
+    } else {
+      ElMessage.error(res.data.msg || '删除失败')
+    }
+  } catch (error) {
+    ElMessage.error('删除操作失败')
+  }
+}
 
 // 商品列表数据
 const products = ref<[]>([])
@@ -117,6 +161,35 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+
+/* 新增样式 */
+.product-wrapper {
+  position: relative;
+}
+
+.delete-wrapper {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+}
+
+.delete-btn {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* 调整卡片间距 */
+.product-col {
+  margin-bottom: 20px;
+  padding: 8px; /* 增加内边距防止遮挡 */
+}
+
 .products-page {
   margin: 0;
   padding: 0;

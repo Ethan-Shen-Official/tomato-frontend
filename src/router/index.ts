@@ -40,7 +40,12 @@ const routes = createRouter({
       path: '/create',
       component: () => import('../views/product/CreateProducts.vue'),
       meta: { title : 'Create Product' }
-  }
+  }, {
+      path: '/products/update/:id',
+      name: 'UpdateProduct',
+      component: () => import('../views/product/UpdateProduct.vue'),
+      meta: { title : 'Update Product' }
+    }
   ],
 })
 
