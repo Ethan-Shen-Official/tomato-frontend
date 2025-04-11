@@ -6,60 +6,65 @@
           <h1 style="margin-bottom: 30px">全部商品</h1>
           <div v-loading="loading" class="products-list">
             <el-row :gutter="20">
-              <el-col
-                  v-for="product in products"
-                  :key="product.id"
-                  :xs="24"
-                  :sm="12"
-                  :md="8"
-                  :lg="6"
-                  class="product-col"
-              >
-                <el-card class="product-card" shadow="hover">
-                  <div class="product-content">
-                    <!-- 商品封面 -->
-                    <div class="product-image">
-                      <el-image
-                          v-if="product.cover"
-                          :src="product.cover"
-                          fit="cover"
-                          class="cover-image"
-                      />
-                      <div v-else class="image-placeholder">
-                        <el-icon :size="50"><Picture /></el-icon>
-                      </div>
-                    </div>
+                <el-col
+                    v-for="product in products"
+                    :key="product.id"
+                    :xs="24"
+                    :sm="12"
+                    :md="8"
+                    :lg="6"
+                    class="product-col"
+                >
+                  <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }"style="text-decoration: none; color: inherit;">
+                    <el-card class="product-card" shadow="hover">
+                      <div class="product-content">
+                        <!-- 商品封面 -->
+                        <div class="product-image">
+                          <el-image
+                              v-if="product.cover"
+                              :src="product.cover"
+                              fit="cover"
+                              class="cover-image"
+                          />
+                          <div v-else class="image-placeholder">
+                            <el-icon :size="50"><Picture /></el-icon>
+                          </div>
+                        </div>
 
-                    <!-- 商品基本信息 -->
-                    <div class="product-info">
-                      <h3 class="product-title">{{ product.title }}</h3>
-                      <div class="price-rate">
-                        <span class="product-price">¥{{ formatPrice(product.price) }}</span>
-                        <el-rate
-                            v-model="product.rate"
-                            disabled
-                            :max="10"
-                            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                            class="product-rate"
-                        />
-                      </div>
-                      <p class="product-desc">{{ product.description }}</p>
+                        <!-- 商品基本信息 -->
+                        <div class="product-info">
+                          <h3 class="product-title">{{ product.title }}</h3>
+                          <div class="price-rate">
+                            <span class="product-price">¥{{ formatPrice(product.price) }}</span>
+                            <el-rate
+                                v-model="product.rate"
+                                disabled
+                                :max="10"
+                                :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                                class="product-rate"
+                            />
+                          </div>
+                          <p class="product-desc">{{ product.description }}</p>
 
-                      <!-- 商品规格 -->
-                      <div v-if="product.specifications?.length" class="specifications">
-                        <div
-                            v-for="(spec, index) in product.specifications"
-                            :key="index"
-                            class="spec-item"
-                        >
-                          <span class="spec-label">{{ spec.item }}：</span>
-                          <span class="spec-value">{{ spec.value }}</span>
+                          <!-- 商品规格 -->
+                          <div v-if="product.specifications?.length" class="specifications">
+                            <div
+                                v-for="(spec, index) in product.specifications"
+                                :key="index"
+                                class="spec-item"
+                            >
+                              <span class="spec-label">{{ spec.item }}：</span>
+                              <span class="spec-value">{{ spec.value }}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </el-card>
-              </el-col>
+                    </el-card>
+                  </router-link>
+
+                </el-col>
+
+
             </el-row>
 
             <!-- 空状态 -->
