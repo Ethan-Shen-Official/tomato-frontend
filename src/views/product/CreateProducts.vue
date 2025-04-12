@@ -89,7 +89,7 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import {UploadFilled} from "@element-plus/icons-vue"
-import {addProduct} from "../../api/product.ts";
+import {addProduct,updateStockpile} from "../../api/product.ts";
 import {uploadimg} from "../../api/tool.ts";
 
 // 新增导入
@@ -124,6 +124,9 @@ const createDisabled = computed(() => {
   return !(hasTitleInput.value && hasPriceInput.value && hasRateInput.value)
 })
 
+// const id = ref("");
+// const amount = ref(0);
+
 // 创建商品按钮触发
 function handleCreateProduct() {
   const newProduct = {
@@ -134,8 +137,14 @@ function handleCreateProduct() {
     cover: image.value,
     specifications: specifications.value,
   };
+
   addProduct(newProduct).then(res => {
     if (res.data.code === '200') {
+      // const newAmmount = {
+      //   id: res.data.data.id,
+      //   amount: 0,
+      // };
+      // updateStockpile(newAmmount);
       ElMessage({
         message: '创建商品成功！',
         type: 'success',
