@@ -3,7 +3,17 @@
     <div class="products-container">
       <el-card class="list-card">
         <div>
+
+          <!-- 添加创建商品的按钮 -->
+          <router-link to="/create">
+            <el-button type="primary" size="medium" class="create-button">
+              创建商品
+            </el-button>
+          </router-link>
           <h1 style="margin-bottom: 30px">全部商品</h1>
+
+
+
           <div v-loading="loading" class="products-list">
             <el-row :gutter="20">
                 <el-col
@@ -161,7 +171,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 
 /* 新增样式 */
 .product-wrapper {
