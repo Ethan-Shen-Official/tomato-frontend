@@ -242,6 +242,14 @@ const formatRole = (role: string) => {
           <el-button type="primary" @click="ToLogin" class="login-button">
             前往登录
           </el-button>
+
+          <!-- 新增查看全部商品按钮 -->
+          <el-button
+              type="success"
+              @click="$router.push('/all')"
+              style="margin-top: 10px">
+            查看全部商品
+          </el-button>
         </div>
       </template>
     </div>
@@ -307,6 +315,14 @@ const formatRole = (role: string) => {
               <div class="button-area">
                 <el-button type="primary" plain @click="activePanel = 'updateInfo'">
                   更新个人信息
+                </el-button>
+
+                <!-- 新增查看全部商品按钮 -->
+                <el-button
+                    type="success"
+                    @click="$router.push('/all')"
+                    style="margin-top: 10px">
+                  查看全部商品
                 </el-button>
               </div>
             </el-card>

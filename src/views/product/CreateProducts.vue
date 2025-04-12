@@ -73,7 +73,7 @@
                 创建商品
               </el-button>
 
-              <router-link to="/dashboard" v-slot="{navigate}">
+              <router-link to="/all" v-slot="{navigate}">
                 <el-button @click="navigate">
                   返回主页
                 </el-button>
@@ -94,6 +94,7 @@ import {uploadimg} from "../../api/tool.ts";
 
 // 新增导入
 import { Delete } from '@element-plus/icons-vue'
+import {routes} from "../../router";
 
 // 在原有响应式变量后添加
 const specifications = ref<Array<{ item: string; value: string }>>([])
@@ -157,6 +158,7 @@ function handleCreateProduct() {
       image.value = ''
       imageFileList.value.splice(0)
       specifications.value.splice(0)
+      routes.push({path: "/all"})
     } else if (res.data.code === '400') {
       ElMessage({
         message: res.data.msg,
