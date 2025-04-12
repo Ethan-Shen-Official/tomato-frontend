@@ -1,3 +1,289 @@
 <template>
+  <div class="update-page">
+    <div class="update-container">
+      <el-card class="form-card">
+        <div>
+          <h1>编辑商品</h1>
+          <el-form label-position="right" label-width="100px" size="large" class="update-form">
+            <el-form-item label="商品名称">
+              <el-input id="title" v-model="formData.title" required placeholder="请输入商品名"/>
+            </el-form-item>
 
+            <el-form-item label="商品价格">
+              <el-input id="price" v-model="formData.price" required placeholder="请输入商品价格" type="number"/>
+            </el-form-item>
+
+            <el-form-item label="商品评分">
+              <el-input
+                  id="rate"
+                  v-model.number="formData.rate"
+                  required
+                  placeholder="请输入评分（0-10）"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="10"
+              />
+            </el-form-item>
+
+            <el-form-item label="商品描述">
+              <el-input
+                  id="description"
+                  v-model="formData.description"
+                  placeholder="商品描述"
+                  type="textarea"
+                  :rows="4"
+              />
+            </el-form-item>
+
+            <el-form-item label="商品封面">
+              <el-upload
+                  v-model:file-list="imageFileList"
+                  :limit="1"
+                  :on-change="handleChange"
+                  :on-exceed="handleExceed"
+                  class="upload-demo"
+                  list-type="picture"
+                  :http-request="uploadHttpRequest"
+                  drag
+              >
+                <el-icon class="el-icon--upload">
+                  <upload-filled/>
+                </el-icon>
+                <div class="el-upload__text">
+                  将文件拖到此处或<em>单击此处</em>上传。仅允许上传一份文件。
+                </div>
+                <template #tip>
+                  <div class="el-upload__tip" v-if="formData.cover">
+                    当前封面：<a :href="formData.cover" target="_blank">{{ formData.cover }}</a>
+                  </div>
+                </template>
+              </el-upload>
+            </el-form-item>
+
+            <!-- 规格编辑部分 -->
+            <el-form-item label="商品规格">
+              <div class="specifications-container">
+                <div v-for="(spec, index) in formData.specifications" :key="index" class="spec-item">
+                  <el-input
+                      v-model="spec.item"
+                      placeholder="规格名称"
+                      style="width: 200px; margin-right: 10px"
+                  />
+                  <el-input
+                      v-model="spec.value"
+                      placeholder="规格值"
+                      style="width: 200px; margin-right: 10px"
+                  />
+                  <el-button
+                      type="danger"
+                      circle
+                      :icon="Delete"
+                      @click="removeSpec(index)"
+                  />
+                </div>
+                <el-button type="primary" @click="addSpec" style="margin-top: 10px">
+                  添加规格
+                </el-button>
+              </div>
+            </el-form-item>
+
+            <span class="button-group">
+              <el-button
+                  type="primary"
+                  @click.prevent="handleUpdateProduct"
+                  :disabled="updateDisabled"
+                  :loading="submitting"
+              >
+                {{ submitting ? '提交中...' : '更新商品' }}
+              </el-button>
+
+              <el-button @click="$router.go(-1)">
+                返回
+              </el-button>
+            </span>
+          </el-form>
+        </div>
+      </el-card>
+    </div>
+  </div>
 </template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { UploadFilled } from '@element-plus/icons-vue'
+import { Delete } from '@element-plus/icons-vue'
+import { getProductById, updateProduct } from '../../api/product'
+import { uploadimg } from '../../api/tool'
+import { ElMessage } from 'element-plus'
+import type { UpdateInfo } from '../../api/product'
+
+const route = useRoute()
+const submitting = ref(false)
+
+// 表单数据结构
+const formData = ref<UpdateInfo>({
+  id: '',
+  title: '',
+  price: 0,
+  rate: 0,
+  description: '',
+  cover: '',
+  specifications: []
+})
+
+// 图片上传相关
+const imageFileList = ref<Array<{ name: string; url?: string }>>([])
+
+// 初始化加载商品数据
+onMounted(async () => {
+  try {
+    const productId = route.params.id as string
+    const res = await getProductById(productId)
+
+    if (res.data.code === '200') {
+      const product = res.data.data
+      formData.value = {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        rate: product.rate,
+        description: product.description,
+        cover: product.cover,
+        specifications: product.specifications || []
+      }
+
+      // 初始化图片显示
+      if (product.cover) {
+        imageFileList.value = [{
+          name: '商品封面',
+          url: product.cover
+        }]
+      }
+    }
+  } catch (error) {
+    ElMessage.error('获取商品信息失败')
+  }
+})
+
+// 表单验证
+const updateDisabled = computed(() => {
+  return !(
+      formData.value.title?.trim() &&
+      formData.value.price !== undefined &&
+      formData.value.rate >= 0 &&
+      formData.value.rate <= 10
+  )
+})
+
+// 处理规格操作
+const addSpec = () => {
+  formData.value.specifications?.push({ item: '', value: '' })
+}
+
+const removeSpec = (index: number) => {
+  formData.value.specifications?.splice(index, 1)
+}
+
+// 图片上传处理
+const handleChange = (file: any) => {
+  const formData = new FormData()
+  formData.append('file', file.raw)
+
+  uploadimg(formData).then(res => {
+    formData.value.cover = res.data.result
+    ElMessage.success('图片上传成功')
+  }).catch(() => {
+    ElMessage.error('图片上传失败')
+  })
+}
+
+const handleExceed = () => {
+  ElMessage.warning('最多只能上传一张图片')
+}
+
+const uploadHttpRequest = () => new XMLHttpRequest()
+
+// 提交更新
+const handleUpdateProduct = async () => {
+  submitting.value = true
+
+  try {
+    // 清理空规格
+    const validSpecs = formData.value.specifications?.filter(
+        spec => spec.item.trim() && spec.value.trim()
+    )
+
+    const updateInfo: UpdateInfo = {
+      ...formData.value,
+      specifications: validSpecs
+    }
+
+    const res = await updateProduct(updateInfo)
+
+    if (res.data.code === '200') {
+      ElMessage.success('商品更新成功')
+      setTimeout(() => {
+        window.location.href = `/products/${formData.value.id}`
+      }, 1500)
+    } else {
+      ElMessage.error(res.data.msg || '更新失败')
+    }
+  } catch (error) {
+    ElMessage.error('请求失败，请检查网络')
+  } finally {
+    submitting.value = false
+  }
+}
+</script>
+
+<style scoped>
+.update-page {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.update-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.form-card {
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.specifications-container {
+  border: 1px solid #ebeef5;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.el-upload__tip {
+  margin-top: 10px;
+  color: #666;
+  font-size: 12px;
+}
+
+.el-upload__tip a {
+  color: #409eff;
+  text-decoration: none;
+}
+</style>
