@@ -28,6 +28,13 @@
               >
                 编辑商品
               </el-button>
+
+              <el-button
+                  type="success"
+                  @click="showStockDialog"
+              >
+                更新库存
+              </el-button>
             </div>
 
             <div class="detail-content">
@@ -69,6 +76,28 @@
             </div>
           </div>
 
+          <!-- 更新库存对话框 -->
+          <el-dialog
+              v-model="stockDialogVisible"
+              title="更新库存"
+              width="30%"
+          >
+            <el-input
+                v-model.number="stockAmount"
+                type="number"
+                placeholder="请输入库存数量"
+                min="0"
+            />
+            <template #footer>
+              <span class="dialog-footer">
+                <el-button @click="stockDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="updateStock">
+                  确认
+                </el-button>
+              </span>
+            </template>
+          </el-dialog>
+
           <!-- 错误提示 -->
           <el-empty
               v-if="!loading && !product"
@@ -83,14 +112,51 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getProductById } from '../../api/product.ts'
+import { getProductById,updateStockpile } from '../../api/product.ts'
 import { ElMessage } from 'element-plus'
 import {routes} from '../../router'
 const route = useRoute()
 const loading = ref(true)
 const product = ref<any>(null)
 
+const stockDialogVisible = ref(false)
+const stockAmount = ref(0)
 
+const showStockDialog = () => {
+  stockAmount.value = product.value.stock // 初始化输入框为当前库存
+  stockDialogVisible.value = true
+}
+
+const updateStock = async () => {
+  try {
+    const res = await updateStockpile({
+      id: product.value.id,
+      amount: stockAmount.value
+    })
+
+    // 处理成功情况
+    if (res.data.code === '200') {
+      ElMessage.success('库存更新成功')
+      product.value.stock = stockAmount.value
+      stockDialogVisible.value = false
+    } else {
+      // 处理业务逻辑错误
+      ElMessage.error(res.data.msg || '库存更新失败')
+    }
+  } catch (error: any) {
+    // 细化错误类型
+    if (error.response) {
+      // 请求已发出且服务器响应状态码非 2xx
+      ElMessage.error(`服务器错误: ${error.response.data?.message || error.message}`)
+    } else if (error.request) {
+      // 请求已发出但没有收到响应
+      ElMessage.error('网络连接异常，请检查网络')
+    } else {
+      // 其他错误
+      ElMessage.error('请求配置错误')
+    }
+  }
+}
 // 添加路由跳转方法
 
 
@@ -130,6 +196,30 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+/* 新增样式 */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stock {
+  font-size: 16px;
+  color: #606266;
+}
+
 .product-detail-page {
   background-color: #f5f5f5; /* 背景色稍更柔和 */
   min-height: 100vh;

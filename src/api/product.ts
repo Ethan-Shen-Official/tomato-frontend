@@ -35,6 +35,8 @@ type productAmount = {
 }
 
 
+
+
 /**
  * 请求方式
     方法: GET
@@ -138,7 +140,7 @@ export const deleteProduct = (id: string) => {
     * @returns update result
  */
 export const updateStockpile = (productinfo : productAmount) => {
-    return axios.patch(`${API_PRODUCT_MODULE_PREFIX}/stockpile/${productinfo.id}`,productinfo,
+    return axios.patch(`${API_PRODUCT_MODULE_PREFIX}/stockpile/${productinfo.id}`,{ amount: productinfo.amount },
         {headers: { 'Content-Type': 'application/json' }})
     .then(res => {
         return res
