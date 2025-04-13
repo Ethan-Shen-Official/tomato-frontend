@@ -21,20 +21,23 @@
                   :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
                   class="product-rating"
               />
-              <el-button
-                  type="primary"
-                  @click="goToEditPage"
-                  class="edit-btn"
-              >
-                编辑商品
-              </el-button>
+              <!-- 添加角色验证 -->
+              <div v-if="role === 'admin'" class="action-buttons">
+                <el-button
+                    type="primary"
+                    @click="goToEditPage"
+                    class="edit-btn"
+                >
+                  编辑商品
+                </el-button>
 
-              <el-button
-                  type="success"
-                  @click="showStockDialog"
-              >
-                更新库存
-              </el-button>
+                <el-button
+                    type="success"
+                    @click="showStockDialog"
+                >
+                  更新库存
+                </el-button>
+              </div>
             </div>
 
             <div class="detail-content">
@@ -110,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import { useRoute } from 'vue-router'
 import { getProductById,updateStockpile } from '../../api/product.ts'
 import { ElMessage } from 'element-plus'
@@ -121,7 +124,7 @@ const product = ref<any>(null)
 
 const stockDialogVisible = ref(false)
 const stockAmount = ref(0)
-
+const role = computed(() => sessionStorage.getItem('role') || '');
 const showStockDialog = () => {
   stockAmount.value = product.value.stock // 初始化输入框为当前库存
   stockDialogVisible.value = true
