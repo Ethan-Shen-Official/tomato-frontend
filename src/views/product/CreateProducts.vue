@@ -132,7 +132,7 @@ const createDisabled = computed(() => {
 function handleCreateProduct() {
   const newProduct = {
     title: title.value,
-    price: price.value,
+    price: Number(price.value),
     rate: rate.value,
     description: description.value,
     cover: image.value,
