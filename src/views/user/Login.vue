@@ -20,7 +20,7 @@ function handleLogin() {
   handlelogin({
     username: username.value,
     password: password.value
-  }).then(res => {
+  }).then(async res => {
     if (res.data.code === '200') {
       ElMessage({
         message: "登录成功！",
@@ -30,6 +30,8 @@ function handleLogin() {
       const token = res.data.data
       sessionStorage.setItem('token', token)
       sessionStorage.setItem('username', username.value)
+      const userRes = await getUserInfo(username.value)
+      sessionStorage.setItem('role', userRes.data.data.role)
       routes.push({path: "/dashboard"})
     } else if (res.data.code === '400') {
       ElMessage({

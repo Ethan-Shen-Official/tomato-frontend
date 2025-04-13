@@ -4,47 +4,46 @@
       <el-card class="list-card">
         <div>
 
-          <!-- 添加创建商品的按钮 -->
-          <router-link to="/create">
+          <!-- 修改后的创建按钮 -->
+          <router-link v-if="role === 'admin'" to="/create">
             <el-button type="primary" size="medium" class="create-button">
               创建商品
             </el-button>
           </router-link>
+
           <h1 style="margin-bottom: 30px">全部商品</h1>
-
-
 
           <div v-loading="loading" class="products-list">
             <el-row :gutter="20">
-                <el-col
-                    v-for="product in products"
-                    :key="product.id"
-                    :xs="24"
-                    :sm="12"
-                    :md="8"
-                    :lg="6"
-                    class="product-col"
-                >
-                  <div class="product-wrapper">
-                    <!-- 新增删除按钮 -->
-                    <div class="delete-wrapper">
-                      <el-popconfirm
-                          title="确认要删除该商品吗？"
-                          @confirm="handleDelete(product.id)"
-                      >
-                        <template #reference>
-                          <el-button
-                              type="danger"
-                              size="small"
-                              circle
-                              class="delete-btn"
-                              @click.stop
-                          >
-                            <el-icon><Delete /></el-icon>
-                          </el-button>
-                        </template>
-                      </el-popconfirm>
-                    </div>
+              <el-col
+                  v-for="product in products"
+                  :key="product.id"
+                  :xs="24"
+                  :sm="12"
+                  :md="8"
+                  :lg="6"
+                  class="product-col"
+              >
+                <div class="product-wrapper">
+                  <!-- 修改后的删除按钮 -->
+                  <div v-if="role === 'admin'" class="delete-wrapper">
+                    <el-popconfirm
+                        title="确认要删除该商品吗？"
+                        @confirm="handleDelete(product.id)"
+                    >
+                      <template #reference>
+                        <el-button
+                            type="danger"
+                            size="small"
+                            circle
+                            class="delete-btn"
+                            @click.stop
+                        >
+                          <el-icon><Delete /></el-icon>
+                        </el-button>
+                      </template>
+                    </el-popconfirm>
+                  </div>
 
                     <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }"style="text-decoration: none; color: inherit;">
                       <el-card class="product-card" shadow="hover">
@@ -115,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,computed } from 'vue'
 import { getProducts } from '../../api/product.ts'
 import { Picture } from '@element-plus/icons-vue'
 
@@ -123,6 +122,7 @@ import { Picture } from '@element-plus/icons-vue'
 import { Delete } from '@element-plus/icons-vue'
 import { deleteProduct } from '../../api/product.ts'
 
+const role = computed(() => sessionStorage.getItem('role') || '');
 // 在原有代码基础上增加删除逻辑
 const handleDelete = async (id: string) => {
   try {
