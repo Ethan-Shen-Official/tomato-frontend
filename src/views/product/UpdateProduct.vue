@@ -241,39 +241,59 @@ const handleUpdateProduct = async () => {
 <style scoped>
 .update-page {
   margin: 0;
-  padding: 20px;
-  min-height: 100vh;
-  background-color: #f5f7fa;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
 }
 
 .update-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .form-card {
-  padding: 30px;
+  width: 70%;
+  max-width: 900px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .button-group {
+  padding-top: 10px;
   display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-  margin-top: 30px;
+  flex-direction: row;
+  gap: 30px;
+  align-items: center;
+  justify-content: right;
 }
 
 .specifications-container {
   border: 1px solid #ebeef5;
   padding: 15px;
   border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .spec-item {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 10px;
 }
 
 .el-upload__tip {
@@ -285,5 +305,20 @@ const handleUpdateProduct = async () => {
 .el-upload__tip a {
   color: #409eff;
   text-decoration: none;
+}
+
+/* 新增适配背景的样式 */
+.update-form :deep(.el-form-item__label) {
+  color: #333;
+  font-weight: 500;
+}
+
+.update-form :deep(.el-input__inner) {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.update-form :deep(.el-textarea__inner) {
+  background-color: rgba(255, 255, 255, 0.8);
+  min-height: 80px;
 }
 </style>

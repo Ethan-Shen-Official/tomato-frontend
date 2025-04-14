@@ -199,47 +199,37 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
-/* 新增样式 */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.price-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.stock {
-  font-size: 16px;
-  color: #606266;
-}
-
 .product-detail-page {
-  background-color: #f5f5f5; /* 背景色稍更柔和 */
-  min-height: 100vh;
-  padding: 20px;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
 }
 
 .detail-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .detail-card {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
+  width: 70%;
+  max-width: 900px;
   padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
 }
 
 .back-button {
@@ -251,64 +241,106 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+  padding: 0 10px;
 }
 
 .product-title {
   font-size: 26px;
   color: #303133;
   margin: 0;
+  flex-grow: 1;
 }
 
-.product-rating {
-  margin-left: 10px;
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-left: 20px;
 }
 
 .detail-content {
   display: flex;
-  gap: 40px; /* 使用 flexbox 布局，使内容更均匀 */
+  gap: 40px;
+  margin-top: 20px;
 }
 
 .detail-image {
-  flex: 1; /* 商品图片占用更多空间 */
+  flex: 1;
+  min-width: 400px;
 }
 
 .image {
+  width: 100%;
   height: 400px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 图片增加阴影 */
+  object-fit: contain;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 15px;
 }
 
 .detail-info {
-  flex: 1; /* 商品信息占用剩余空间 */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  gap: 25px;
 }
 
 .price-section {
-  margin: 20px 0;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 20px;
+  border-radius: 8px;
 }
 
 .price {
-  font-size: 28px;
+  font-size: 32px;
   color: #f56c6c;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .specs {
-  margin: 30px 0;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.specs :deep(.el-descriptions) {
+  margin-top: 15px;
 }
 
 .description {
-  margin-top: 30px;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 20px;
+  border-radius: 8px;
   line-height: 1.8;
 }
 
-.edit-btn {
-  margin-left: 20px;
+/* 统一表单元素样式 */
+:deep(.el-descriptions__title) {
+  font-size: 18px;
+  color: #303133 !important;
 }
 
-h3 {
-  color: #606266; /* 统一标题颜色 */
+:deep(.el-descriptions__label) {
+  color: #606266 !important;
+  font-weight: 500;
+}
+
+:deep(.el-button) {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* 对话框样式统一 */
+:deep(.el-dialog) {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #ebeef5;
+}
+
+:deep(.el-input__inner) {
+  background: rgba(245, 247, 250, 0.8);
 }
 </style>
