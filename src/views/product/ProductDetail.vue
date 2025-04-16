@@ -56,6 +56,30 @@
                   <span class="price">¥{{ formatPrice(product.price) }}</span>
                 </div>
 
+                <!-- 添加购物车功能 -->
+                <div class="cart-section" v-if="role === 'user'">
+                  <div class="quantity-selector">
+                    <span class="quantity-label">购买数量：</span>
+                    <el-input-number
+                        v-model="quantity"
+                        :min="1"
+                        :max="stocknumber"
+                        size="default"
+                        :precision="0"
+                        @change="handleChange"
+                    />
+                    <span class="stock-info">库存 {{ stocknumber }} 件</span>
+                  </div>
+                  <el-button
+                      type="danger"
+                      class="add-cart-btn"
+                      @click="handleAddToCart"
+                      :disabled="quantity > stocknumber || quantity < 1"
+                  >
+                    🛒 加入购物车
+                  </el-button>
+                </div>
+
                 <!-- 商品规格 -->
                 <div v-if="product.specifications?.length" class="specs">
                   <h3>商品规格</h3>
@@ -115,13 +139,52 @@
 <script setup lang="ts">
 import {ref, onMounted, computed} from 'vue'
 import { useRoute } from 'vue-router'
-import { getProductById,updateStockpile } from '../../api/product.ts'
+import { getProductById,updateStockpile,getStockpile } from '../../api/product.ts'
+import { addToCart } from '../../api/cart.ts'
 import { ElMessage } from 'element-plus'
 import {routes} from '../../router'
 const route = useRoute()
 const loading = ref(true)
 const product = ref<any>(null)
 
+
+const handleChange = (value: number | undefined) => {
+  console.log(value)
+}
+// 购物车相关逻辑
+const quantity = ref(1)
+
+const handleAddToCart = async () => {
+  try {
+    // 二次验证库存
+    if (quantity.value > stocknumber.value) {
+      ElMessage.warning('库存不足')
+      return
+    }
+
+    const res = await addToCart({
+      productId: product.value.id,
+      quantity: quantity.value
+    })
+
+    if (res.data.code === '200') {
+      ElMessage.success({
+        message: '成功加入购物车',
+        duration: 1000,
+        showClose: true
+      })
+      // 清空选择数量
+      quantity.value = 1
+    } else {
+      ElMessage.error(res.data.msg || '添加购物车失败')
+    }
+  } catch (error) {
+    ElMessage.error('网络请求失败')
+    console.error('添加购物车错误:', error)
+  }
+}
+
+const stocknumber = ref(0)
 const stockDialogVisible = ref(false)
 const stockAmount = ref(0)
 const role = computed(() => sessionStorage.getItem('role') || '');
@@ -140,7 +203,7 @@ const updateStock = async () => {
     // 处理成功情况
     if (res.data.code === '200') {
       ElMessage.success('库存更新成功')
-      product.value.stock = stockAmount.value
+      stocknumber.value = stockAmount.value
       stockDialogVisible.value = false
     } else {
       // 处理业务逻辑错误
@@ -180,11 +243,17 @@ const fetchProduct = async () => {
   try {
     loading.value = true
     const res = await getProductById(route.params.id as string)
-
+    const ress = await getStockpile(route.params.id as string)
     if (res.data.code === '200') {
       product.value = res.data.data
     } else {
       ElMessage.error(res.data.msg || '获取商品详情失败')
+    }
+
+    if (ress.data.code === '200') {
+      stocknumber.value = ress.data.data.amount
+    } else {
+      ElMessage.error(res.data.msg || '获取库存失败')
     }
   } catch (error) {
     ElMessage.error('网络请求失败')
@@ -200,46 +269,78 @@ onMounted(() => {
 
 <style scoped>
 
-/* 新增样式 */
-.header-right {
+/* 新增购物车样式 */
+.cart-section {
+  margin: 25px 0;
+  padding: 20px;
+  background: rgba(245, 247, 250, 0.8);
+  border-radius: 8px;
+}
+
+.quantity-selector {
   display: flex;
   align-items: center;
-  gap: 20px;
+  margin-bottom: 15px;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.price-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.stock {
-  font-size: 16px;
+.quantity-label {
+  font-size: 14px;
   color: #606266;
+  margin-right: 15px;
+}
+
+.stock-info {
+  margin-left: 20px;
+  font-size: 13px;
+  color: #909399;
+}
+
+.add-cart-btn {
+  width: 100%;
+  height: 45px;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+:deep(.el-input-number) {
+  width: 120px;
+}
+
+:deep(.el-input-number .el-input__inner) {
+  text-align: center;
 }
 
 .product-detail-page {
-  background-color: #f5f5f5; /* 背景色稍更柔和 */
-  min-height: 100vh;
-  padding: 20px;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
 }
 
 .detail-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .detail-card {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
+  width: 70%;
+  max-width: 900px;
   padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
 }
 
 .back-button {
@@ -251,64 +352,106 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+  padding: 0 10px;
 }
 
 .product-title {
   font-size: 26px;
   color: #303133;
   margin: 0;
+  flex-grow: 1;
 }
 
-.product-rating {
-  margin-left: 10px;
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-left: 20px;
 }
 
 .detail-content {
   display: flex;
-  gap: 40px; /* 使用 flexbox 布局，使内容更均匀 */
+  gap: 40px;
+  margin-top: 20px;
 }
 
 .detail-image {
-  flex: 1; /* 商品图片占用更多空间 */
+  flex: 1;
+  min-width: 400px;
 }
 
 .image {
+  width: 100%;
   height: 400px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 图片增加阴影 */
+  object-fit: contain;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 15px;
 }
 
 .detail-info {
-  flex: 1; /* 商品信息占用剩余空间 */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  gap: 25px;
 }
 
 .price-section {
-  margin: 20px 0;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 20px;
+  border-radius: 8px;
 }
 
 .price {
-  font-size: 28px;
+  font-size: 32px;
   color: #f56c6c;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .specs {
-  margin: 30px 0;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.specs :deep(.el-descriptions) {
+  margin-top: 15px;
 }
 
 .description {
-  margin-top: 30px;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 20px;
+  border-radius: 8px;
   line-height: 1.8;
 }
 
-.edit-btn {
-  margin-left: 20px;
+/* 统一表单元素样式 */
+:deep(.el-descriptions__title) {
+  font-size: 18px;
+  color: #303133 !important;
 }
 
-h3 {
-  color: #606266; /* 统一标题颜色 */
+:deep(.el-descriptions__label) {
+  color: #606266 !important;
+  font-weight: 500;
+}
+
+:deep(.el-button) {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* 对话框样式统一 */
+:deep(.el-dialog) {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #ebeef5;
+}
+
+:deep(.el-input__inner) {
+  background: rgba(245, 247, 250, 0.8);
 }
 </style>
