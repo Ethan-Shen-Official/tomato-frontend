@@ -4,9 +4,12 @@
       <div v-loading="loading">
         <!-- 返回按钮 -->
         <div class="header-section">
-          <el-button @click="$router.go(-1)" type="primary" plain>
-            ← 返回商品列表
-          </el-button>
+          <router-link to="/all" v-slot="{navigate}">
+            <el-button @click="navigate" type="primary" plain>
+              返回商品列表
+            </el-button>
+          </router-link>
+
           <h1 class="cart-title">我的购物车（{{ cartData?.total || 0 }}件）</h1>
         </div>
 
@@ -23,7 +26,6 @@
             <!-- 商品信息 -->
             <div class="item-info">
               <h3 class="item-title">{{ item.title }}</h3>
-              <p class="item-desc">{{ item.description }}</p>
             </div>
 
             <!-- 价格区域 -->
@@ -43,7 +45,7 @@
               <el-input-number
                   v-model="item.quantity"
                   :min="1"
-                  :max="10"
+                  :max="120"
                   :precision="0"
                   size="small"
                   @change="handleQuantityChange(item)"
@@ -55,7 +57,7 @@
               <el-button
                   type="danger"
                   size="small"
-                  @click="handleDelete(item.cartItemId)"
+                  @click="handleDelete(item)"
                   circle
               >
                 <el-icon><Delete /></el-icon>
@@ -89,7 +91,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
-import { getCartItems } from '../../api/cart'
+import { getCartItems,deleteFromCart } from '../../api/cart'
 
 interface CartItem {
   cartItemId: string
@@ -131,18 +133,33 @@ const handleQuantityChange = async (item: CartItem) => {
   }
 }
 
-// 处理删除商品
-const handleDelete = async (cartItemId: string) => {
+// 删除逻辑
+const handleDelete = async (mergedItem: MergedCartItem) => {
   try {
-    // 这里需要调用删除购物车商品的API
-    cartData.value!.items = cartData.value!.items.filter(
-        item => item.cartItemId !== cartItemId
+    // 确认对话框（可选）
+    await ElMessageBox.confirm('确定移除该商品所有数量吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    // 循环删除
+    const deletePromises = mergedItem.cartItemIds.map(id =>
+        deleteFromCart(id).catch(e => {
+          console.warn(`删除 ${id} 失败（可忽略）:`, e)
+          return null // 标记失败但继续执行
+        })
     )
-    cartData.value!.total -= 1
+
+    await Promise.all(deletePromises)
+    await fetchCartItems()
     ElMessage.success('已移除商品')
   } catch (error) {
-    ElMessage.error('删除商品失败')
-    console.error('删除错误:', error)
+    // 用户取消删除时不需要处理
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+      console.error(error)
+    }
   }
 }
 
@@ -153,29 +170,53 @@ const handleCheckout = () => {
 }
 
 //获取购物车数据
+interface MergedCartItem {
+  productId: string
+  title: string
+  price: number
+  cover: string
+  quantity: number
+  cartItemIds: string[] // 保留原始ID用于后续操作
+}
+
+// 在 fetchCartItems 方法中添加合并逻辑
 const fetchCartItems = async () => {
   try {
     loading.value = true
     const res = await getCartItems()
-    console.log('完整响应:', res)
-    console.log('响应数据:', res.data)
 
     if (res.data.code === '200') {
-      console.log('购物车数据:', res.data.data)
+      const originalItems = res.data.data.items || []
+
+      // 使用Map合并相同productId的商品
+      const itemsMap = new Map<string, MergedCartItem>()
+      originalItems.forEach(item => {
+        if (itemsMap.has(item.productId)) {
+          const existing = itemsMap.get(item.productId)!
+          existing.quantity += item.quantity
+          existing.cartItemIds.push(item.cartItemId)
+        } else {
+          itemsMap.set(item.productId, {
+            productId: item.productId,
+            title: item.title,
+            price: item.price,
+            cover: item.cover,
+            quantity: item.quantity,
+            cartItemIds: [item.cartItemId]
+          })
+        }
+      })
+
       cartData.value = {
-        items: res.data.data.items || [],
-        total: res.data.data.total || 0,
-        totalAmount: res.data.data.totalAmount || 0
+        items: Array.from(itemsMap.values()),
+        total: Array.from(itemsMap.values()).reduce((sum, item) => sum + item.quantity, 0),
+        totalAmount: Array.from(itemsMap.values()).reduce((sum, item) => sum + (item.price * item.quantity), 0)
       }
-    } else {
-      ElMessage.error(res.data.msg || '获取购物车数据失败')
     }
   } catch (error) {
-    console.error('请求错误:', error)
-    ElMessage.error('网络请求失败')
+    // 错误处理
   } finally {
     loading.value = false
-    console.log('最终cartData值:', cartData.value)
   }
 }
 

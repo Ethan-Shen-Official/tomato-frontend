@@ -6,21 +6,13 @@
           <!-- 返回按钮 -->
           <div class="back-button">
             <el-button @click="$router.go(-1)" type="primary" plain>
-              ← 返回列表
+              返回列表
             </el-button>
           </div>
 
           <!-- 商品详情内容 -->
           <div v-if="product">
             <div class="detail-header">
-              <h1 class="product-title">{{ product.title }}</h1>
-              <el-rate
-                  v-model="product.rate"
-                  disabled
-                  :max="10"
-                  :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                  class="product-rating"
-              />
               <!-- 添加角色验证 -->
               <div v-if="role === 'admin'" class="action-buttons">
                 <el-button
@@ -52,6 +44,18 @@
 
               <!-- 商品信息 -->
               <div class="detail-info">
+
+                <div class="product-header">
+                  <h1 class="product-title">{{ product.title }}</h1>
+                  <el-rate
+                      v-model="product.rate"
+                      disabled
+                      :max="10"
+                      :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                      class="product-rating"
+                  />
+                </div>
+
                 <div class="price-section">
                   <span class="price">¥{{ formatPrice(product.price) }}</span>
                 </div>
@@ -80,27 +84,32 @@
                   </el-button>
                 </div>
 
-                <!-- 商品规格 -->
-                <div v-if="product.specifications?.length" class="specs">
-                  <h3>商品规格</h3>
-                  <el-descriptions border>
-                    <el-descriptions-item
-                        v-for="(spec, index) in product.specifications"
-                        :key="index"
-                        :label="spec.item"
-                    >
-                      {{ spec.value }}
-                    </el-descriptions-item>
-                  </el-descriptions>
-                </div>
-
-                <!-- 商品描述 -->
-                <div class="description">
-                  <h3>商品详情</h3>
-                  <div v-html="product.detail"></div>
-                </div>
               </div>
             </div>
+
+            <!-- 下半部分：商品详情 -->
+            <div class="bottom-section">
+              <!-- 商品描述 -->
+              <div class="product-description">
+                <h3 class="section-title">商品详情</h3>
+                <div v-html="product.detail" class="description-content"></div>
+              </div>
+
+              <!-- 商品规格 -->
+              <div v-if="product.specifications?.length" class="product-specs">
+                <h3 class="section-title">商品规格</h3>
+                <el-descriptions border>
+                  <el-descriptions-item
+                      v-for="(spec, index) in product.specifications"
+                      :key="index"
+                      :label="spec.item"
+                  >
+                    {{ spec.value }}
+                  </el-descriptions-item>
+                </el-descriptions>
+              </div>
+            </div>
+
           </div>
 
           <!-- 更新库存对话框 -->
@@ -324,7 +333,7 @@ onMounted(() => {
 .detail-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/background.jpg');
+  background-image: url('../../assets/background1.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -336,7 +345,7 @@ onMounted(() => {
 
 .detail-card {
   width: 70%;
-  max-width: 900px;
+  max-width: 1200px;
   padding: 30px;
   background-color: rgba(255, 255, 255, 0.95);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -375,8 +384,8 @@ onMounted(() => {
 }
 
 .detail-image {
-  flex: 1;
-  min-width: 400px;
+  flex: 0 0 30%;
+  min-width: 100px;
 }
 
 .image {
@@ -405,6 +414,13 @@ onMounted(() => {
   font-size: 32px;
   color: #f56c6c;
   font-weight: 600;
+}
+
+/* 优化商品描述和规格的标题样式 */
+.product-description .section-title,
+.product-specs .section-title {
+  text-align: left; /* 左对齐 */
+  margin-bottom: 10px; /* 添加一定的底部间距 */
 }
 
 .specs {
@@ -443,7 +459,7 @@ onMounted(() => {
 /* 对话框样式统一 */
 :deep(.el-dialog) {
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(5px);
 }
 

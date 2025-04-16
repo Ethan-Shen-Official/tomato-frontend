@@ -104,7 +104,7 @@ function handleLogin() {
 .login-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/background.jpg');
+  background-image: url('../../assets/background1.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -118,7 +118,7 @@ function handleLogin() {
   width: 400px;
   max-width: 80%;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.7);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
 }
