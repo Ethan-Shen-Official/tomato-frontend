@@ -56,6 +56,30 @@
                   <span class="price">¥{{ formatPrice(product.price) }}</span>
                 </div>
 
+                <!-- 添加购物车功能 -->
+                <div class="cart-section" v-if="role === 'user'">
+                  <div class="quantity-selector">
+                    <span class="quantity-label">购买数量：</span>
+                    <el-input-number
+                        v-model="quantity"
+                        :min="1"
+                        :max="stocknumber"
+                        size="default"
+                        :precision="0"
+                        @change="handleChange"
+                    />
+                    <span class="stock-info">库存 {{ stocknumber }} 件</span>
+                  </div>
+                  <el-button
+                      type="danger"
+                      class="add-cart-btn"
+                      @click="handleAddToCart"
+                      :disabled="quantity > stocknumber || quantity < 1"
+                  >
+                    🛒 加入购物车
+                  </el-button>
+                </div>
+
                 <!-- 商品规格 -->
                 <div v-if="product.specifications?.length" class="specs">
                   <h3>商品规格</h3>
@@ -115,13 +139,52 @@
 <script setup lang="ts">
 import {ref, onMounted, computed} from 'vue'
 import { useRoute } from 'vue-router'
-import { getProductById,updateStockpile } from '../../api/product.ts'
+import { getProductById,updateStockpile,getStockpile } from '../../api/product.ts'
+import { addToCart } from '../../api/cart.ts'
 import { ElMessage } from 'element-plus'
 import {routes} from '../../router'
 const route = useRoute()
 const loading = ref(true)
 const product = ref<any>(null)
 
+
+const handleChange = (value: number | undefined) => {
+  console.log(value)
+}
+// 购物车相关逻辑
+const quantity = ref(1)
+
+const handleAddToCart = async () => {
+  try {
+    // 二次验证库存
+    if (quantity.value > stocknumber.value) {
+      ElMessage.warning('库存不足')
+      return
+    }
+
+    const res = await addToCart({
+      productId: product.value.id,
+      quantity: quantity.value
+    })
+
+    if (res.data.code === '200') {
+      ElMessage.success({
+        message: '成功加入购物车',
+        duration: 1000,
+        showClose: true
+      })
+      // 清空选择数量
+      quantity.value = 1
+    } else {
+      ElMessage.error(res.data.msg || '添加购物车失败')
+    }
+  } catch (error) {
+    ElMessage.error('网络请求失败')
+    console.error('添加购物车错误:', error)
+  }
+}
+
+const stocknumber = ref(0)
 const stockDialogVisible = ref(false)
 const stockAmount = ref(0)
 const role = computed(() => sessionStorage.getItem('role') || '');
@@ -140,7 +203,7 @@ const updateStock = async () => {
     // 处理成功情况
     if (res.data.code === '200') {
       ElMessage.success('库存更新成功')
-      product.value.stock = stockAmount.value
+      stocknumber.value = stockAmount.value
       stockDialogVisible.value = false
     } else {
       // 处理业务逻辑错误
@@ -180,11 +243,17 @@ const fetchProduct = async () => {
   try {
     loading.value = true
     const res = await getProductById(route.params.id as string)
-
+    const ress = await getStockpile(route.params.id as string)
     if (res.data.code === '200') {
       product.value = res.data.data
     } else {
       ElMessage.error(res.data.msg || '获取商品详情失败')
+    }
+
+    if (ress.data.code === '200') {
+      stocknumber.value = ress.data.data.amount
+    } else {
+      ElMessage.error(res.data.msg || '获取库存失败')
     }
   } catch (error) {
     ElMessage.error('网络请求失败')
@@ -199,6 +268,48 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+/* 新增购物车样式 */
+.cart-section {
+  margin: 25px 0;
+  padding: 20px;
+  background: rgba(245, 247, 250, 0.8);
+  border-radius: 8px;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.quantity-label {
+  font-size: 14px;
+  color: #606266;
+  margin-right: 15px;
+}
+
+.stock-info {
+  margin-left: 20px;
+  font-size: 13px;
+  color: #909399;
+}
+
+.add-cart-btn {
+  width: 100%;
+  height: 45px;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+:deep(.el-input-number) {
+  width: 120px;
+}
+
+:deep(.el-input-number .el-input__inner) {
+  text-align: center;
+}
+
 .product-detail-page {
   margin: 0;
   padding: 0;
