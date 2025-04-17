@@ -66,7 +66,7 @@
                           <div class="product-info">
                             <h3 class="product-title">{{ product.title }}</h3>
                             <div class="price-rate">
-                              <span class="product-price">¥{{ formatPrice(product.price) }}</span>
+
                               <el-rate
                                   v-model="product.rate"
                                   disabled
@@ -75,19 +75,13 @@
                                   class="product-rate"
                               />
                             </div>
-                            <p class="product-desc">{{ product.description }}</p>
 
-                            <!-- 商品规格 -->
-                            <div v-if="product.specifications?.length" class="specifications">
-                              <div
-                                  v-for="(spec, index) in product.specifications"
-                                  :key="index"
-                                  class="spec-item"
-                              >
-                                <span class="spec-label">{{ spec.item }}：</span>
-                                <span class="spec-value">{{ spec.value }}</span>
-                              </div>
+                            <div class="price-show">
+                              <span class="product-price">¥{{ formatPrice(product.price) }}</span>
                             </div>
+
+
+
                           </div>
                         </div>
                       </el-card>
@@ -292,6 +286,10 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.price-show {
+  text-align: center;
 }
 
 .product-price {

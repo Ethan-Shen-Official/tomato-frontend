@@ -89,8 +89,12 @@
 
             <!-- 下半部分：商品详情 -->
             <div class="bottom-section">
+              <div v-if="product.description && product.description.trim()" class="product-description">
+                <h3 class="section-title">商品简介</h3>
+                <div v-html="product.description" class="description-content"></div>
+              </div>
               <!-- 商品描述 -->
-              <div class="product-description">
+              <div v-if="product.detail && product.detail.trim()" class="product-description">
                 <h3 class="section-title">商品详情</h3>
                 <div v-html="product.detail" class="description-content"></div>
               </div>
@@ -277,7 +281,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
+.description-content {
+  text-align: left; /* 文本左对齐 */
+  line-height: 1.6; /* 行高调整 */
+  color: #303133; /* 文本颜色 */
+  margin-top: 10px; /* 顶部边距 */
+}
 /* 新增购物车样式 */
 .cart-section {
   margin: 25px 0;
@@ -418,7 +427,7 @@ onMounted(() => {
 
 /* 优化商品描述和规格的标题样式 */
 .product-description .section-title,
-.product-specs .section-title {
+.section-title {
   text-align: left; /* 左对齐 */
   margin-bottom: 10px; /* 添加一定的底部间距 */
 }
@@ -427,6 +436,11 @@ onMounted(() => {
   background: rgba(245, 247, 250, 0.8);
   padding: 20px;
   border-radius: 8px;
+}
+
+.product-specs {
+  width: 40%; /* 设置宽度为40% */
+  border-radius: 8px; /* 圆角 */
 }
 
 .specs :deep(.el-descriptions) {
