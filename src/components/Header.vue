@@ -44,9 +44,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-//import { getUserInfo } from '../api/user'
+import { getUserInfo } from '../api/user'
 import { ShoppingCart, User, SwitchButton } from '@element-plus/icons-vue'
 //import { useRouter } from 'vue-router'
+import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
 import { routes } from '../router'
 
@@ -69,16 +70,27 @@ const handleLogout = () => {
 
 // 在组件挂载后获取用户信息
 onMounted (() => {
-  getCartItems().then((res) => {
-    if (res.data.code === '200') {
-      cartCount.value = res.data.data.total
-    } else {
-      ElMessage.error('获取购物车商品数量失败')
-    }
-  }).catch((error) => {
-    console.error('获取购物车商品数量失败', error)
+  if (isLogin()) {
+    getCartItems().then((res) => {
+      if (res.data.code === '200') {
+        cartCount.value = res.data.data.total
+      } else {
+        ElMessage.error('获取购物车商品数量失败')
+      }
+    }).catch((error) => {
+      console.error('获取购物车商品数量失败', error)
+    })
+
+    getUserInfo(username||'').then((res) => {
+      if (res.data.code === '200') {
+        avatar_url.value = res.data.data.avatar
+      } else {
+        ElMessage.error('获取用户信息失败')
+      }
+    }).catch((error) => {
+      console.error('获取用户信息失败', error)
+    })
   }
-)
 })
 
 </script>
