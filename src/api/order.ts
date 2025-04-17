@@ -12,7 +12,7 @@ type Recipient = {
     telephone: string;
     location: string;
 }
-//TODO:
+
 /**
  * 请求方式
  *  方法 POST
