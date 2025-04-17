@@ -48,7 +48,7 @@ export const deleteFromCart = (cartItemId: string) => {
  * @returns updateRes
  */
 export const updateCartItem = (cartItem: UpdateItem) => {
-    return axios.patch(`${API_CART_MODULE_PREFIX}/${cartItem.cartItemId}`, { quantity: cartItem.quantity }
+    return axios.patch(`${API_CART_MODULE_PREFIX}/${cartItem.cartItemId}/quantity`, { quantity: cartItem.quantity }
     , {headers: {"Content-Type": "application/json"}})
     .then((res) => {
         return res;
