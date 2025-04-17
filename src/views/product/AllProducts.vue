@@ -66,7 +66,7 @@
                           <div class="product-info">
                             <h3 class="product-title">{{ product.title }}</h3>
                             <div class="price-rate">
-                              <span class="product-price">¥{{ formatPrice(product.price) }}</span>
+
                               <el-rate
                                   v-model="product.rate"
                                   disabled
@@ -75,19 +75,13 @@
                                   class="product-rate"
                               />
                             </div>
-                            <p class="product-desc">{{ product.description }}</p>
 
-                            <!-- 商品规格 -->
-                            <div v-if="product.specifications?.length" class="specifications">
-                              <div
-                                  v-for="(spec, index) in product.specifications"
-                                  :key="index"
-                                  class="spec-item"
-                              >
-                                <span class="spec-label">{{ spec.item }}：</span>
-                                <span class="spec-value">{{ spec.value }}</span>
-                              </div>
+                            <div class="price-show">
+                              <span class="product-price">¥{{ formatPrice(product.price) }}</span>
                             </div>
+
+
+
                           </div>
                         </div>
                       </el-card>
@@ -213,7 +207,7 @@ onMounted(() => {
 .products-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/background.jpg');
+  background-image: url('../../assets/background1.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -227,7 +221,7 @@ onMounted(() => {
   width: 90%;
   max-width: 1200px;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.85);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   margin: 20px 0;
@@ -292,6 +286,10 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.price-show {
+  text-align: center;
 }
 
 .product-price {

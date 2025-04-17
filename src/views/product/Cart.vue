@@ -4,15 +4,23 @@
       <div v-loading="loading">
         <!-- 返回按钮 -->
         <div class="header-section">
-          <el-button @click="$router.go(-1)" type="primary" plain>
-            ← 返回商品列表
-          </el-button>
+          <router-link to="/all" v-slot="{navigate}">
+            <el-button @click="navigate" type="primary" plain>
+              返回商品列表
+            </el-button>
+          </router-link>
+
           <h1 class="cart-title">我的购物车（{{ cartData?.total || 0 }}件）</h1>
         </div>
 
         <!-- 商品列表 -->
         <div class="cart-items">
-          <div v-for="item in cartData?.items" :key="item.cartItemId" class="cart-item">
+          <div v-for="item in cartData?.items" :key="item.productId" class="cart-item">
+            <!-- 选择框 -->
+            <div class="checkbox-section">
+              <el-checkbox v-model="item.selected" />
+            </div>
+
             <!-- 商品图片 -->
             <el-image
                 :src="item.cover"
@@ -23,7 +31,6 @@
             <!-- 商品信息 -->
             <div class="item-info">
               <h3 class="item-title">{{ item.title }}</h3>
-              <p class="item-desc">{{ item.description }}</p>
             </div>
 
             <!-- 价格区域 -->
@@ -43,7 +50,6 @@
               <el-input-number
                   v-model="item.quantity"
                   :min="1"
-                  :max="10"
                   :precision="0"
                   size="small"
                   @change="handleQuantityChange(item)"
@@ -55,7 +61,7 @@
               <el-button
                   type="danger"
                   size="small"
-                  @click="handleDelete(item.cartItemId)"
+                  @click="handleDelete(item)"
                   circle
               >
                 <el-icon><Delete /></el-icon>
@@ -67,8 +73,8 @@
         <!-- 汇总信息 -->
         <div v-if="cartData?.total > 0" class="summary-section">
           <div class="total-info">
-            <span class="total-label">共 {{ cartData.total }} 件商品，合计：</span>
-            <span class="total-amount">¥{{ formatPrice(cartData.totalAmount) }}</span>
+            <span class="total-label">已选 {{ selectedTotal }} 件商品，合计：</span>
+            <span class="total-amount">¥{{ formatPrice(selectedTotalAmount) }}</span>
           </div>
           <el-button type="danger" size="large" @click="handleCheckout">
             去结算
@@ -86,10 +92,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
-import { getCartItems } from '../../api/cart'
+import { getCartItems,deleteFromCart,updateCartItem } from '../../api/cart'
+import { getStockpile } from "../../api/product";
+import {routes} from '../../router'
+
 
 interface CartItem {
   cartItemId: string
@@ -121,61 +130,157 @@ const formatPrice = (price: number) => {
 }
 
 // 处理数量变化
-const handleQuantityChange = async (item: CartItem) => {
+const handleQuantityChange = async (item: MergedCartItem) => {
   try {
-    // 这里需要调用更新购物车数量的API
-    ElMessage.success('已更新商品数量')
+    if (!item.cartItemIds?.length) {
+      ElMessage.error('商品数据异常')
+      return
+    }
+
+    // 获取要修改的第一个条目ID
+    const [firstId, ...otherIds] = item.cartItemIds
+
+    // 更新第一个条目数量
+    await updateCartItem({
+      cartItemId: firstId,
+      quantity: item.quantity
+    })
+
+    // 删除其他冗余条目
+    if (otherIds.length > 0) {
+      const deletePromises = otherIds.map(id =>
+          deleteFromCart(id).catch(e => {
+            console.warn(`删除条目 ${id} 失败:`, e)
+            return null
+          })
+      )
+      await Promise.all(deletePromises)
+    }
+
+    // 刷新购物车数据
+    await fetchCartItems()
+    ElMessage.success('商品数量更新成功')
   } catch (error) {
     ElMessage.error('数量更新失败')
-    console.error('更新数量错误:', error)
+    console.error('更新错误:', error)
+    // 失败时重新加载确保数据一致
+    await fetchCartItems()
   }
 }
 
-// 处理删除商品
-const handleDelete = async (cartItemId: string) => {
+// 删除逻辑
+const handleDelete = async (mergedItem: MergedCartItem) => {
   try {
-    // 这里需要调用删除购物车商品的API
-    cartData.value!.items = cartData.value!.items.filter(
-        item => item.cartItemId !== cartItemId
+    // 确认对话框（可选）
+    await ElMessageBox.confirm('确定移除该商品所有数量吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    // 循环删除
+    const deletePromises = mergedItem.cartItemIds.map(id =>
+        deleteFromCart(id).catch(e => {
+          console.warn(`删除 ${id} 失败（可忽略）:`, e)
+          return null // 标记失败但继续执行
+        })
     )
-    cartData.value!.total -= 1
+
+    await Promise.all(deletePromises)
+    await fetchCartItems()
     ElMessage.success('已移除商品')
   } catch (error) {
-    ElMessage.error('删除商品失败')
-    console.error('删除错误:', error)
+    // 用户取消删除时不需要处理
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+      console.error(error)
+    }
   }
 }
 
 // 处理结算
 const handleCheckout = () => {
-  ElMessage.success('跳转结算页面')
-  // 实际应跳转到结算页面
+  if (selectedTotal.value === 0) {
+    ElMessage.warning('请选择要结算的商品')
+    return
+  }
+  ElMessage.success(`跳转结算页面，共${selectedTotal.value}件商品`)
+  // 实际跳转逻辑
+  const selected = selectedItems.value;
+  sessionStorage.setItem('selectedItems', JSON.stringify(selected));
+  routes.push({
+    path: '/payment'
+  })
 }
 
 //获取购物车数据
+interface MergedCartItem {
+  productId: string
+  title: string
+  price: number
+  cover: string
+  quantity: number
+  cartItemIds: string[] // 保留原始ID用于后续操作
+  selected: boolean
+}
+
+// 计算选中商品
+const selectedItems = computed(() => {
+  return cartData.value.items.filter(item => item.selected)
+})
+
+// 计算选中总数量
+const selectedTotal = computed(() => {
+  return selectedItems.value.reduce((sum, item) => sum + item.quantity, 0)
+})
+
+// 计算选中总金额
+const selectedTotalAmount = computed(() => {
+  return selectedItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+})
+
+// 在 fetchCartItems 中添加 selected 状态
 const fetchCartItems = async () => {
   try {
     loading.value = true
     const res = await getCartItems()
-    console.log('完整响应:', res)
-    console.log('响应数据:', res.data)
 
     if (res.data.code === '200') {
-      console.log('购物车数据:', res.data.data)
-      cartData.value = {
-        items: res.data.data.items || [],
-        total: res.data.data.total || 0,
-        totalAmount: res.data.data.totalAmount || 0
+      const originalItems = res.data.data.items || []
+      const itemsMap = new Map<string, MergedCartItem>()
+
+      for (const item of originalItems) {
+        const stockRes = await getStockpile(item.productId)
+        const stock = stockRes.data.code === '200' ? stockRes.data.data.amount : 0
+
+        if (itemsMap.has(item.productId)) {
+          const existing = itemsMap.get(item.productId)!
+          existing.quantity += item.quantity
+          existing.quantity = Math.min(existing.quantity, stock)
+          existing.cartItemIds.push(item.cartItemId)
+        } else {
+          itemsMap.set(item.productId, {
+            productId: item.productId,
+            title: item.title,
+            price: item.price,
+            cover: item.cover,
+            quantity: Math.min(item.quantity, stock),
+            cartItemIds: [item.cartItemId],
+            selected: false
+          })
+        }
       }
-    } else {
-      ElMessage.error(res.data.msg || '获取购物车数据失败')
+
+      cartData.value = {
+        items: Array.from(itemsMap.values()),
+        total: Array.from(itemsMap.values()).reduce((sum, item) => sum + item.quantity, 0),
+        totalAmount: Array.from(itemsMap.values()).reduce((sum, item) => sum + (item.price * item.quantity), 0)
+      }
     }
   } catch (error) {
-    console.error('请求错误:', error)
-    ElMessage.error('网络请求失败')
+    console.error('Error fetching cart items:', error)
   } finally {
     loading.value = false
-    console.log('最终cartData值:', cartData.value)
   }
 }
 
@@ -186,6 +291,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+/* 新增复选框样式 */
+.checkbox-section {
+  margin-right: 20px;
+}
+
+/* 调整商品项布局 */
+.cart-item {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
 .cart-container {
   width: 100vw; /* 视口宽度 */
   height: 100vh; /* 视口高度 */
