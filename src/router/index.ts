@@ -49,7 +49,11 @@ const routes = createRouter({
       path: '/cart',
       component: () => import('../views/product/Cart.vue'),
       meta: { title : 'Cart' }
-    }
+  }, {
+      path: '/payment',
+      component: () => import('../views/product/Payment.vue'),
+      meta: { title : 'Payment' }
+  }
   ],
 })
 

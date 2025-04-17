@@ -97,7 +97,7 @@ import { ElMessage } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import { getCartItems,deleteFromCart,updateCartItem } from '../../api/cart'
 import { getStockpile } from "../../api/product";
-
+import {routes} from '../../router'
 
 
 interface CartItem {
@@ -206,6 +206,11 @@ const handleCheckout = () => {
   }
   ElMessage.success(`跳转结算页面，共${selectedTotal.value}件商品`)
   // 实际跳转逻辑
+  const selected = selectedItems.value;
+  sessionStorage.setItem('selectedItems', JSON.stringify(selected));
+  routes.push({
+    path: '/payment'
+  })
 }
 
 //获取购物车数据
