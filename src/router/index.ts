@@ -47,11 +47,11 @@ const routes = createRouter({
       meta: { title : 'Create Product' }
   }, {
       path: '/cart',
-      component: () => import('../views/product/Cart.vue'),
+      component: () => import('../views/order/Cart.vue'),
       meta: { title : 'Cart' }
   }, {
       path: '/payment',
-      component: () => import('../views/product/Payment.vue'),
+      component: () => import('../views/order/Payment.vue'),
       meta: { title : 'Payment' }
   }, {
       path: '/create_ad',
