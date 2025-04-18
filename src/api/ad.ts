@@ -4,7 +4,7 @@ import { axios } from "../utils/request";
 type Ad = {
     title: string;
     content: string;
-    imageUrl: string;
+    imgUrl: string;
     productId: string;
 }
 
@@ -12,7 +12,7 @@ type AdUpdate = {
     id: string;
     title?: string;
     content?: string;
-    imageUrl?: string;
+    imgUrl?: string;
     productId: string;
 }
 
