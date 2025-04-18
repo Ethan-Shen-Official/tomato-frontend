@@ -141,11 +141,11 @@ function handleCreateProduct() {
 
   addProduct(newProduct).then(res => {
     if (res.data.code === '200') {
-      // const newAmmount = {
-      //   id: res.data.data.id,
-      //   amount: 0,
-      // };
-      // updateStockpile(newAmmount);
+      const newAmmount = {
+        id: res.data.data.id,
+        amount: 1,
+      };
+      updateStockpile(newAmmount);
       ElMessage({
         message: '创建商品成功！',
         type: 'success',

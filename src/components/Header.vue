@@ -44,10 +44,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-//import { getUserInfo } from '../api/user'
+import { getUserInfo } from '../api/user'
 import { ShoppingCart, User, SwitchButton } from '@element-plus/icons-vue'
 //import { useRouter } from 'vue-router'
-import { getUserInfo } from '../api/user'
+import { isLogin } from '../utils'
+import { getCartItems } from '../api/cart'
 import { routes } from '../router'
 
 // 用户信息
@@ -55,7 +56,7 @@ const avatar_url = ref('')
 const username = sessionStorage.getItem('username')
 
 // 购物车商品数量
-const cartCount = ref(99)
+const cartCount = ref(0)
 
 // 处理登出
 const handleLogout = () => {
@@ -69,17 +70,29 @@ const handleLogout = () => {
 
 // 在组件挂载后获取用户信息
 onMounted (() => {
-  /*
-  getUserInfo(username || '').then(res => {
-    if (res.data.code === '200') {
-      avatar_url.value = res.data.data.avatar
-    } else if (res.data.code === '400') {
-      console.error('获取用户信息失败')
-    }
-  }).catch(err => {
-    console.error('连接失败', err)
-  })*/
+  if (isLogin()) {
+    getCartItems().then((res) => {
+      if (res.data.code === '200') {
+        cartCount.value = res.data.data.total
+      } else {
+        ElMessage.error('获取购物车商品数量失败')
+      }
+    }).catch((error) => {
+      console.error('获取购物车商品数量失败', error)
+    })
+
+    getUserInfo(username||'').then((res) => {
+      if (res.data.code === '200') {
+        avatar_url.value = res.data.data.avatar
+      } else {
+        ElMessage.error('获取用户信息失败')
+      }
+    }).catch((error) => {
+      console.error('获取用户信息失败', error)
+    })
+  }
 })
+
 </script>
 
 <style scoped>

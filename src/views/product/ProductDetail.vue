@@ -29,6 +29,14 @@
                 >
                   更新库存
                 </el-button>
+
+                <!-- 新增创建广告按钮 -->
+                <el-button
+                    type="warning"
+                    @click="createAdvertisement"
+                >
+                  创建广告
+                </el-button>
               </div>
             </div>
 
@@ -67,7 +75,6 @@
                     <el-input-number
                         v-model="quantity"
                         :min="1"
-                        :max="stocknumber"
                         size="default"
                         :precision="0"
                         @change="handleChange"
@@ -159,6 +166,15 @@ import {routes} from '../../router'
 const route = useRoute()
 const loading = ref(true)
 const product = ref<any>(null)
+
+const createAdvertisement = () => {
+  routes.push({
+    path: '/create_ad', // 根据实际路由配置调整
+    query: {
+      productId: product.value.id // 传递当前商品ID
+    }
+  })
+}
 
 
 const handleChange = (value: number | undefined) => {
