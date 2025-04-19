@@ -84,7 +84,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useRouter } from 'vue-router'
+import { routes } from '../../router'
 
 interface SelectedItem {
   productId: string
@@ -94,7 +94,7 @@ interface SelectedItem {
   quantity: number
 }
 
-const router = useRouter()
+const router = routes;
 
 // 从sessionStorage获取选中的商品
 const selectedItems = ref<SelectedItem[]>([])
@@ -116,7 +116,7 @@ const rules = {
   phone: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
     {
-      pattern: /^1[3-9]\d{9}$/,
+      pattern: /^1\d{10}$/,
       message: '手机号格式不正确',
       trigger: 'blur'
     }
