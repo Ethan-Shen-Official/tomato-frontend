@@ -2,7 +2,7 @@ import { API_ORDER_MODULE_PREFIX,API_CART_MODULE_PREFIX } from "./_prefix";
 import { axios } from "../utils/request";
 
 type Order = {
-    cartItemIds: string[];
+    itemIds: string[];
     recipient: Recipient;
     method: string;
 }

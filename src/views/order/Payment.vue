@@ -157,7 +157,7 @@ const handlePayment = async () => {
     const cartItemIds = JSON.parse(sessionStorage.getItem('selectedCartItemIds') || '[]')
     // 构造订单数据
     const order = {
-      cartItemIds: cartItemIds,
+      itemIds: cartItemIds,
       recipient: {
         name: form.value.name,
         telephone: form.value.phone,
@@ -168,19 +168,17 @@ const handlePayment = async () => {
 
     // 调用创建订单接口
     const res = await addOrder(order)
-    if (res.data.code === 200) {
-      ElMessage.success()
+    if (res.data.code === '200') {
+      ElMessage.success("订单创建成功")
+      const orderId = res.data.data.orderId;
       await router.push({
-        path: '/payment-detail',
-        query: {
-          orderId: res.data.data.orderId,
-          amount: res.data.data.amount,
-          method: res.data.data.method
-        }
+        path: `/payment-detail/${orderId}`,
       })
+    } else {
+      ElMessage.error(res.data.msg)
     }
   } catch (error) {
-    ElMessage.error()
+    ElMessage.error("创建失败")
     // 处理取消或错误
   }
 }
