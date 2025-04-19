@@ -85,6 +85,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { routes } from '../../router'
+import { addOrder } from '../../api/order'
 
 interface SelectedItem {
   productId: string
@@ -143,24 +144,44 @@ const handleCancel = () => {
   router.push('/cart') // 返回上一页
 }
 
-// 处理支付
+// 替换原有的handlePayment函数
 const handlePayment = async () => {
-  // 表单验证
-  const valid = await formRef.value.validate()
-  if (!valid) return
-
   try {
-    await ElMessageBox.confirm('确认支付该订单吗？', '支付确认', {
-      confirmButtonText: '确认支付',
+    await formRef.value.validate()
+
+    await ElMessageBox.confirm('确认生成订单并支付吗？', '支付确认', {
+      confirmButtonText: '确认',
       cancelButtonText: '取消',
       type: 'warning'
     })
+    const cartItemIds = JSON.parse(sessionStorage.getItem('selectedCartItemIds') || '[]')
+    // 构造订单数据
+    const order = {
+      cartItemIds: cartItemIds,
+      recipient: {
+        name: form.value.name,
+        telephone: form.value.phone,
+        location: form.value.address
+      },
+      method: form.value.paymentMethod
+    }
 
-    // 这里调用支付接口
-    ElMessage.success('支付成功！')
-    router.push('/order-success') // 跳转到支付成功页面
+    // 调用创建订单接口
+    const res = await addOrder(order)
+    if (res.data.code === 200) {
+      ElMessage.success()
+      await router.push({
+        path: '/payment-detail',
+        query: {
+          orderId: res.data.data.orderId,
+          amount: res.data.data.amount,
+          method: res.data.data.method
+        }
+      })
+    }
   } catch (error) {
-    // 用户取消支付
+    ElMessage.error()
+    // 处理取消或错误
   }
 }
 

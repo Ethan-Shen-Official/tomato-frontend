@@ -4,7 +4,7 @@ import { axios } from "../utils/request";
 type Order = {
     cartItemIds: string[];
     recipient: Recipient;
-    paymentMethod: string;
+    method: string;
 }
 
 type Recipient = {
