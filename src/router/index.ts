@@ -57,6 +57,10 @@ const routes = createRouter({
       path: '/create_ad',
       component: () => import('../views/advertisement/CreateAdvertisement.vue'),
       meta: { title : 'Create Advertisement' }
+  }, {
+      path: '/payment-detail',
+      component: () => import('../views/order/PaymentDetail.vue'),
+      meta: { requiresAuth: true }
   }
   ],
 })

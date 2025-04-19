@@ -100,19 +100,9 @@ import { getStockpile } from "../../api/product";
 import {routes} from '../../router'
 
 
-interface CartItem {
-  cartItemId: string
-  productId: string
-  title: string
-  price: number
-  description: string
-  cover: string
-  detail: string
-  quantity: number
-}
 
 interface CartData {
-  items: CartItem[]
+  items: MergedCartItem[]
   total: number
   totalAmount: number
 }
@@ -206,8 +196,11 @@ const handleCheckout = () => {
   }
   ElMessage.success(`跳转结算页面，共${selectedTotal.value}件商品`)
   // 实际跳转逻辑
+  // 获取所有选中商品的 cartItemIds（扁平化二维数组）
+  const selectedCartItemIds = selectedItems.value.flatMap(item => item.cartItemIds)
   const selected = selectedItems.value;
   sessionStorage.setItem('selectedItems', JSON.stringify(selected));
+  sessionStorage.setItem('selectedCartItemIds', JSON.stringify(selectedCartItemIds))
   routes.push({
     path: '/payment'
   })
