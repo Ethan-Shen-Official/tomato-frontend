@@ -1,5 +1,5 @@
 <template>
-  <div id="payment-container" ref="paymentContainer"></div>
+  <div ref="paymentContainer"></div>
 </template>
 
 <script setup lang="ts">
