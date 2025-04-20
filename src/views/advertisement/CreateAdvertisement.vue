@@ -26,6 +26,7 @@
                   required
                   placeholder="请输入关联产品ID"
                   type="text"
+                  disabled
               />
             </el-form-item>
 

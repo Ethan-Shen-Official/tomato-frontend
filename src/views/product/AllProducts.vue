@@ -1,6 +1,38 @@
 <template>
   <div class="products-page">
     <div class="products-container">
+      <!-- 广告轮播部分 -->
+      <div class="ad-section">
+        <!-- 新增广告轮播部分 -->
+        <el-carousel
+            v-if="ads.length > 0"
+            :interval="5000"
+            type="card"
+            height="300px"
+            class="ad-carousel"
+        >
+          <el-carousel-item
+              v-for="ad in ads"
+              :key="ad.id"
+              class="ad-item"
+              @click="goToProduct(ad.productId, ad.id)"
+          >
+            <div class="ad-content">
+              <el-image
+                  :src="ad.imgUrl"
+                  fit="cover"
+                  class="ad-image"
+              />
+              <div class="ad-overlay">
+                <h3 class="ad-title">{{ ad.title }}</h3>
+                <p class="ad-description">{{ ad.content }}</p>
+              </div>
+            </div>
+          </el-carousel-item>
+        </el-carousel>
+      </div>
+
+
       <el-card class="list-card">
         <div>
 
@@ -111,10 +143,44 @@
 import { ref, onMounted,computed } from 'vue'
 import { getProducts } from '../../api/product.ts'
 import { Picture } from '@element-plus/icons-vue'
-
+import {routes} from '../../router'
 // 新增导入
 import { Delete } from '@element-plus/icons-vue'
 import { deleteProduct } from '../../api/product.ts'
+
+
+// 新增广告相关导入
+import { getAd } from '../../api/ad'
+
+// 广告数据
+const ads = ref<any[]>([])
+
+// 获取广告数据
+const fetchAds = async () => {
+  try {
+    const res = await getAd()
+    if (res.data.code === '200') {
+      ads.value = res.data.data
+    }
+  } catch (error) {
+    ElMessage.error('获取广告数据失败')
+  }
+}
+
+// 修改原来的goToProduct方法
+const goToProduct = (productId: string, adId: string) => {
+  const role = sessionStorage.getItem('role')
+  if (role === 'admin') {
+    routes.push({ name: 'UpdateAdvertisement', params: { id: adId } })
+  } else {
+    routes.push({ name: 'ProductDetail', params: { id: productId } })
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([fetchProducts(), fetchAds()])
+})
+
 
 const role = computed(() => sessionStorage.getItem('role') || '');
 // 在原有代码基础上增加删除逻辑
@@ -194,37 +260,131 @@ onMounted(() => {
 }
 
 .products-page {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
-  top: 0;
-  left: 0;
-  overflow: auto;
-}
-
-.products-container {
   width: 100%;
   height: 100%;
+  margin: 0 ;
   background-image: url('../../assets/background1.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  /* 添加全屏设置 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto; /* 允许内容滚动 */
+  padding: 20px 0 60px; /* 增加底部内边距 */
 }
 
-.list-card {
-  width: 90%;
-  max-width: 1200px;
+.products-container {
+  max-width: 1500px;
+  margin: 0 auto;
+  flex: 1;
+  width: 100%;
+  display: flex; /* 新增 */
+  flex-direction: column; /* 新增 */
+}
+
+
+
+/* 新增广告容器样式 */
+.ad-section {
+  padding: 90px 0 20px;
+  margin-bottom: 20px;
+}
+
+/* 调整轮播样式 */
+.ad-carousel {
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* 新增响应式调整 */
+@media (max-width: 768px) {
+  .ad-carousel {
+    height: 200px !important;
+  }
+
+  .ad-overlay {
+    padding: 12px;
+
+    .ad-title {
+      font-size: 1.2em;
+    }
+
+    .ad-description {
+      display: none;
+    }
+  }
+
+  .products-page {
+    padding: 10px;
+  }
+}
+
+.ad-item {
+  border-radius: 12px;
+  overflow: hidden;
+  transform: scale(0.85);
+  transition: transform 0.3s;
+  cursor: pointer;
+
+  &.is-active {
+    transform: scale(1);
+    z-index: 3;
+  }
+}
+
+.ad-content {
+  position: relative;
+  height: 100%;
+}
+
+.ad-image {
+  width: 100%;
+  height: 100%;
+  filter: brightness(0.8);
+}
+
+.ad-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  margin: 20px 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  color: white;
+
+  .ad-title {
+    margin: 0;
+    font-size: 1.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .ad-description {
+    margin: 10px 0 0;
+    font-size: 0.9em;
+    line-height: 1.4;
+    opacity: 0.9;
+  }
+}
+
+/* 调整列表卡片样式 */
+.list-card {
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 12px;
+  overflow: hidden;
+  padding-top: 20px; /* 为顶部留出空间 */
+
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 50px;
+  flex: 1;
 }
 
 .products-list {

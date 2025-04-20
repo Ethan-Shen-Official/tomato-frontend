@@ -1,3 +1,4 @@
+
 <template>
   <div v-html="paymentContainer" ref="paymentContainer"></div>
 </template>
@@ -36,5 +37,5 @@ onMounted (() => {
 </script>
 
 <style scoped>
-    
+
 </style>
