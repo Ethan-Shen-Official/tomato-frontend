@@ -97,7 +97,7 @@ onMounted (() => {
 
 <style scoped>
 .custom-header {
-  background-color: #e50e0e;
+  backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   position: fixed;
   top: 0;
@@ -130,7 +130,7 @@ onMounted (() => {
 }
 
 .header-text {
-  color: white;
+  color: rgb(231, 139, 59);
   font-size: 3rem;
   font-weight: 600;
   margin: 0;
