@@ -18,3 +18,6 @@ export const API_ORDER_MODULE_PREFIX = `${API_MODULE_PREFIX}/orders`
 
 //advertisement_module
 export const API_ADVERTISEMENT_MODULE_PREFIX = `${API_MODULE_PREFIX}/advertisements`
+
+//comment_module
+export const API_COMMENT_MODULE_PREFIX = `${API_MODULE_PREFIX}/comments`
