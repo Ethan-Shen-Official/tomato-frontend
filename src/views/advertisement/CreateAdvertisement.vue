@@ -57,11 +57,7 @@
                 创建广告
               </el-button>
 
-              <router-link to="/all" v-slot="{navigate}">
-                <el-button @click="navigate">
-                  返回主页
-                </el-button>
-              </router-link>
+              <el-button @click="goBack">返回</el-button>
             </span>
           </el-form>
         </div>
@@ -101,6 +97,11 @@ const createDisabled = computed(() => {
       adData.value.imgUrl
   )
 })
+
+
+const goBack = () => {
+  routes.go(-1)
+}
 
 // 创建广告处理
 const handleCreateAd = async () => {
@@ -171,7 +172,7 @@ const uploadHttpRequest = () => {
 .create-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/background1.jpg');
+  background-image: url('../../assets/OIP-C.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

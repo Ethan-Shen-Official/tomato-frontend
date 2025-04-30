@@ -235,7 +235,7 @@ onMounted(() => {
 .update-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/background1.jpg');
+  background-image: url('../../assets/OIP-C.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

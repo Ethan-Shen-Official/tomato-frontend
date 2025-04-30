@@ -115,8 +115,8 @@ function handleRegister() {
           <el-form>
             <el-row>
               <el-col :span="7">
-                <el-form-item>
-                  <label for="username">用户名（必填）</label>
+                <el-form-item required>
+                  <label for="username">用户名</label>
                   <el-input id="username" v-model="username" placeholder="请输入用户名"/>
                 </el-form-item>
               </el-col>
@@ -124,8 +124,8 @@ function handleRegister() {
               <el-col :span="1"></el-col>
 
               <el-col :span="7">
-                <el-form-item>
-                  <label for="name">真实姓名（必填）</label>
+                <el-form-item required>
+                  <label for="name">真实姓名</label>
                   <el-input id="name" v-model="name" placeholder="请输入真实姓名"/>
                 </el-form-item>
               </el-col>
@@ -133,8 +133,8 @@ function handleRegister() {
               <el-col :span="1"></el-col>
 
               <el-col :span="8">
-                <el-form-item>
-                  <label for="role">身份（必选）</label>
+                <el-form-item required>
+                  <label for="role">身份</label>
                   <el-select id="role" v-model="role" placeholder="请选择身份" style="width: 100%">
                     <el-option value='user' label="用户"/>
                     <el-option value='admin' label="管理员"/>
@@ -192,15 +192,15 @@ function handleRegister() {
               </el-col>
             </el-row>
 
-            <el-form-item>
-              <label for="password">密码（必填）</label>
+            <el-form-item required>
+              <label for="password">密码</label>
               <el-input type="password" id="password" v-model="password" placeholder="••••••••"/>
             </el-form-item>
 
-            <el-form-item>
+            <el-form-item required>
               <label v-if="!hasConfirmPasswordInput">确认密码（必填）</label>
               <label v-else-if="!isPasswordIdentical" class="error">密码不一致</label>
-              <label v-else>确认密码（必填）</label>
+              <label v-else>确认密码</label>
               <el-input type="password" id="confirm-password" v-model="confirmPassword" :class="{'error-input' :(hasConfirmPasswordInput && !isPasswordIdentical)}" placeholder="••••••••"/>
             </el-form-item>
 
@@ -239,7 +239,7 @@ function handleRegister() {
 .register-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/background1.jpg');
+  background-image: url('../../assets/OIP-C.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

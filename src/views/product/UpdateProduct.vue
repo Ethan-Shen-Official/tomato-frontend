@@ -5,15 +5,15 @@
         <div>
           <h1>编辑商品</h1>
           <el-form label-position="right" label-width="100px" size="large" class="update-form">
-            <el-form-item label="商品名称">
+            <el-form-item label="商品名称" required>
               <el-input id="title" v-model="formData.title" required placeholder="请输入商品名"/>
             </el-form-item>
 
-            <el-form-item label="商品价格">
+            <el-form-item label="商品价格" required>
               <el-input id="price" v-model="formData.price" required placeholder="请输入商品价格" type="number"/>
             </el-form-item>
 
-            <el-form-item label="商品评分">
+            <el-form-item label="商品评分" required>
               <el-input
                   id="rate"
                   v-model.number="formData.rate"
@@ -253,7 +253,7 @@ const handleUpdateProduct = async () => {
 .update-container {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/background.jpg');
+  background-image: url('../../assets/OIP-C.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

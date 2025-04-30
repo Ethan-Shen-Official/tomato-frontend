@@ -40,7 +40,7 @@ export const submitComment = (comment: Comment) => {
  * 请求路径：/api/comments/{id}
  * @returns deleteRes
  */
-export const deleteComment = (id: number) => {
+export const deleteComment = (id: string) => {
   return axios.delete(`${API_COMMENT_MODULE_PREFIX}/${id}`)
     .then((res) => {
       return res
