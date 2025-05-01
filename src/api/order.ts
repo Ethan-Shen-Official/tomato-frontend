@@ -44,3 +44,16 @@ export const callPayment = (orderId: string) => {
         return res;
     })
 }
+
+/**
+ * 请求方式
+ * 方法 GET
+ * 路径 /api/order/:orderId
+ * @returns orderRes
+ */
+export const getOrder = (orderId: string) => {
+    return axios.get(`${API_ORDER_MODULE_PREFIX}/${orderId}`)
+    .then((res) => {
+        return res;
+    })
+}
