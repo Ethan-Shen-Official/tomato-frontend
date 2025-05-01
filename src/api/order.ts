@@ -57,3 +57,16 @@ export const getOrder = (orderId: string) => {
         return res;
     })
 }
+
+/**
+ * 请求方式
+ * 方法 GET
+ * 路径 /api/order
+ * @returns orderRes
+ */
+export const getAllOrders = () => {
+    return axios.get(`${API_ORDER_MODULE_PREFIX}`)
+    .then((res) => {
+        return res;
+    })
+}
