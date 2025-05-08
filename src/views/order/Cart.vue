@@ -305,6 +305,7 @@ onMounted(() => {
   height: 100vh; /* 视口高度 */
   margin: 0; /* 去掉外边距 */
   padding: 0; /* 去掉内边距 */
+
 }
 
 .cart-card {
