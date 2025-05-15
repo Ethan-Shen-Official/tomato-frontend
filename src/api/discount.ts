@@ -16,7 +16,7 @@ type Discount  = {
 
 type CouponType = {
     title: string;
-    descirption: string;
+    description: string;
     trigger: number;
     discount: number;
     lastHour: number;
