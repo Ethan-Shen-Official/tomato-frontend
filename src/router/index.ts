@@ -29,6 +29,10 @@ const routes = createRouter({
         name: 'UpdateProduct',
         component: () => import('../views/product/UpdateProduct.vue'),
         meta: { title : 'Update Product' }
+      }, {
+        path: '/order',
+        component: () => import('../views/order/MyOrders.vue'),
+        meta: { title : 'My Orders' }
       }
       ],
   },

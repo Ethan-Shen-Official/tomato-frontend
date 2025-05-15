@@ -18,3 +18,13 @@ export function isLogin() {
 export function translateException(exception: string) {
     //TODO:
 }
+
+export const traslateOrderStatus = (status: string) => {
+    if (status === "PENDING") {
+        return "待支付";
+    } else if (status === "PAID") {
+        return "已支付";
+    } else if (status == "SHIPPED") {
+        return "已发货";
+    }
+}

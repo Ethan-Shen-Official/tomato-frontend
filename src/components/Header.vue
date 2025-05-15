@@ -10,6 +10,14 @@
 
       <!-- 右侧菜单 -->
       <div class="header-right">
+        <!-- 订单图标 -->
+        <router-link to="/order" class="header-icon-link">
+          <div class="icon-container">
+            <el-icon :size="24" color="#333333"><Handbag /></el-icon>
+          </div>
+          <span class="icon-text">订单</span>
+        </router-link>
+
         <!-- 购物车图标 -->
         <router-link to="/cart" class="header-icon-link">
           <div class="icon-container">
@@ -45,8 +53,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getUserInfo } from '../api/user'
-import { ShoppingCart, User, SwitchButton } from '@element-plus/icons-vue'
-//import { useRouter } from 'vue-router'
+import { Handbag,ShoppingCart, User, SwitchButton } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
 import { routes } from '../router'
