@@ -14,3 +14,7 @@ export function isLogin() {
     }
     return false;
 }
+
+export function translateException(exception: string) {
+    //TODO:
+}

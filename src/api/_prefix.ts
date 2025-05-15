@@ -21,3 +21,8 @@ export const API_ADVERTISEMENT_MODULE_PREFIX = `${API_MODULE_PREFIX}/advertiseme
 
 //comment_module
 export const API_COMMENT_MODULE_PREFIX = `${API_MODULE_PREFIX}/comments`
+
+//coupon_module
+export const API_DISCOUNT_MODULE_PREFIX = `${API_MODULE_PREFIX}/discounts`
+
+export const API_COUPON_MODULE_PREFIX = `${API_DISCOUNT_MODULE_PREFIX}/coupon`
