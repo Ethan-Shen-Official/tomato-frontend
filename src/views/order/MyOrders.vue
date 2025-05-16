@@ -1,4 +1,5 @@
 <template>
+  <div class="page-bg">
   <div class="orders-container">
     <div class="orders-header">
       <h1>我的订单</h1>
@@ -57,13 +58,12 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="middle" width="200">
+        <el-table-column align="middle" width="150" label="操作">
           <template #default="scope">
             <el-button 
-              size="default" 
+              color="#409EFF"
               @click="payOrder(scope.row.orderId)"
-              type="success" 
-              text
+              type="text" 
               v-if="scope.row.status === 'PENDING'"
             >
               去支付
@@ -82,6 +82,7 @@
       </div>
     </el-card>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -91,7 +92,6 @@ import { getAllOrders } from '../../api/order';
 import { traslateOrderStatus } from '../../utils';
 import { Refresh } from '@element-plus/icons-vue'
 import { routes } from '../../router'
-import { de } from 'element-plus/es/locales.mjs';
 
 interface Order {
     orderId: string;
@@ -107,7 +107,7 @@ const loading = ref(false)
 const statusFilter = ref('')
 const dateRange = ref([])
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(8)
 
 // 获取订单列表
 function fetchOrders() {
@@ -192,7 +192,7 @@ onMounted(fetchOrders);
 <style scoped>
 .orders-container {
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 120px auto;
   padding: 0 20px;
 }
 
@@ -204,8 +204,8 @@ onMounted(fetchOrders);
 }
 
 .orders-header h1 {
-  margin: 12%;
-  font-size: 24px;
+  margin: 0 0 20px 0; /* 合理的边距 */
+  font-size: 28px;
   color: #333;
 }
 
@@ -215,8 +215,9 @@ onMounted(fetchOrders);
 }
 
 .orders-card {
-  margin-bottom: 30%;
+  margin-bottom: 30px; /* 使用固定像素值 */
   border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .card-header {
@@ -248,4 +249,21 @@ onMounted(fetchOrders);
     flex-direction: column;
   }
 }
+
+.page-bg {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-image: url('../../assets/OIP-C.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  position: fixed;
+  display: flex;
+  left: 0;
+  overflow-y: auto;
+  padding-bottom: 20px;
+}
+
 </style>

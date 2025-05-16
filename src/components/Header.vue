@@ -13,7 +13,7 @@
         <!-- 订单图标 -->
         <router-link to="/order" class="header-icon-link">
           <div class="icon-container">
-            <el-icon :size="24" color="#333333"><Handbag /></el-icon>
+            <el-icon :size="24" color="#333333"><Tickets /></el-icon>
           </div>
           <span class="icon-text">订单</span>
         </router-link>
@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getUserInfo } from '../api/user'
-import { Handbag,ShoppingCart, User, SwitchButton } from '@element-plus/icons-vue'
+import { ShoppingCart, User, SwitchButton, Tickets } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
 import { routes } from '../router'

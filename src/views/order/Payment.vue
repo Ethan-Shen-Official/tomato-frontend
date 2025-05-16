@@ -211,11 +211,13 @@ onMounted(() => {
 .payment-container {
   padding: 20px;
   width: 50%;
+  border-radius: 15%;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .title {
+  font-size: 40px;
   text-align: center;
   margin-bottom: 30px;
 }
