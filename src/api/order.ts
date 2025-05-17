@@ -1,5 +1,6 @@
 import { API_ORDER_MODULE_PREFIX,API_CART_MODULE_PREFIX } from "./_prefix";
 import { axios } from "../utils/request";
+import { Recipient } from "../utils/type";
 
 type Order = {
     itemIds: string[];
@@ -7,11 +8,6 @@ type Order = {
     method: string;
 }
 
-type Recipient = {
-    name: string;
-    telephone: string;
-    location: string;
-}
 
 /**
  * 请求方式
