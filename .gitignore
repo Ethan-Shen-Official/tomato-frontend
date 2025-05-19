@@ -23,5 +23,6 @@ src\views\tmp\*
 *.njsproj
 *.sln
 *.sw?
+src/views/tmp/*
 package.json
 vite.config.js

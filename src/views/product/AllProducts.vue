@@ -150,7 +150,7 @@ import { deleteProduct } from '../../api/product.ts'
 
 
 // 新增广告相关导入
-import { getAd } from '../../api/ad'
+import { getAd } from '../../api/advertisement.ts'
 
 // 广告数据
 const ads = ref<any[]>([])

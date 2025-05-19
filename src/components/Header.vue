@@ -10,30 +10,38 @@
 
       <!-- 右侧菜单 -->
       <div class="header-right">
+        <!-- 订单图标 -->
+        <router-link to="/order" class="header-icon-link">
+          <div class="icon-container">
+            <el-icon :size="24" color="#333333"><Tickets /></el-icon>
+          </div>
+          <span class="icon-text">订单</span>
+        </router-link>
+
         <!-- 购物车图标 -->
         <router-link to="/cart" class="header-icon-link">
           <div class="icon-container">
             <el-badge :value="cartCount" :max="99" class="cart-badge" v-if="cartCount > 0">
-              <el-icon :size="24" color="white"><ShoppingCart /></el-icon>
+              <el-icon :size="24" color="#333333"><ShoppingCart /></el-icon>
             </el-badge>
-            <el-icon v-else :size="24" color="white"><ShoppingCart /></el-icon>
+            <el-icon v-else :size="24" color="#333333"><ShoppingCart /></el-icon>
           </div>
           <span class="icon-text">购物车</span>
         </router-link>
 
         <!-- 用户图标/头像 -->
-        <router-link to="/dashboard" class="header-icon-link user-link">
-          <div class="avatar-container">
+        <router-link to="/dashboard" class="header-icon-link">
+          <div class="icon-container" :class="{ 'avatar-container': avatar_url }">
             <img v-if="avatar_url" :src="avatar_url" alt="用户头像" class="user-avatar">
-            <el-icon v-else size="24" color="white"><User /></el-icon>
+            <el-icon v-else :size="24" color="#333333"><User /></el-icon>
           </div>
-          <span class="user-name">{{ username }}</span>
+          <span class="icon-text">{{ username }}</span>
         </router-link>
         
-        <!-- 登出图标 -->
+        <!-- 退出图标 -->
         <div class="header-icon-link" @click="handleLogout">
           <div class="icon-container">
-            <el-icon :size="24" color="white"><SwitchButton /></el-icon>
+            <el-icon :size="24" color="#333333"><SwitchButton /></el-icon>
           </div>
           <span class="icon-text">退出</span>
         </div>
@@ -45,8 +53,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getUserInfo } from '../api/user'
-import { ShoppingCart, User, SwitchButton } from '@element-plus/icons-vue'
-//import { useRouter } from 'vue-router'
+import { ShoppingCart, User, SwitchButton, Tickets } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
 import { routes } from '../router'
@@ -97,15 +104,16 @@ onMounted (() => {
 
 <style scoped>
 .custom-header {
+  background-color: rgba(255, 235, 205, 0.85);
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   padding: 0;
-  width: 100%;
+  width: 100%; /* 提示浏览器该属性会变化 */
 }
 
 .header-container {
@@ -140,22 +148,47 @@ onMounted (() => {
   text-decoration: none;
 }
 
+.icon-container {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+/* 头像特殊样式，在有头像时应用 */
+.avatar-container {
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .header-icon-link {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: white;
+  color: #333333;
   padding: 5px 8px;
   border-radius: 8px;
   transition: background-color 0.2s;
+  cursor: pointer;
 }
 
 .header-icon-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .icon-text {
-  color: white;
+  color: #333333;
   margin-left: 5px;
   font-size: 1rem;
 }
@@ -165,45 +198,6 @@ onMounted (() => {
   align-items: center;
 }
 
-.icon-container {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 5px;
-}
-
-.avatar-container {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  margin-right: 5px;
-}
-
-.user-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-name {
-  color: white;
-  font-size: 1rem;
-}
-
-.icon-text, .user-name {
-  color: white;
-  margin-left: 5px;
-  font-size: 1rem;
-}
-
-/* 购物车徽章样式覆盖 */
 :deep(.el-badge__content.is-fixed) {
   top: 8px;
   right: 8px;

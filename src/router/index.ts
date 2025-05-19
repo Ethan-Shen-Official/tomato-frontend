@@ -29,6 +29,10 @@ const routes = createRouter({
         name: 'UpdateProduct',
         component: () => import('../views/product/UpdateProduct.vue'),
         meta: { title : 'Update Product' }
+      }, {
+        path: '/order',
+        component: () => import('../views/order/MyOrders.vue'),
+        meta: { title : 'My Orders' }
       }
       ],
   },
@@ -65,6 +69,11 @@ const routes = createRouter({
       path: '/advertisements/update/:id',
       name: 'UpdateAdvertisement',
       component: () => import('../views/advertisement/UpdateAdvertisement.vue'),
+      meta: { requiresAuth: true }
+  }, {
+      path: '/discount/:id',
+      name: 'CreateDiscount',
+      component: () => import('../views/discount/CreateDiscount.vue'),
       meta: { requiresAuth: true }
   }
   ],

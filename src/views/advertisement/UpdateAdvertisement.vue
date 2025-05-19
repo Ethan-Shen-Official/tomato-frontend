@@ -85,10 +85,10 @@ import { ref, computed, onMounted } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage,ElMessageBox } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
-import { getAd } from '../../api/ad'
-import { updateAd } from '../../api/ad'
+import { getAd } from '../../api/advertisement'
+import { updateAd } from '../../api/advertisement'
 import { uploadimg } from '../../api/tool'
-import { deleteAd } from '../../api/ad' // 添加删除API导入
+import { deleteAd } from '../../api/advertisement' // 添加删除API导入
 
 
 const route = useRoute()

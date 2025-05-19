@@ -75,7 +75,7 @@
       <!-- 操作按钮 -->
       <div class="action-buttons">
         <el-button class="cancel-button" @click="handleCancel">取消</el-button>
-        <el-button class="pay-button" @click="handlePayment">去支付</el-button>
+        <el-button class="pay-button" @click="handlePayment">生成订单</el-button>
       </div>
     </el-card>
   </div>
@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+//import { ElMessage, ElMessageBox } from 'element-plus'
 import { routes } from '../../router'
 import { addOrder } from '../../api/order'
 
@@ -149,7 +149,7 @@ const handlePayment = async () => {
   try {
     await formRef.value.validate()
 
-    await ElMessageBox.confirm('确认生成订单并支付吗？', '支付确认', {
+    await ElMessageBox.confirm('确认生成订单吗？', '订单确认', {
       confirmButtonText: '确认',
       cancelButtonText: '取消',
       type: 'warning'
@@ -170,10 +170,7 @@ const handlePayment = async () => {
     const res = await addOrder(order)
     if (res.data.code === '200') {
       ElMessage.success("订单创建成功")
-      const orderId = res.data.data.orderId;
-      await router.push({
-        path: `/payment-detail/${orderId}`,
-      })
+      router.push('/order')
     } else {
       ElMessage.error(res.data.msg)
     }
@@ -214,11 +211,13 @@ onMounted(() => {
 .payment-container {
   padding: 20px;
   width: 50%;
+  border-radius: 15%;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .title {
+  font-size: 40px;
   text-align: center;
   margin-bottom: 30px;
 }

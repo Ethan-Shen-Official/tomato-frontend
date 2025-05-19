@@ -70,7 +70,7 @@
 import { ref, computed } from 'vue'
 import { UploadFilled } from "@element-plus/icons-vue"
 import { ElMessage } from 'element-plus'
-import { newAd } from '../../api/ad' // 请确认路径是否正确
+import { newAd } from '../../api/advertisement.ts' // 请确认路径是否正确
 import { uploadimg } from "../../api/tool.ts";
 import { useRoute } from 'vue-router'; // 从 vue-router 导入 useRoute
 import {routes} from "../../router";

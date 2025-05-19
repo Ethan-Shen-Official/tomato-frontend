@@ -1,4 +1,4 @@
-import { API_USER_MODULE_PREFIX} from "./_prefix";
+import { API_USER_MODULE_PREFIX,API_CREDITS_MODULE_PREFIX } from "./_prefix";
 import { axios } from "../utils/request";
 
 //contains username,password,name,avatar_url?,role,tele?,email?,location?
@@ -80,6 +80,18 @@ export const handlelogin = async (loginreq : LoginReq) => {
 export const updateInfo = (userinfo : UpdateInfo) => {
     return axios.put(`${API_USER_MODULE_PREFIX}`,userinfo,
         {headers: { 'Content-Type': 'application/json' }})
+    .then(res => {
+        return res
+    })
+}
+
+/**
+ * 方法: GET
+ * 路径: /api/credits
+ * @returns getRes
+ */
+export const getCredits = () => {
+    return axios.get(`${API_CREDITS_MODULE_PREFIX}/credits`)
     .then(res => {
         return res
     })
