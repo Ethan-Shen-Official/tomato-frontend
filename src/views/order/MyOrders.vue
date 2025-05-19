@@ -80,44 +80,45 @@
           </template>
         </el-table-column>
 
-        <!-- 新增优惠券选择对话框 -->
-        <el-dialog
-            v-model="couponDialog.visible"
-            :title="`选择优惠券 - 订单 ${couponDialog.orderId}`"
-            width="600px"
-        >
-          <el-table :data="availableCoupons" empty-text="暂无可用优惠券">
-            <el-table-column prop="title" label="优惠券名称" width="150" />
-            <el-table-column label="使用条件" width="200">
-              <template #default="{ row }">
-                {{ row.trigger > 0 ? `满${row.trigger}元可用` : '无门槛' }}
-              </template>
-            </el-table-column>
-            <el-table-column label="优惠金额">
-              <template #default="{ row }">-¥{{ row.discount }}</template>
-            </el-table-column>
-            <el-table-column label="有效期" width="180">
-              <template #default="{ row }">
-                {{ dayjs(row.effectTime).format('YYYY-MM-DD') }} 至
-                {{ dayjs(row.expireTime).format('YYYY-MM-DD') }}
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="100">
-              <template #default="{ row }">
-                <el-button
-                    type="primary"
-                    size="small"
-                    @click="applyCoupon(row.id)"
-                    :disabled="!checkCouponAvailable(row)"
-                >
-                  使用
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-dialog>
+
       </el-table>
-      
+
+      <!-- 新增优惠券选择对话框 -->
+      <el-dialog
+          v-model="couponDialog.visible"
+          :title="`选择优惠券 - 订单 ${couponDialog.orderId}`"
+          width="700px"
+      >
+        <el-table :data="availableCoupons" empty-text="暂无可用优惠券" >
+          <el-table-column prop="title" label="优惠券名称" width="140" align="center"/>
+          <el-table-column label="使用条件" width="140"  >
+            <template #default="{ row }" >
+              {{ row.trigger > 0 ? `满${row.trigger}元可用` : '无门槛' }}
+            </template>
+          </el-table-column>
+          <el-table-column label="优惠金额" width="100">
+            <template #default="{ row }">{{`-¥${row.discount}`}}</template>
+          </el-table-column>
+          <el-table-column label="有效期" width="180">
+            <template #default="{ row }">
+              {{ dayjs(row.expireTime).format('YYYY-MM-DD') }}到期
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="100">
+            <template #default="{ row }">
+              <el-button
+                  type="primary"
+                  size="small"
+                  @click="applyCoupon(row.id)"
+                  :disabled="!checkCouponAvailable(row)"
+              >
+                使用
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-dialog>
+
       <div class="pagination-container">
         <el-pagination
           layout="prev, pager, next"
@@ -259,12 +260,9 @@ const couponDialog = ref({
 const fetchCoupons = async () => {
   try {
     const res = await getUserCoupons()
-
     if (res.data.code === '200') {
-
       coupons.value = res.data.data
     }
-
   } catch (error) {
     console.error('获取优惠券失败', error)
     ElMessage.error('获取优惠券失败')
@@ -284,7 +282,7 @@ const showCouponDialog = (order: Order) => {
 // 可用的优惠券（过滤已使用和过期）
 const availableCoupons = computed(() => {
   return coupons.value.filter(coupon =>
-      coupon.status === '未使用' &&
+      coupon.status === 'AVAILABLE' &&
       dayjs().isBefore(coupon.expireTime))
 })
 
