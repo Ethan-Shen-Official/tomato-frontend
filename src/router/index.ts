@@ -75,6 +75,11 @@ const routes = createRouter({
       name: 'CreateDiscount',
       component: () => import('../views/discount/CreateDiscount.vue'),
       meta: { requiresAuth: true }
+  }, {
+      path: '/create_coupon',
+      name: 'CreateCoupon',
+      component: () => import('../views/discount/CreateCoupon.vue'),
+      meta: { title : 'Create Coupon' }
   }
   ],
 })
