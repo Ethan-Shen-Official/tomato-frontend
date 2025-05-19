@@ -43,7 +43,7 @@ export const getAllCouponType = () => {
     })
 }
 
-export const getUsrCoupons = () => {
+export const getUserCoupons = () => {
     return axios.get(`${API_COUPON_MODULE_PREFIX}`)
     .then(res => {
         return res

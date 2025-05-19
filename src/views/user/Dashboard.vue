@@ -229,6 +229,15 @@ const formatRole = (role: string) => {
               :class="{ active: activePanel === 'updateInfo' }">
               更新个人信息
             </el-button>
+
+            <div v-if="role === 'admin'">
+              <el-button
+                  type="primary"
+                  @click="$router.push('/create_coupon')"
+                  style="margin-top: 10px">
+                创建折扣券
+              </el-button>
+            </div>
           </el-row>
         </div>
       </template>
@@ -324,6 +333,8 @@ const formatRole = (role: string) => {
                     style="margin-top: 10px">
                   查看全部商品
                 </el-button>
+
+
               </div>
             </el-card>
           </div>
