@@ -33,8 +33,12 @@ const routes = createRouter({
         path: '/order',
         component: () => import('../views/order/MyOrders.vue'),
         meta: { title : 'My Orders' }
+      }, {
+        path: '/lottery',
+        component: () => import('../views/lottery/Lottery.vue'),
+        meta: { title : 'Lottery' }
       }
-      ],
+      ]
   },
   {
     path: '/login',
