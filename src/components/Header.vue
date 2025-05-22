@@ -4,7 +4,7 @@
       <!-- 商城标题 -->
       <div class="header-left">
         <router-link to="/home" class="no-link">
-          <h1 class="header-text">TomaTo书城</h1>
+          <h1 class="header-text">TomaTo 书城</h1>
         </router-link>
       </div>
 
