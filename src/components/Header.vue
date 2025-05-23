@@ -56,7 +56,7 @@ import { getUserInfo } from '../api/user'
 import { ShoppingCart, User, SwitchButton, Tickets } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
-import { routes } from '../router'
+//import { routes } from '../router'
 
 // 用户信息
 const avatar_url = ref('')

@@ -187,16 +187,16 @@ const removeSpec = (index: number) => {
 }
 
 // 图片上传处理
-const handleChange = (file: any) => {
-  const formData = new FormData()
-  formData.append('file', file.raw)
+const handleChange = async (file: any) => {
+  const formDataObj = new FormData()
+  formDataObj.append('file', file.raw)
 
-  uploadimg(formData).then(res => {
-    formData.value.cover = res.data.result
+  try {
+    formData.value.cover = void
     ElMessage.success('图片上传成功')
-  }).catch(() => {
+  } catch (error) {
     ElMessage.error('图片上传失败')
-  })
+  }
 }
 
 const handleExceed = () => {
