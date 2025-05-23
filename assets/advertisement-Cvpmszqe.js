@@ -1,0 +1,1 @@
+import{s as n,e as r}from"./request-C-7Hg0qh.js";const o=e=>n.post(`${r}`,e,{headers:{"Content-Type":"application/json"}}).then(t=>t),a=()=>n.get(`${r}`).then(e=>e),p=e=>n.put(`${r}`,e,{headers:{"Content-Type":"application/json"}}).then(t=>t),u=e=>n.delete(`${r}/${e}`).then(t=>t);export{u as d,a as g,o as n,p as u};

@@ -1,0 +1,1 @@
+import{s as n,b as r}from"./request-C-7Hg0qh.js";const s=t=>n.post(`${r}`,t,{headers:{"Content-Type":"application/json"}}).then(e=>e),o=t=>n.delete(`${r}/${t}`).then(e=>e),u=t=>n.patch(`${r}/${t.cartItemId}/quantity`,{quantity:t.quantity},{headers:{"Content-Type":"application/json"}}).then(e=>e),p=()=>n.get(`${r}`).then(t=>t);export{s as a,o as d,p as g,u};

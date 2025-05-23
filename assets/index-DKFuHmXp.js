@@ -1,0 +1,1 @@
+function r(e){if(e==="admin")return"管理员";if(e==="user")return"会员"}function t(){return!!sessionStorage.getItem("token")}const n=e=>{if(e==="PENDING")return"待支付";if(e==="PAID")return"已支付";if(e=="SHIPPED")return"已发货"};export{t as i,r as p,n as t};
