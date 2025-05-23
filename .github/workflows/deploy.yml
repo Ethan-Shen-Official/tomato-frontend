@@ -2,7 +2,7 @@ name: Depoly Front
 
 on:
   push:
-    branches: master
+    branches: [master,shen]
   pull_request:
     branches: master
 

@@ -324,7 +324,7 @@ const commentRules = {
   rating: [
     {
       required: true,
-      validator: (_, value, callback) => {
+      validator: (_: unknown, value: number, callback: (error?: Error) => void) => {
         if (value <= 0) {
           callback(new Error('请选择评分'))
         } else {
@@ -346,7 +346,7 @@ const commentRules = {
       trigger: 'blur'
     },
     {
-      validator: (_, value, callback) => {
+      validator: (_: unknown, value: string, callback: (error?: Error) => void) => {
         if (!value || !value.trim() || !/\S/.test(value)) {
           callback(new Error('评论内容不能为空或全是空格'))
         } else {

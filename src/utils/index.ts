@@ -17,6 +17,9 @@ export function isLogin() {
 
 export function translateException(exception: string) {
     //TODO:
+    if (exception === "USER_NOT_FOUND") {
+        return "用户不存在";
+    }
 }
 
 export const traslateOrderStatus = (status: string) => {

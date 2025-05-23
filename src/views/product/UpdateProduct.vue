@@ -172,6 +172,7 @@ const updateDisabled = computed(() => {
   return !(
       formData.value.title?.trim() &&
       formData.value.price !== undefined &&
+      formData.value.rate !== undefined &&
       formData.value.rate >= 0 &&
       formData.value.rate <= 10
   )
@@ -187,16 +188,16 @@ const removeSpec = (index: number) => {
 }
 
 // 图片上传处理
-const handleChange = async (file: any) => {
-  const formDataObj = new FormData()
-  formDataObj.append('file', file.raw)
+const handleChange = (file: any) => {
+  const imageFormData = new FormData()
+  imageFormData.append('file', file.raw)
 
-  try {
-    formData.value.cover = void
+  uploadimg(imageFormData).then((res: any) => {
+    formData.value.cover = res.data.data.url
     ElMessage.success('图片上传成功')
-  } catch (error) {
+  }).catch(() => {
     ElMessage.error('图片上传失败')
-  }
+  })
 }
 
 const handleExceed = () => {
