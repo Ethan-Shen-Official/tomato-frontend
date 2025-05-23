@@ -1,0 +1,1 @@
+import{s as r,d as n,b as s}from"./request-BuipQ3Vl.js";const o=e=>r.post(`${s}/checkout`,e,{headers:{"Content-Type":"application/json"}}).then(t=>t),p=e=>r.post(`${n}/${e}/pay`,{},{headers:{"Content-Type":"application/json"}}).then(t=>t),c=()=>r.get(`${n}`).then(e=>e);export{o as a,p as c,c as g};

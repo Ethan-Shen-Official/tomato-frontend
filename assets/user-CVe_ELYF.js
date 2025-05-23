@@ -1,0 +1,1 @@
+import{s as t,a as r}from"./request-BuipQ3Vl.js";const o=n=>t.get(`${r}/${n}`).then(e=>e),a=n=>t.post(`${r}`,n,{headers:{"Content-Type":"application/json"}}).then(e=>e),p=async n=>t.post(`${r}/login`,n,{headers:{"Content-Type":"application/json"}}).then(e=>e),u=n=>t.put(`${r}`,n,{headers:{"Content-Type":"application/json"}}).then(e=>e);export{o as g,p as h,a as n,u};
