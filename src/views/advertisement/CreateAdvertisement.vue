@@ -87,7 +87,7 @@ const adData = ref({
 })
 
 // 图片上传相关
-const imageFileList = ref([])
+const imageFileList = ref<any[]>([])
 
 // 表单验证计算属性
 const createDisabled = computed(() => {
@@ -127,7 +127,7 @@ const handleImageChange = (file: any) => {
   imageFileList.value = [file]
   const formData = new FormData()
   formData.append('file', file.raw)
-  uploadimg(formData).then(res => {
+  uploadimg(formData).then((res:any) => {
     adData.value.imgUrl = res.data.result
   })
 }

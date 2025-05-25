@@ -136,7 +136,7 @@ const currentAd = ref<Ad | null>(null)
 const loading = ref(true)
 
 // 图片上传相关
-const imageFileList = ref([])
+const imageFileList = ref<any[]>([])
 
 // 从所有广告中匹配当前广告
 const findCurrentAd = () => {
@@ -195,7 +195,7 @@ const handleImageChange = (file: any) => {
   imageFileList.value = [file]
   const formData = new FormData()
   formData.append('file', file.raw)
-  uploadimg(formData).then(res => {
+  uploadimg(formData).then((res: any) => {
     if (currentAd.value) {
       currentAd.value.imgUrl = res.data.result
     }

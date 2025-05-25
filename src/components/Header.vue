@@ -64,7 +64,7 @@ import { getUserInfo } from '../api/user'
 import { ShoppingCart, User, SwitchButton, Tickets, Present } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
-import { routes } from '../router'
+//import { routes } from '../router'
 
 // 用户信息
 const avatar_url = ref('')
@@ -90,7 +90,7 @@ onMounted (() => {
       if (res.data.code === '200') {
         cartCount.value = res.data.data.total
       } else {
-        ElMessage.error('获取购物车商品数量失败')
+        ElMessage.error(res.data.msg)
       }
     }).catch((error) => {
       console.error('获取购物车商品数量失败', error)

@@ -19,7 +19,9 @@ type UpdateItem = {
  *  @returns addRes
  */
 export const addToCart = (item: CartItem) => {
-    return axios.post(`${API_CART_MODULE_PREFIX}`, item)
+    return axios.post(`${API_CART_MODULE_PREFIX}`, item,
+        {headers: {"Content-Type": "application/json"}}
+    )
     .then((res) => {
         return res;
     })

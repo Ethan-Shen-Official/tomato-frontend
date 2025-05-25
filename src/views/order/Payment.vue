@@ -165,7 +165,7 @@ const handlePayment = async () => {
       },
       method: form.value.paymentMethod
     }
-
+    sessionStorage.removeItem('selectedCartItemIds')
     // 调用创建订单接口
     const res = await addOrder(order)
     if (res.data.code === '200') {
@@ -183,6 +183,7 @@ const handlePayment = async () => {
 onMounted(() => {
   // 从sessionStorage获取选中的商品
   const items = sessionStorage.getItem('selectedItems')
+  sessionStorage.removeItem('selectedItems')
   if (items) {
     try {
       selectedItems.value = JSON.parse(items)
