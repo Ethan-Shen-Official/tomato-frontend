@@ -1,9 +1,87 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Present,Box } from '@element-plus/icons-vue'
+import { Present,Box,Notebook, Ticket, Coin } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import {routes} from '../../router'
+import { drawLottery } from '../../api/lottery'
+import { getProductById } from '../../api/product'
 
+// 奖品类型映射
+const typeIconMap = {
+  BOOK: Notebook,
+  COUPON: Ticket,
+  CREDIT: Coin,
+  BLIND_BOX: Box
+}
+
+const statusTypeMap = {
+  AVAILABLE: 'success',
+  GENERATED: 'warning',
+  USED: 'info'
+}
+
+const statusTextMap = {
+  AVAILABLE: '未使用',
+  GENERATED: '已生成',
+  USED: '已使用'
+}
+
+// 抽奖结果数据
+const results = ref<any[]>([])
+const drawLoading = ref(false)
+
+// 处理抽奖操作
+const handleDraw = async (quantity: number) => {
+  try {
+
+    drawLoading.value = true
+
+    const res = await drawLottery({ quantity })
+
+
+    if (res.data.code === '200') {
+      const items = res.data.data
+
+      // 获取书籍详情
+      const enhancedItems = await Promise.all(
+          items.map(async item => {
+            if (item.type === 'BOOK') {
+              const productRes = await getProductById(item.itemId)
+              if (productRes.data.code === '200') {
+                return { ...item, product: productRes.data.data }
+              }
+            }
+            return item
+          })
+      )
+
+      // 十连抽动画处理
+      if (quantity === 10) {
+        results.value = []
+        for (let i = 0; i < enhancedItems.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 200))
+          results.value.push(enhancedItems[i])
+        }
+      } else {
+        results.value = enhancedItems
+      }
+    }
+  } catch (error) {
+    ElMessage.error(error.response?.data?.msg || '抽奖失败')
+  } finally {
+    drawLoading.value = false
+  }
+}
+
+// 类型图标处理
+const getTypeIcon = (type: string) => typeIconMap[type] || Box
+const getIconClass = (type: string) => `${type.toLowerCase()}-icon`
+const getTypeName = (type: string) => ({
+  BOOK: '书籍',
+  COUPON: '优惠券',
+  CREDIT: '积分',
+  BLIND_BOX: '盲盒'
+})[type]
 
 // 判断管理员状态
 const isAdmin = computed(() => sessionStorage.role === 'admin')
@@ -53,7 +131,9 @@ const handleMultiDraw = () => {
             <el-button
                 type="primary"
                 size="large"
-                @click="handleSingleDraw"
+                @click="handleDraw(1)"
+                :loading="drawLoading"
+                :disabled="drawLoading"
             >
               单抽 (100积分)
             </el-button>
@@ -61,7 +141,9 @@ const handleMultiDraw = () => {
             <el-button
                 type="danger"
                 size="large"
-                @click="handleMultiDraw"
+                @click="handleDraw(10)"
+                :loading="drawLoading"
+                :disabled="drawLoading"
             >
               十连抽 (900积分)
               <span class="discount-tag">九折</span>
@@ -100,6 +182,50 @@ const handleMultiDraw = () => {
               <span class="discount-tag">九折</span>
             </el-button>
           </div>
+        </div>
+      </el-card>
+
+      <!-- 抽奖结果展示 -->
+      <el-card class="result-card" v-if="results.length > 0">
+        <div class="result-container">
+          <transition-group name="list">
+            <div
+                v-for="(item, index) in results"
+                :key="item.id"
+                class="result-item"
+                :style="{ transitionDelay: `${index * 0.1}s` }"
+            >
+              <!-- 奖品图标 -->
+              <div class="icon-section">
+                <el-icon :class="getIconClass(item.type)" size="36">
+                  <component :is="getTypeIcon(item.type)" />
+                </el-icon>
+              </div>
+
+              <!-- 书籍类奖品详情 -->
+              <div class="detail-section" v-if="item.type === 'BOOK' && item.product">
+                <img :src="item.product.cover" class="book-cover" />
+                <div class="book-info">
+                  <h4>{{ item.product.title }}</h4>
+                  <p>价格: ¥{{ item.product.price }}</p>
+                  <p>评分: {{ item.product.rate }}</p>
+                </div>
+              </div>
+
+              <!-- 其他类型奖品 -->
+              <div class="common-info" v-else>
+                <h3>{{ getTypeName(item.type) }}</h3>
+                <p>{{ item.itemId }}</p>
+              </div>
+
+              <!-- 状态标签 -->
+              <div class="status-section">
+                <el-tag :type="statusTypeMap[item.status]">
+                  {{ statusTextMap[item.status] }}
+                </el-tag>
+              </div>
+            </div>
+          </transition-group>
         </div>
       </el-card>
     </div>
@@ -244,5 +370,89 @@ const handleMultiDraw = () => {
   0% { opacity: 0; }
   50% { opacity: 1; }
   100% { opacity: 0; }
+}
+
+.action-section {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 20px;
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.result-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.list-enter-active, .list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from, .list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.icon-section {
+  margin-right: 15px;
+}
+
+.book-cover {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  margin-right: 15px;
+  border-radius: 4px;
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-info h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.common-info {
+  flex: 1;
+}
+
+.common-info h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.status-section {
+  margin-left: auto;
+}
+
+/* 图标颜色 */
+.book-icon { color: #409eff; }
+.coupon-icon { color: #f56c6c; }
+.credit-icon { color: #e6a23c; }
+.blind_box-icon { color: #d53ce6; }
+
+.discount-tag {
+  margin-left: 8px;
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 </style>
