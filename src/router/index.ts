@@ -37,6 +37,14 @@ const routes = createRouter({
         path: '/lottery',
         component: () => import('../views/lottery/Lottery.vue'),
         meta: { title : 'Lottery' }
+      }, {
+        path: '/pool',
+        component: () => import('../views/lottery/Pool.vue'),
+        meta: { title : 'Pool' }
+      }, {
+        path: '/all_coupons',
+        component: () => import('../views/discount/AllCoupons.vue'),
+        meta: { title : 'All Coupons' }
       }
       ]
   },

@@ -4,7 +4,7 @@ import { PrizeType,Recipient,DrawRequest } from "../utils/type";
 
 type PoolItem = {
     type: PrizeType;
-    itemid: string;
+    itemId: string;
     quantity: number;
 }
 
@@ -15,7 +15,7 @@ type UpdateRequest = {
 
 type PrizeOrder = {
     prizeIds: string[];
-    recipent: Recipient; 
+    recipient: Recipient;
 }
 
 export const getLotteryPool = () => {

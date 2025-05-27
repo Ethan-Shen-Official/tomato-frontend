@@ -1,7 +1,20 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Present } from '@element-plus/icons-vue'
+import { Present,Box } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import {routes} from '../../router'
+
+
+// 判断管理员状态
+const isAdmin = computed(() => sessionStorage.role === 'admin')
+
+// 图标点击处理
+const handleIconClick = () => {
+
+  if (isAdmin.value) {
+    routes.push('/pool')
+  }
+}
 
 // 模拟抽奖逻辑
 const handleSingleDraw = () => {
@@ -26,10 +39,10 @@ const handleMultiDraw = () => {
     <div class="lottery-container">
       <el-card class="lottery-card">
         <div class="lottery-content">
-          <h1>幸运抽奖</h1>
+          <h1>普通抽奖</h1>
 
           <!-- 抽奖大图标 -->
-          <div class="lottery-icon">
+          <div class="lottery-icon" @click="handleIconClick">
             <el-icon :size="100" color="#ff6b6b">
               <Present />
             </el-icon>
@@ -42,7 +55,7 @@ const handleMultiDraw = () => {
                 size="large"
                 @click="handleSingleDraw"
             >
-              单抽 (100金币)
+              单抽 (100积分)
             </el-button>
 
             <el-button
@@ -50,7 +63,40 @@ const handleMultiDraw = () => {
                 size="large"
                 @click="handleMultiDraw"
             >
-              十连抽 (900金币)
+              十连抽 (900积分)
+              <span class="discount-tag">九折</span>
+            </el-button>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="lottery-card">
+        <div class="lottery-content">
+          <h1>盲盒抽奖</h1>
+
+          <!-- 抽奖大图标 -->
+          <div class="lottery-icon" @click="handleIconClick">
+            <el-icon :size="100" color="#d53ce6">
+              <Box />
+            </el-icon>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div class="action-buttons">
+            <el-button
+                type="primary"
+                size="large"
+                @click="handleSingleDraw"
+            >
+              单抽 (100积分)
+            </el-button>
+
+            <el-button
+                type="danger"
+                size="large"
+                @click="handleMultiDraw"
+            >
+              十连抽 (900积分)
               <span class="discount-tag">九折</span>
             </el-button>
           </div>
@@ -58,6 +104,8 @@ const handleMultiDraw = () => {
       </el-card>
     </div>
   </div>
+
+
 </template>
 
 <style scoped>
@@ -82,16 +130,18 @@ const handleMultiDraw = () => {
   background-attachment: fixed;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* 左右分布 */
 }
 
 .lottery-card {
-  width: 500px;
+  width: 550px;
   max-width: 90%;
   padding: 30px;
   background-color: rgba(255, 255, 255, 0.7);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .lottery-content {
