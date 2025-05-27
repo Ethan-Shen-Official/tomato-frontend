@@ -4,6 +4,7 @@ import { getUserInfo, updateInfo } from '../../api/user.ts';
 import { ElMessage } from 'element-plus';
 import { routes } from '../../router';
 import { parseRole } from '../../utils';
+import {addNewItem} from "../../api/lottery.ts";
 
 // 登录状态
 const isLoggedIn = ref(true);
@@ -199,6 +200,51 @@ const handleUpdate = async () => {
 const formatRole = (role: string) => {
   return parseRole(role);
 };
+
+const adding = ref(false)
+const showAddDialog = ref(false)
+
+// 添加表单数据
+const addForm = ref({
+  type: '',
+  couponId: 1,
+  quantity: 1
+})
+
+// 打开添加对话框
+const openAddDialog = () => {
+  addForm.value = {
+    type: 'CREDIT',
+    couponId: 1,
+    quantity: 1
+  }
+  showAddDialog.value = true
+}
+
+// 处理添加操作
+const handleAddToPool = async () => {
+  try {
+    adding.value = true
+
+    const params = {
+      type: addForm.value.type,
+      itemId: addForm.value.couponId.toString(),
+      quantity: addForm.value.quantity
+    }
+
+    const res = await addNewItem(params)
+    if (res.data.code === '200') {
+      ElMessage.success('添加奖池成功')
+      showAddDialog.value = false
+    } else {
+      ElMessage.error(res.data.msg || '添加失败')
+    }
+  } catch (error) {
+    ElMessage.error('请求失败，请稍后重试')
+  } finally {
+    adding.value = false
+  }
+}
 </script>
 
 <template>
@@ -237,11 +283,81 @@ const formatRole = (role: string) => {
                   style="margin-top: 10px">
                 创建折扣券
               </el-button>
+
+              <el-button
+                  type="primary"
+                  @click="$router.push('/all_coupons')"
+                  style="margin-top: 10px">
+                查看全部折扣券
+              </el-button>
+
+              <el-button
+                  type="primary"
+                  @click="openAddDialog()"
+                  style="margin-top: 10px">
+                积分奖池
+              </el-button>
             </div>
           </el-row>
         </div>
+
+        <el-dialog
+            v-model="showAddDialog"
+            title="加入奖池"
+            width="400px"
+            :align-center="true"
+            class="custom-dialog"
+        >
+          <div class="add-dialog-content">
+            <el-form label-width="auto">
+              <el-form-item
+                  label="积分："
+                  label-width="80px"
+                  class="form-item-custom"
+              >
+                <el-input-number
+                    v-model="addForm.couponId"
+                    :min="1"
+                    :precision="0"
+                    controls-position="right"
+                    class="full-width-input"
+                />
+              </el-form-item>
+
+              <el-form-item
+                  label="数量："
+                  label-width="80px"
+                  class="form-item-custom"
+              >
+                <el-input-number
+                    v-model="addForm.quantity"
+                    :min="1"
+                    :precision="0"
+                    controls-position="right"
+                    class="full-width-input"
+                />
+              </el-form-item>
+            </el-form>
+          </div>
+
+          <template #footer>
+            <div class="dialog-footer-btns">
+              <el-button @click="showAddDialog = false" size="medium">取消</el-button>
+              <el-button
+                  type="primary"
+                  :loading="adding"
+                  @click="handleAddToPool"
+                  size="medium"
+              >
+                确认添加
+              </el-button>
+            </div>
+          </template>
+        </el-dialog>
       </template>
-      
+
+
+
       <!-- 未登录状态 -->
       <template v-else>
         <div class="not-logged-in">
@@ -708,5 +824,13 @@ h3 {
 .error-input {
   --el-input-focus-border-color: red;
   border-color: red;
+}
+
+.full-width-input {
+  width: 100%;
+}
+
+.form-item-custom {
+  margin-bottom: 15px;
 }
 </style>

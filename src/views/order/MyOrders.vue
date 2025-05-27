@@ -68,12 +68,19 @@
             >
               去支付
             </el-button>
+
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="coupon" label="优惠券" width="150">
+          <template #default="scope">
             <!-- 新增使用优惠券按钮 -->
             <el-button
                 type="text"
                 color="#67C23A"
                 @click="showCouponDialog(scope.row)"
                 :disabled="scope.row.status !== 'PENDING'"
+                v-if="scope.row.status === 'PENDING' && !usedCoupons.includes(scope.row.orderId)"
             >
               使用优惠券
             </el-button>
@@ -91,20 +98,20 @@
       >
         <el-table :data="availableCoupons" empty-text="暂无可用优惠券" >
           <el-table-column prop="title" label="优惠券名称" width="140" align="center"/>
-          <el-table-column label="使用条件" width="140"  >
+          <el-table-column label="使用条件" width="140"  align="center">
             <template #default="{ row }" >
               {{ row.trigger > 0 ? `满${row.trigger}元可用` : '无门槛' }}
             </template>
           </el-table-column>
-          <el-table-column label="优惠金额" width="100">
+          <el-table-column label="优惠金额" width="100" align="center">
             <template #default="{ row }">{{`-¥${row.discount}`}}</template>
           </el-table-column>
-          <el-table-column label="有效期" width="180">
+          <el-table-column label="有效期" width="200" align="center">
             <template #default="{ row }">
-              {{ dayjs(row.expireTime).format('YYYY-MM-DD') }}到期
+              {{ dayjs(row.expireTime).format('YYYY-MM-DD HH:mm:ss') }} 到期
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="100">
+          <el-table-column label="操作" width="100" align="center">
             <template #default="{ row }">
               <el-button
                   type="primary"
@@ -237,6 +244,9 @@ const paginatedOrders = computed(() => {
 
 onMounted(fetchOrders);
 
+
+const usedCoupons = ref<string[]>([]) // 存储已使用优惠券的订单ID
+
 // 新增状态管理
 interface Coupon {
   id: string
@@ -305,6 +315,7 @@ const applyCoupon = async (couponId: string) => {
       // 更新订单金额
       const order = orders.value.find(o => o.orderId === orderId)
       if (order) order.amount = res.data.data.amount
+      usedCoupons.value.push(orderId) // 记录已使用的订单
       couponDialog.value.visible = false
       fetchOrders() // 刷新订单列表
     }
