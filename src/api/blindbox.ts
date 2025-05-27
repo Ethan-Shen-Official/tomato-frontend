@@ -3,7 +3,7 @@ import { axios } from "../utils/request";
 import { DrawRequest } from "../utils/type";
 
 export const drawBlindBox = (draw: DrawRequest) => {
-    return axios.post(`${API_BLINDBOX_MODULE_PREFIX}/draw`, draw,
+    return axios.post(`${API_BLINDBOX_MODULE_PREFIX}`, draw,
     {headers: {'Content-Type': 'application/json'}})
     .then((res) => {
         return res;

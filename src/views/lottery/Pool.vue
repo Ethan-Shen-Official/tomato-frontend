@@ -46,7 +46,7 @@
                       :precision="0"
                       size="small"
                       @change="handleQuantityChange(item)"
-                      :disabled="item.updating"
+                      :disabled="updatingIds.has(item.id)"
                   />
                 </div>
 
@@ -83,14 +83,24 @@ import {
   Notebook,
   Ticket,
   Coin,
-  Box
+  Box,
+  Delete
 } from '@element-plus/icons-vue'
 import { getLotteryPool, deleteItem, updateQuantity } from '../../api/lottery'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete } from '@element-plus/icons-vue'
+import { PrizeType } from '../../utils/type'
+
+// 定义奖池项目的类型
+interface PoolItem {
+  id: string
+  type: PrizeType
+  itemId: string | number
+  quantity: number
+  updating?: boolean
+}
 
 const loading = ref(true)
-const poolData = ref([])
+const poolData = ref<PoolItem[]>([])
 
 // 初始化加载数据
 const fetchData = async () => {
@@ -98,7 +108,7 @@ const fetchData = async () => {
     const res = await getLotteryPool()
     if (res.data.code === "200") {
       // 添加排序逻辑
-      poolData.value = res.data.data.sort((a, b) => {
+      poolData.value = res.data.data.sort((a: PoolItem, b: PoolItem) => {
         return typeOrder[a.type] - typeOrder[b.type]
       })
     }
@@ -108,7 +118,7 @@ const fetchData = async () => {
 }
 
 // 定义排序优先级
-const typeOrder = {
+const typeOrder: Record<PrizeType, number> = {
   BOOK: 1,
   COUPON: 2,
   CREDIT: 3,
@@ -116,42 +126,43 @@ const typeOrder = {
 }
 
 // 图标颜色样式
-const getIconClass = (type) => {
-  return {
+const getIconClass = (type: PrizeType): string => {
+  const classes: Record<PrizeType, string> = {
     BOOK: 'book-icon',
     COUPON: 'coupon-icon',
     CREDIT: 'credit-icon',
     BLIND_BOX: 'blind_box-icon'
-  }[type]
+  }
+  return classes[type] || ''
 }
 
 // 奖品类型图标映射
-const getTypeIcon = (type) => {
+const getTypeIcon = (type: PrizeType) => {
   const icons = {
     BOOK: Notebook,
     COUPON: Ticket,
     CREDIT: Coin,
     BLIND_BOX: Box
   }
-  return icons[type] || '/icons/default.png'
+  return icons[type] || Notebook
 }
 
 // 类型名称映射
-const getTypeName = (type) => {
-  return {
+const getTypeName = (type: PrizeType): string => {
+  const names: Record<PrizeType, string> = {
     BOOK: '书籍',
     COUPON: '折扣券',
     CREDIT: '积分',
     BLIND_BOX: '盲盒'
-  }[type] || '未知奖品'
+  }
+  return names[type] || '未知奖品'
 }
-
 
 // 新增状态
 const updatingIds = ref<Set<string>>(new Set())
 
 // 优化后的处理函数
-const handleQuantityChange = async (item: any) => {
+const handleQuantityChange = async (item: PoolItem) => {
   try {
     updatingIds.value.add(item.id)
     const oldValue = item.quantity
@@ -168,8 +179,8 @@ const handleQuantityChange = async (item: any) => {
     }
 
     ElMessage.success('数量更新成功')
-  } catch (error) {
-    item.quantity = oldValue
+  } catch (error: any) {
+    item.quantity = item.quantity // 恢复原值
     ElMessage.error(error.response?.data?.msg || '更新失败')
   } finally {
     updatingIds.value.delete(item.id)
@@ -177,7 +188,7 @@ const handleQuantityChange = async (item: any) => {
 }
 
 // 添加带确认的删除逻辑
-const handleDelete = async (id) => {
+const handleDelete = async (id: string) => {
   try {
     // 确认对话框
     await ElMessageBox.confirm('确定要删除该奖品吗？', '删除确认', {
@@ -195,7 +206,7 @@ const handleDelete = async (id) => {
     } else {
       ElMessage.error(res.data.msg || '删除失败')
     }
-  } catch (error) {
+  } catch (error: any) {
     // 错误处理（排除用户取消的情况）
     if (error !== 'cancel') {
       ElMessage.error(error.response?.data?.msg || '删除操作失败')

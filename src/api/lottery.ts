@@ -49,7 +49,7 @@ export const deleteItem = (id: string) => {
 }
 
 export const drawLottery = (draw: DrawRequest) => {
-    return axios.post(`${API_LOTTERY_MODULE_PREFIX}/draw`, draw,
+    return axios.post(`${API_LOTTERY_MODULE_PREFIX}`, draw,
     {headers: {'Content-Type': 'application/json'}})
     .then((res) => {
         return res;
