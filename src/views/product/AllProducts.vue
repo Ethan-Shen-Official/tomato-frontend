@@ -38,7 +38,7 @@
 
           <!-- 修改后的创建按钮 -->
           <router-link v-if="role === 'admin'" to="/create">
-            <el-button type="primary" size="medium" class="create-button">
+            <el-button type="primary" size="default" class="create-button">
               创建商品
             </el-button>
           </router-link>
@@ -61,7 +61,7 @@
                   <div v-if="role === 'admin'" class="delete-wrapper">
                     <el-popconfirm
                         title="确认要删除该商品吗？"
-                        @confirm="handleDelete(product.id)"
+                        @confirm="handleDelete(String(product.id))"
                     >
                       <template #reference>
                         <el-button
@@ -144,7 +144,6 @@ import { ref, onMounted,computed } from 'vue'
 import { getProducts } from '../../api/product.ts'
 import { Picture } from '@element-plus/icons-vue'
 import {routes} from '../../router'
-// 新增导入
 import { Delete } from '@element-plus/icons-vue'
 import { deleteProduct } from '../../api/product.ts'
 
@@ -199,12 +198,22 @@ const handleDelete = async (id: string) => {
   }
 }
 
+// 商品类型定义
+interface Product {
+  id: string | number
+  title?: string
+  cover?: string
+  price?: number | bigint
+  rate?: number
+  // 其他字段可按需补充
+}
+
 // 商品列表数据
-const products = ref<[]>([])
+const products = ref<Product[]>([])
 const loading = ref(true)
 
 // 格式化价格显示
-const formatPrice = (price?: bigint) => {
+const formatPrice = (price?: number | bigint) => {
   if (!price) return '0.00'
   // 假设price以分为单位，转换为元
   return (Number(price)).toFixed(2)

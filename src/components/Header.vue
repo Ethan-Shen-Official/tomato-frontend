@@ -10,6 +10,14 @@
 
       <!-- 右侧菜单 -->
       <div class="header-right">
+        <!-- 抽奖图标 -->
+        <router-link to="/lottery" class="header-icon-link" v-if="username">
+          <div class="icon-container">
+            <el-icon :size="24" color="#333333"><Present /></el-icon>
+          </div>
+          <span class="icon-text">抽奖</span>
+        </router-link>
+
         <!-- 订单图标 -->
         <router-link to="/order" class="header-icon-link">
           <div class="icon-container">
@@ -53,10 +61,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getUserInfo } from '../api/user'
-import { ShoppingCart, User, SwitchButton, Tickets } from '@element-plus/icons-vue'
+import { ShoppingCart, User, SwitchButton, Tickets, Present } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
-import { routes } from '../router'
+//import { routes } from '../router'
 
 // 用户信息
 const avatar_url = ref('')
@@ -82,7 +90,7 @@ onMounted (() => {
       if (res.data.code === '200') {
         cartCount.value = res.data.data.total
       } else {
-        ElMessage.error('获取购物车商品数量失败')
+        ElMessage.error(res.data.msg)
       }
     }).catch((error) => {
       console.error('获取购物车商品数量失败', error)

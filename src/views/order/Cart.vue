@@ -71,7 +71,7 @@
         </div>
 
         <!-- 汇总信息 -->
-        <div v-if="cartData?.total > 0" class="summary-section">
+        <div v-if="cartData && cartData.total > 0" class="summary-section">
           <div class="total-info">
             <span class="total-label">已选 {{ selectedTotal }} 件商品，合计：</span>
             <span class="total-amount">¥{{ formatPrice(selectedTotalAmount) }}</span>
@@ -219,7 +219,7 @@ interface MergedCartItem {
 
 // 计算选中商品
 const selectedItems = computed(() => {
-  return cartData.value.items.filter(item => item.selected)
+  return cartData.value?.items?.filter(item => item.selected) || []
 })
 
 // 计算选中总数量

@@ -124,8 +124,23 @@
                     >
                       创建折扣
                     </el-button>
+
+                    <el-button
+                        type="info"
+                        @click="openAddDialog1(product.id)"
+                    >
+                      普通奖池
+                    </el-button>
+
+                    <el-button
+                        type="info"
+                        @click="openAddDialog2(product.id)"
+                    >
+                      盲盒奖池
+                    </el-button>
                   </div>
                 </div>
+
 
 
 
@@ -225,6 +240,46 @@
 
           </div>
 
+          <el-dialog
+              v-model="showAddDialog"
+              title="加入奖池"
+              width="400px"
+              :align-center="true"
+              class="custom-dialog"
+          >
+            <div class="add-dialog-content">
+              <el-form label-width="auto">
+                <el-form-item
+                    label="数量："
+                    label-width="80px"
+                    class="form-item-custom"
+                >
+                  <el-input-number
+                      v-model="addForm.quantity"
+                      :min="1"
+                      :precision="0"
+                      controls-position="right"
+                      class="full-width-input"
+                  />
+                </el-form-item>
+              </el-form>
+            </div>
+
+            <template #footer>
+              <div class="dialog-footer-btns">
+                <el-button @click="showAddDialog = false" size="medium">取消</el-button>
+                <el-button
+                    type="primary"
+                    :loading="adding"
+                    @click="handleAddToPool"
+                    size="medium"
+                >
+                  确认添加
+                </el-button>
+              </div>
+            </template>
+          </el-dialog>
+
           <!-- 添加评论对话框 -->
           <el-dialog
               v-model="commentDialogVisible"
@@ -322,6 +377,7 @@ const product = ref<any>(null)
 import { getComments,submitComment,deleteComment } from '../../api/comment.ts'
 import dayjs from 'dayjs'
 import { getDiscount,deleteDiscount } from '../../api/discount.ts'
+import {addNewItem} from "../../api/lottery.ts";
 
 const discount = ref<any>(null)
 
@@ -336,6 +392,67 @@ const discountRateText = computed(() => {
   const discountRate = Math.floor((1 - discount.value.rate) * 100)
   return `${discountRate}% OFF`
 })
+
+
+const adding = ref(false)
+const showAddDialog = ref(false)
+
+// 添加表单数据
+const addForm = ref({
+  type: '',
+  couponId: '',
+  quantity: 1
+})
+
+// 打开添加对话框
+const openAddDialog1 = (id: String) => {
+  addForm.value = {
+    type: 'BOOK',
+    couponId: id,
+    quantity: 1
+  }
+  showAddDialog.value = true
+}
+
+const openAddDialog2 = (id: String) => {
+  addForm.value = {
+    type: 'BLIND_BOX',
+    couponId: id,
+    quantity: 1
+  }
+  showAddDialog.value = true
+}
+// 处理添加操作
+const handleAddToPool = async () => {
+  try {
+    adding.value = true
+
+    const params = {
+      type: addForm.value.type,
+      itemId: addForm.value.couponId,
+      quantity: addForm.value.quantity
+    }
+
+    const res = await addNewItem(params)
+    if (res.data.code === '200') {
+      ElMessage.success('添加奖池成功')
+      showAddDialog.value = false
+    } else {
+      ElMessage.error(res.data.msg || '添加失败')
+    }
+  } catch (error) {
+    ElMessage.error('请求失败，请稍后重试')
+  } finally {
+    adding.value = false
+  }
+}
+
+
+
+
+
+
+
 
 // 在获取商品信息后获取折扣信息
 const fetchDiscount = async () => {
@@ -417,7 +534,7 @@ const commentRules = {
   rating: [
     {
       required: true,
-      validator: (_, value, callback) => {
+      validator: (_: unknown, value: number, callback: (error?: Error) => void) => {
         if (value <= 0) {
           callback(new Error('请选择评分'))
         } else {
@@ -439,7 +556,7 @@ const commentRules = {
       trigger: 'blur'
     },
     {
-      validator: (_, value, callback) => {
+      validator: (_: unknown, value: string, callback: (error?: Error) => void) => {
         if (!value || !value.trim() || !/\S/.test(value)) {
           callback(new Error('评论内容不能为空或全是空格'))
         } else {
@@ -1013,7 +1130,7 @@ onMounted(() => {
   padding-top: 20px;
   display: flex;
   gap: 30px;
-  margin-left: 150px;
+  margin-left: 20px;
 }
 
 .detail-content {
@@ -1113,6 +1230,14 @@ onMounted(() => {
 
 :deep(.el-input__inner) {
   background: rgba(245, 247, 250, 0.8);
+}
+
+.full-width-input {
+  width: 100%;
+}
+
+.form-item-custom {
+  margin-bottom: 0;
 }
 </style>
 
