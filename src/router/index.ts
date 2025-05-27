@@ -70,6 +70,16 @@ const routes = createRouter({
       name: 'UpdateAdvertisement',
       component: () => import('../views/advertisement/UpdateAdvertisement.vue'),
       meta: { requiresAuth: true }
+  }, {
+      path: '/discount/:id',
+      name: 'CreateDiscount',
+      component: () => import('../views/discount/CreateDiscount.vue'),
+      meta: { requiresAuth: true }
+  }, {
+      path: '/create_coupon',
+      name: 'CreateCoupon',
+      component: () => import('../views/discount/CreateCoupon.vue'),
+      meta: { title : 'Create Coupon' }
   }
   ],
 })

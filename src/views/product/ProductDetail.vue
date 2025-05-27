@@ -39,7 +39,34 @@
                 </div>
 
                 <div class="price-section">
-                  <span class="price">¥{{ formatPrice(product.price) }}</span>
+                  <div v-if="discount" class="discount-price">
+                    <div class="original-price">
+                      <span class="label">原价：</span>
+                      <del>¥{{ formatPrice(product.price) }}</del>
+                    </div>
+                    <div class="current-price">
+                      <span class="label">折扣价：</span>
+                      <span class="price highlight">
+                  ¥{{ formatPrice(discountedPrice) }}
+                </span>
+                      <el-tag type="danger" effect="dark" class="discount-tag">
+                        {{ discountRateText }}
+                      </el-tag>
+                      <!-- 新增删除按钮 -->
+                      <el-button
+                          v-if="role === 'admin' && discount"
+                          type="danger"
+                          size="small"
+                          @click="handleDeleteDiscount"
+                          class="delete-discount-btn"
+                      >
+                        删除折扣
+                      </el-button>
+                    </div>
+                  </div>
+                  <div v-else class="normal-price">
+                    <span class="price">¥{{ formatPrice(product.price) }}</span>
+                  </div>
                 </div>
 
                 <!-- 添加购物车功能 -->
@@ -89,6 +116,13 @@
                         @click="createAdvertisement"
                     >
                       创建广告
+                    </el-button>
+
+                    <el-button
+                        type="info"
+                        @click="createDiscount"
+                    >
+                      创建折扣
                     </el-button>
                   </div>
                 </div>
@@ -287,10 +321,69 @@ const loading = ref(true)
 const product = ref<any>(null)
 import { getComments,submitComment,deleteComment } from '../../api/comment.ts'
 import dayjs from 'dayjs'
+import { getDiscount,deleteDiscount } from '../../api/discount.ts'
 
+const discount = ref<any>(null)
+
+// 计算属性
+const discountedPrice = computed(() => {
+  if (!discount.value || !product.value) return 0
+  return product.value.price * discount.value.rate
+})
+
+const discountRateText = computed(() => {
+  if (!discount.value) return ''
+  const discountRate = Math.floor((1 - discount.value.rate) * 100)
+  return `${discountRate}% OFF`
+})
+
+// 在获取商品信息后获取折扣信息
+const fetchDiscount = async () => {
+  try {
+    const res = await getDiscount(route.params.id as string)
+    if (res.data.code === '200') {
+      discount.value = res.data.data
+    }
+  } catch (error) {
+    console.error('获取折扣信息失败:', error)
+  }
+}
+
+// 新增删除折扣方法
+const handleDeleteDiscount = async () => {
+  try {
+    const confirm = await ElMessageBox.confirm(
+        '确定要删除该折扣吗？',
+        '删除确认',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+
+    if (confirm) {
+      const res = await deleteDiscount(discount.value.id)
+      if (res.data.code === '200') {
+        ElMessage.success('折扣删除成功')
+        await fetchDiscount()
+      } else {
+        ElMessage.error(res.data.msg || '删除失败')
+      }
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除折扣失败，请稍后重试')
+    }
+  }
+}
 
 // 获取当前登录用户名
 const currentUsername = computed(() => sessionStorage.getItem('username') || '')
+
+const createDiscount = () => {
+  routes.push({ name: 'CreateDiscount', params: { id: product.id } })
+}
 
 
 const createAdvertisement = () => {
@@ -307,7 +400,7 @@ const comments = ref<any[]>([])
 
 // 时间格式化方法
 const formatTime = (timeStr: string) => {
-  return dayjs(timeStr).format('YYYY-MM-DD HH:mm')
+  return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss')
 }
 
 // 新增评论相关逻辑
@@ -531,6 +624,7 @@ const fetchProduct = async () => {
     const ress = await getStockpile(route.params.id as string)
     if (res.data.code === '200') {
       product.value = res.data.data
+      await fetchDiscount()
     } else {
       ElMessage.error(res.data.msg || '获取商品详情失败')
     }
@@ -559,6 +653,59 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+/* 新增价格部分样式 */
+.price-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.discount-price {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.original-price {
+  font-size: 16px;
+  color: #909399;
+}
+
+.current-price {
+  margin-left: 250px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.highlight {
+  color: #f56c6c;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.discount-tag {
+  font-weight: bold;
+
+}
+
+.label {
+  font-size: 14px;
+  color: #606266;
+}
+
+.normal-price .price {
+  font-size: 28px;
+  color: #303133;
+  font-weight: 600;
+}
+
+.delete-discount-btn {
+  margin-left: 80px;
+  padding: 8px 12px;
+}
 /* 添加表单样式 */
 /* 调整评论对话框的表单项布局 */
 :deep(.comment-form) {
@@ -866,7 +1013,7 @@ onMounted(() => {
   padding-top: 20px;
   display: flex;
   gap: 30px;
-  margin-left: 190px;
+  margin-left: 150px;
 }
 
 .detail-content {

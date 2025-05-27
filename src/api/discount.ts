@@ -43,7 +43,7 @@ export const getAllCouponType = () => {
     })
 }
 
-export const getUsrCoupons = () => {
+export const getUserCoupons = () => {
     return axios.get(`${API_COUPON_MODULE_PREFIX}`)
     .then(res => {
         return res
@@ -69,8 +69,8 @@ export const newDiscount = (discount : Discount) => {
 }
 
 
-export const getDiscount = (id : string) => {
-    return axios.get(`${API_DISCOUNT_MODULE_PREFIX}/${id}`)
+export const getDiscount = (productId : string) => {
+    return axios.get(`${API_DISCOUNT_MODULE_PREFIX}/${productId}`)
     .then(res => {
         return res
     })
