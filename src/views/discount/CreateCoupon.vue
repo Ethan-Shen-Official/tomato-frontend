@@ -133,7 +133,7 @@ const rules = {
   ],
   trigger: [
     {
-      type: 'number',
+      type: 'number' as const,
       min: 0,
       message: '金额不能小于0',
       trigger: ['blur', 'change']
@@ -142,7 +142,7 @@ const rules = {
   discount: [
     { required: true, message: '请输入优惠金额', trigger: 'blur' },
     {
-      type: 'number',
+      type: 'number' as const,
       min: 0,
       message: '金额不能小于0',
       trigger: ['blur', 'change']
@@ -151,7 +151,7 @@ const rules = {
   lastHour: [
     { required: true, message: '请输入有效时长', trigger: 'blur' },
     {
-      type: 'number',
+      type: 'number' as const,
       min: 1,
       message: '有效时长不能小于1小时',
       trigger: ['blur', 'change']

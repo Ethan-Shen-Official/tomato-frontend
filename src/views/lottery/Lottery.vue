@@ -1,54 +1,65 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed } from 'vue'
 import { Present, Box, Notebook, Ticket, Coin } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { drawLottery } from '../../api/lottery'
 import { drawBlindBox } from '../../api/blindbox.ts'
 import { getProductById } from '../../api/product'
+import { PrizeType } from '../../utils/type.ts'
 
 const router = useRouter()
 
+// 定义类型接口
+interface LotteryItem {
+  id: string
+  type: PrizeType 
+  itemId: string
+  status: 'AVAILABLE' | 'GENERATED' | 'USED'
+  product?: {
+    title: string
+    // 添加其他产品属性
+  }
+}
+
 // 奖品类型映射
-const typeIconMap = {
+const typeIconMap: Record<string, any> = {
   BOOK: Notebook,
   COUPON: Ticket,
   CREDIT: Coin,
   BLIND_BOX: Box
 }
 
-const statusTypeMap = {
+const statusTypeMap: Record<string, 'success' | 'warning' | 'info'> = {
   AVAILABLE: 'success',
   GENERATED: 'warning',
   USED: 'info'
 }
 
-const statusTextMap = {
+const statusTextMap: Record<string, string> = {
   AVAILABLE: '未使用',
   GENERATED: '已生成',
   USED: '已使用'
 }
 
 // 抽奖相关数据
-const results = ref<any[]>([])
+const results = ref<LotteryItem[]>([])
 const drawLoading = ref(false)
 const dialogVisible = ref(false)
 
 // 处理抽奖操作
 const handleDraw = async (quantity: number) => {
-
   try {
-
     drawLoading.value = true
     const res = await drawLottery({ quantity })
 
     if (res.data.code === '200') {
       ElMessage.success('抽奖成功！')
-      const items = res.data.data
+      const items: LotteryItem[] = res.data.data
 
       // 获取书籍详情
       const enhancedItems = await Promise.all(
-          items.map(async item => {
+          items.map(async (item: LotteryItem) => {
             if (item.type === 'BOOK') {
               try {
                 const productRes = await getProductById(item.itemId)
@@ -68,7 +79,7 @@ const handleDraw = async (quantity: number) => {
         results.value = []
         dialogVisible.value = true
         for (let i = 0; i < enhancedItems.length; i++) {
-          await new Promise(resolve => setTimeout(resolve, 200))
+          await new Promise<void>(resolve => setTimeout(resolve, 200))
           results.value.push(enhancedItems[i])
         }
       } else {
@@ -77,28 +88,25 @@ const handleDraw = async (quantity: number) => {
       }
     }
 
-  } catch (error) {
+  } catch (error: any) {
     ElMessage.error(error.response?.data?.msg || '抽奖失败')
   } finally {
     drawLoading.value = false
   }
 }
 
-
 const handleBlindBoxDraw = async (quantity: number) => {
-
   try {
-
     drawLoading.value = true
     const res = await drawBlindBox({ quantity })
 
     if (res.data.code === '200') {
       ElMessage.success('抽奖成功！')
-      const items = res.data.data
+      const items: LotteryItem[] = res.data.data
 
       // 获取书籍详情
       const enhancedItems = await Promise.all(
-          items.map(async item => {
+          items.map(async (item: LotteryItem) => {
             if (item.type === 'BOOK') {
               try {
                 const productRes = await getProductById(item.itemId)
@@ -118,7 +126,7 @@ const handleBlindBoxDraw = async (quantity: number) => {
         results.value = []
         dialogVisible.value = true
         for (let i = 0; i < enhancedItems.length; i++) {
-          await new Promise(resolve => setTimeout(resolve, 200))
+          await new Promise<void>(resolve => setTimeout(resolve, 200))
           results.value.push(enhancedItems[i])
         }
       } else {
@@ -127,24 +135,28 @@ const handleBlindBoxDraw = async (quantity: number) => {
       }
     }
 
-  } catch (error) {
+  } catch (error: any) {
     ElMessage.error(error.response?.data?.msg || '抽奖失败')
   } finally {
     drawLoading.value = false
   }
 }
+
 // 类型处理函数
 const getTypeIcon = (type: string) => typeIconMap[type] || Box
 const getIconClass = (type: string) => `${type.toLowerCase()}-icon`
-const getTypeName = (type: string) => ({
-  BOOK: '书籍',
-  COUPON: '优惠券',
-  CREDIT: '积分',
-  BLIND_BOX: '盲盒'
-})[type]
+const getTypeName = (type: string): string => {
+  const typeNameMap: Record<string, string> = {
+    BOOK: '书籍',
+    COUPON: '优惠券',
+    CREDIT: '积分',
+    BLIND_BOX: '盲盒'
+  }
+  return typeNameMap[type] || '未知类型'
+}
 
 // 管理员判断
-const isAdmin = computed(() => sessionStorage.role === 'admin')
+const isAdmin = computed(() => sessionStorage.getItem('role') === 'admin')
 
 // 图标点击处理
 const handleIconClick = () => {

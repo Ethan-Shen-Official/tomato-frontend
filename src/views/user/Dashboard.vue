@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus';
 import { routes } from '../../router';
 import { parseRole } from '../../utils';
 import {addNewItem} from "../../api/lottery.ts";
+import { PrizeType } from '../../utils/type.ts';
 
 // 登录状态
 const isLoggedIn = ref(true);
@@ -227,7 +228,7 @@ const handleAddToPool = async () => {
     adding.value = true
 
     const params = {
-      type: addForm.value.type,
+      type: addForm.value.type as PrizeType,
       itemId: addForm.value.couponId.toString(),
       quantity: addForm.value.quantity
     }
@@ -342,12 +343,12 @@ const handleAddToPool = async () => {
 
           <template #footer>
             <div class="dialog-footer-btns">
-              <el-button @click="showAddDialog = false" size="medium">取消</el-button>
+              <el-button @click="showAddDialog = false" size="default">取消</el-button>
               <el-button
                   type="primary"
                   :loading="adding"
                   @click="handleAddToPool"
-                  size="medium"
+                  size="default"
               >
                 确认添加
               </el-button>

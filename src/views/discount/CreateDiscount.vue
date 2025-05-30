@@ -82,7 +82,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, type FormInstance } from 'element-plus'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { newDiscount } from '../../api/discount'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -110,7 +110,7 @@ const discountForm = ref<DiscountForm>({
 })
 
 // 表单验证规则
-const rules = {
+const rules: FormRules<DiscountForm> = {
   productId: [{ required: true, message: '商品ID不能为空', trigger: 'blur' }],
   rate: [
     { required: true, message: '请输入折扣率', trigger: 'blur' },
@@ -129,7 +129,7 @@ const rules = {
       trigger: 'change'
     },
     {
-      validator: (_, value, callback) => {
+      validator: (_, value: string, callback) => {
         if (dayjs(value).isAfter(dayjs(discountForm.value.expireTime))) {
           callback(new Error('生效时间不能晚于过期时间'))
         } else {
@@ -146,7 +146,7 @@ const rules = {
       trigger: 'change'
     },
     {
-      validator: (_, value, callback) => {
+      validator: (rule, value: string, callback) => {
         if (dayjs(value).isBefore(dayjs(discountForm.value.effectTime))) {
           callback(new Error('过期时间不能早于生效时间'))
         } else {
@@ -185,6 +185,11 @@ const submitForm = async () => {
     }
   } catch (error) {
     console.error('创建折扣失败:', error)
+    if (error instanceof Error) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.error('创建失败，请重试')
+    }
   } finally {
     submitting.value = false
   }

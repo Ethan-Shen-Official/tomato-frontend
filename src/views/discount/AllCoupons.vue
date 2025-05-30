@@ -86,12 +86,12 @@
 
               <template #footer>
                 <div class="dialog-footer-btns">
-                  <el-button @click="showAddDialog = false" size="medium">取消</el-button>
+                  <el-button @click="showAddDialog = false" size="default">取消</el-button>
                   <el-button
                       type="primary"
                       :loading="adding"
                       @click="handleAddToPool"
-                      size="medium"
+                      size="default"
                   >
                     确认添加
                   </el-button>
@@ -116,7 +116,8 @@ import { ref } from 'vue'
 import { Ticket } from '@element-plus/icons-vue'
 import { getAllCouponType } from '../../api/discount.ts'
 import { addNewItem } from '../../api/lottery'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { PrizeType } from '../../utils/type.ts'
 
 const loading = ref(true)
 const adding = ref(false)
@@ -144,7 +145,7 @@ const handleAddToPool = async () => {
     adding.value = true
 
     const params = {
-      type: 'COUPON',
+      type: PrizeType.coupon,
       itemId: addForm.value.couponId,
       quantity: addForm.value.quantity
     }

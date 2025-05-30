@@ -267,12 +267,12 @@
 
             <template #footer>
               <div class="dialog-footer-btns">
-                <el-button @click="showAddDialog = false" size="medium">取消</el-button>
+                <el-button @click="showAddDialog = false" size="default">取消</el-button>
                 <el-button
                     type="primary"
                     :loading="adding"
                     @click="handleAddToPool"
-                    size="medium"
+                    size="default"
                 >
                   确认添加
                 </el-button>
@@ -378,6 +378,7 @@ import { getComments,submitComment,deleteComment } from '../../api/comment.ts'
 import dayjs from 'dayjs'
 import { getDiscount,deleteDiscount } from '../../api/discount.ts'
 import {addNewItem} from "../../api/lottery.ts";
+import { PrizeType } from '../../utils/type.ts'
 
 const discount = ref<any>(null)
 
@@ -393,7 +394,6 @@ const discountRateText = computed(() => {
   return `${discountRate}% OFF`
 })
 
-
 const adding = ref(false)
 const showAddDialog = ref(false)
 
@@ -405,18 +405,18 @@ const addForm = ref({
 })
 
 // 打开添加对话框
-const openAddDialog1 = (id: String) => {
+const openAddDialog1 = (id: string) => {
   addForm.value = {
-    type: 'BOOK',
+    type: PrizeType.book,
     couponId: id,
     quantity: 1
   }
   showAddDialog.value = true
 }
 
-const openAddDialog2 = (id: String) => {
+const openAddDialog2 = (id: string) => {
   addForm.value = {
-    type: 'BLIND_BOX',
+    type: PrizeType.blindbox,
     couponId: id,
     quantity: 1
   }
@@ -428,7 +428,7 @@ const handleAddToPool = async () => {
     adding.value = true
 
     const params = {
-      type: addForm.value.type,
+      type: addForm.value.type as PrizeType,
       itemId: addForm.value.couponId,
       quantity: addForm.value.quantity
     }
@@ -446,13 +446,6 @@ const handleAddToPool = async () => {
     adding.value = false
   }
 }
-
-
-
-
-
-
-
 
 // 在获取商品信息后获取折扣信息
 const fetchDiscount = async () => {
@@ -499,9 +492,8 @@ const handleDeleteDiscount = async () => {
 const currentUsername = computed(() => sessionStorage.getItem('username') || '')
 
 const createDiscount = () => {
-  routes.push({ name: 'CreateDiscount', params: { id: product.id } })
+  routes.push({ name: 'CreateDiscount', params: { id: product.value.id } })
 }
-
 
 const createAdvertisement = () => {
   routes.push({
@@ -1240,6 +1232,3 @@ onMounted(() => {
   margin-bottom: 0;
 }
 </style>
-
-
-
