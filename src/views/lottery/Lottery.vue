@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Present,Box,Notebook, Ticket, Coin } from '@element-plus/icons-vue'
+import { ref, computed, nextTick } from 'vue'
+import { Present, Box, Notebook, Ticket, Coin } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import {routes} from '../../router'
+import { useRouter } from 'vue-router'
 import { drawLottery } from '../../api/lottery'
+import { drawBlindBox } from '../../api/blindbox.ts'
 import { getProductById } from '../../api/product'
+
+const router = useRouter()
 
 // 奖品类型映射
 const typeIconMap = {
@@ -26,46 +29,54 @@ const statusTextMap = {
   USED: '已使用'
 }
 
-// 抽奖结果数据
+// 抽奖相关数据
 const results = ref<any[]>([])
 const drawLoading = ref(false)
+const dialogVisible = ref(false)
 
 // 处理抽奖操作
 const handleDraw = async (quantity: number) => {
+
   try {
 
     drawLoading.value = true
-
     const res = await drawLottery({ quantity })
 
-
     if (res.data.code === '200') {
+      ElMessage.success('抽奖成功！')
       const items = res.data.data
 
       // 获取书籍详情
       const enhancedItems = await Promise.all(
           items.map(async item => {
             if (item.type === 'BOOK') {
-              const productRes = await getProductById(item.itemId)
-              if (productRes.data.code === '200') {
-                return { ...item, product: productRes.data.data }
+              try {
+                const productRes = await getProductById(item.itemId)
+                if (productRes.data.code === '200') {
+                  return { ...item, product: productRes.data.data }
+                }
+              } catch (error) {
+                console.error('获取书籍详情失败:', error)
               }
             }
             return item
           })
       )
 
-      // 十连抽动画处理
+      // 处理动画显示
       if (quantity === 10) {
         results.value = []
+        dialogVisible.value = true
         for (let i = 0; i < enhancedItems.length; i++) {
           await new Promise(resolve => setTimeout(resolve, 200))
           results.value.push(enhancedItems[i])
         }
       } else {
         results.value = enhancedItems
+        dialogVisible.value = true
       }
     }
+
   } catch (error) {
     ElMessage.error(error.response?.data?.msg || '抽奖失败')
   } finally {
@@ -73,7 +84,56 @@ const handleDraw = async (quantity: number) => {
   }
 }
 
-// 类型图标处理
+
+const handleBlindBoxDraw = async (quantity: number) => {
+
+  try {
+
+    drawLoading.value = true
+    const res = await drawBlindBox({ quantity })
+
+    if (res.data.code === '200') {
+      ElMessage.success('抽奖成功！')
+      const items = res.data.data
+
+      // 获取书籍详情
+      const enhancedItems = await Promise.all(
+          items.map(async item => {
+            if (item.type === 'BOOK') {
+              try {
+                const productRes = await getProductById(item.itemId)
+                if (productRes.data.code === '200') {
+                  return { ...item, product: productRes.data.data }
+                }
+              } catch (error) {
+                console.error('获取书籍详情失败:', error)
+              }
+            }
+            return item
+          })
+      )
+
+      // 处理动画显示
+      if (quantity === 10) {
+        results.value = []
+        dialogVisible.value = true
+        for (let i = 0; i < enhancedItems.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 200))
+          results.value.push(enhancedItems[i])
+        }
+      } else {
+        results.value = enhancedItems
+        dialogVisible.value = true
+      }
+    }
+
+  } catch (error) {
+    ElMessage.error(error.response?.data?.msg || '抽奖失败')
+  } finally {
+    drawLoading.value = false
+  }
+}
+// 类型处理函数
 const getTypeIcon = (type: string) => typeIconMap[type] || Box
 const getIconClass = (type: string) => `${type.toLowerCase()}-icon`
 const getTypeName = (type: string) => ({
@@ -83,50 +143,34 @@ const getTypeName = (type: string) => ({
   BLIND_BOX: '盲盒'
 })[type]
 
-// 判断管理员状态
+// 管理员判断
 const isAdmin = computed(() => sessionStorage.role === 'admin')
 
 // 图标点击处理
 const handleIconClick = () => {
-
   if (isAdmin.value) {
-    routes.push('/pool')
+    router.push('/pool')
   }
 }
 
-// 模拟抽奖逻辑
-const handleSingleDraw = () => {
-  ElMessage({
-    message: '单抽功能开发中',
-    type: 'info',
-    center: true
-  })
-}
-
-const handleMultiDraw = () => {
-  ElMessage({
-    message: '十连抽功能开发中',
-    type: 'info',
-    center: true
-  })
+// 模拟抽奖函数
+const showComingSoon = () => {
+  ElMessage.info('功能开发中，敬请期待')
 }
 </script>
 
 <template>
   <div class="lottery-page">
     <div class="lottery-container">
+      <!-- 普通抽奖卡 -->
       <el-card class="lottery-card">
         <div class="lottery-content">
           <h1>普通抽奖</h1>
-
-          <!-- 抽奖大图标 -->
           <div class="lottery-icon" @click="handleIconClick">
             <el-icon :size="100" color="#ff6b6b">
               <Present />
             </el-icon>
           </div>
-
-          <!-- 操作按钮 -->
           <div class="action-buttons">
             <el-button
                 type="primary"
@@ -137,7 +181,6 @@ const handleMultiDraw = () => {
             >
               单抽 (100积分)
             </el-button>
-
             <el-button
                 type="danger"
                 size="large"
@@ -152,31 +195,31 @@ const handleMultiDraw = () => {
         </div>
       </el-card>
 
+      <!-- 盲盒抽奖卡 -->
       <el-card class="lottery-card">
         <div class="lottery-content">
           <h1>盲盒抽奖</h1>
-
-          <!-- 抽奖大图标 -->
           <div class="lottery-icon" @click="handleIconClick">
             <el-icon :size="100" color="#d53ce6">
               <Box />
             </el-icon>
           </div>
-
-          <!-- 操作按钮 -->
           <div class="action-buttons">
             <el-button
                 type="primary"
                 size="large"
-                @click="handleSingleDraw"
+                @click="handleBlindBoxDraw(1)"
+                :loading="drawLoading"
+                :disabled="drawLoading"
             >
               单抽 (100积分)
             </el-button>
-
             <el-button
                 type="danger"
                 size="large"
-                @click="handleMultiDraw"
+                @click="handleBlindBoxDraw(10)"
+                :loading="drawLoading"
+                :disabled="drawLoading"
             >
               十连抽 (900积分)
               <span class="discount-tag">九折</span>
@@ -185,8 +228,15 @@ const handleMultiDraw = () => {
         </div>
       </el-card>
 
-      <!-- 抽奖结果展示 -->
-      <el-card class="result-card" v-if="results.length > 0">
+      <!-- 抽奖结果对话框 -->
+      <el-dialog
+          v-model="dialogVisible"
+          title="抽奖结果"
+          width="60%"
+          align-center
+          class="result-dialog"
+          :close-on-click-modal="false"
+      >
         <div class="result-container">
           <transition-group name="list">
             <div
@@ -195,30 +245,32 @@ const handleMultiDraw = () => {
                 class="result-item"
                 :style="{ transitionDelay: `${index * 0.1}s` }"
             >
-              <!-- 奖品图标 -->
               <div class="icon-section">
                 <el-icon :class="getIconClass(item.type)" size="36">
                   <component :is="getTypeIcon(item.type)" />
                 </el-icon>
               </div>
 
-              <!-- 书籍类奖品详情 -->
-              <div class="detail-section" v-if="item.type === 'BOOK' && item.product">
-                <img :src="item.product.cover" class="book-cover" />
+              <!-- 书籍类奖品 -->
+              <div v-if="item.type === 'BOOK' && item.product" class="detail-section">
+
                 <div class="book-info">
                   <h4>{{ item.product.title }}</h4>
-                  <p>价格: ¥{{ item.product.price }}</p>
-                  <p>评分: {{ item.product.rate }}</p>
                 </div>
               </div>
 
+              <!-- 盲盒类奖品 -->
+              <div v-if="item.type === 'BLIND_BOX'" class="blind-box--info">
+                <h3 class="blind_context">{{ getTypeName(item.type) }}</h3>
+              </div>
+
               <!-- 其他类型奖品 -->
-              <div class="common-info" v-else>
+              <div v-else class="common-info">
                 <h3>{{ getTypeName(item.type) }}</h3>
                 <p>{{ item.itemId }}</p>
               </div>
 
-              <!-- 状态标签 -->
+              <!-- 状态显示 -->
               <div class="status-section">
                 <el-tag :type="statusTypeMap[item.status]">
                   {{ statusTextMap[item.status] }}
@@ -227,7 +279,13 @@ const handleMultiDraw = () => {
             </div>
           </transition-group>
         </div>
-      </el-card>
+
+        <template #footer>
+          <el-button type="primary" @click="dialogVisible = false">
+            关闭
+          </el-button>
+        </template>
+      </el-dialog>
     </div>
   </div>
 
@@ -314,11 +372,6 @@ const handleMultiDraw = () => {
   transition: all 0.3s;
 }
 
-.el-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
 .discount-tag {
   margin-left: 8px;
   font-size: 0.9em;
@@ -342,19 +395,6 @@ const handleMultiDraw = () => {
   }
 }
 
-.sparkle {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-      circle at center,
-      rgba(255,255,255,0.8) 0%,
-      rgba(255,255,255,0) 70%
-  );
-  pointer-events: none;
-  animation: sparkle 2s linear infinite;
-}
-
 @keyframes float {
   0%, 100% {
     transform: translateY(0);
@@ -372,17 +412,6 @@ const handleMultiDraw = () => {
   100% { opacity: 0; }
 }
 
-.action-section {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  padding: 20px;
-}
-
-.result-card {
-  background: rgba(255, 255, 255, 0.9);
-}
-
 .result-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -398,14 +427,6 @@ const handleMultiDraw = () => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
-}
-
-.list-enter-active, .list-leave-active {
-  transition: all 0.5s ease;
-}
-.list-enter-from, .list-leave-to {
-  opacity: 0;
-  transform: translateY(30px);
 }
 
 .icon-section {
@@ -433,6 +454,18 @@ const handleMultiDraw = () => {
   flex: 1;
 }
 
+.blind-box--info {
+  flex: 1;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.blind_context {
+  margin-left: 150px;
+  font-size: 16px;
+}
+
 .common-info h3 {
   margin: 0 0 8px;
   font-size: 16px;
@@ -455,4 +488,85 @@ const handleMultiDraw = () => {
   padding: 2px 8px;
   border-radius: 4px;
 }
+
+/* 抽奖结果样式 */
+.result-container {
+  max-height: 60vh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 改为两列布局 */
+  gap: 20px;
+  padding: 10px;
+}
+
+.result-item {
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.result-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.icon-section {
+  margin-right: 15px;
+}
+
+.book-cover {
+  width: 80px;
+  height: 110px;
+  border-radius: 6px;
+  margin-right: 15px;
+  object-fit: cover;
+}
+
+.book-info h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #333;
+}
+
+.book-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.common-info h3 {
+  margin: 0 0 8px;
+  color: #2c3e50;
+}
+
+.status-section {
+  margin-left: auto;
+}
+
+/* 入场动画 */
+.list-enter-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* 对话框标题样式 */
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+:deep(.el-dialog__title) {
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: 600;
+}
+
 </style>
