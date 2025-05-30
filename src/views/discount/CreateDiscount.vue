@@ -146,7 +146,7 @@ const rules: FormRules<DiscountForm> = {
       trigger: 'change'
     },
     {
-      validator: (rule, value: string, callback) => {
+      validator: (_, value: string, callback) => {
         if (dayjs(value).isBefore(dayjs(discountForm.value.effectTime))) {
           callback(new Error('过期时间不能早于生效时间'))
         } else {
