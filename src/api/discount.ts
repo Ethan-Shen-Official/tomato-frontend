@@ -50,6 +50,13 @@ export const getUserCoupons = () => {
     })
 }
 
+export const getCouponType = (id: string) => {
+    return axios.get(`${API_COUPON_MODULE_PREFIX}/type/${id}`)
+    .then(res => {
+        return res
+    })
+}
+
 export const useCoupon = (useRequest : UseRequest) => {
     return axios.post(`${API_COUPON_MODULE_PREFIX}`,useRequest,
         { headers: {"Content-Type": "application/json" } }
