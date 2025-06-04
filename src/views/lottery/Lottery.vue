@@ -162,6 +162,7 @@ const isAdmin = computed(() => sessionStorage.getItem('role') === 'admin')
 const handleIconClick = () => {
   if (isAdmin.value) {
     router.push('/pool')
+    sessionStorage.setItem('lotteryType', 'normal')
   }
 }
 

@@ -11,13 +11,13 @@
                   返回首页
                 </el-button>
               </router-link>
-              <h1 class="pool-title">我的奖池（{{ poolData?.length || 0 }}种奖品）</h1>
+              <h1 class="pool-title">我的奖池（{{ filteredPoolData?.length || 0 }}种奖品）</h1>
             </div>
 
             <!-- 奖品列表 -->
             <div class="pool-items">
 
-              <div v-for="item in poolData" :key="item.id" class="pool-item">
+              <div v-for="item in filteredPoolData" :key="item.id" class="pool-item">
                 <!-- 类型图标 -->
                 <div class="icon-section">
                   <el-icon :class="getIconClass(item.type)" size="28">
@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import {
   Notebook,
   Ticket,
@@ -101,6 +101,20 @@ interface PoolItem {
 
 const loading = ref(true)
 const poolData = ref<PoolItem[]>([])
+const poolType = sessionStorage.getItem('lotteryType') || 'normal'
+
+// 添加过滤后的数据计算属性
+const filteredPoolData = computed(() => {
+  if (!poolData.value) return []
+  
+  if (poolType === 'blindbox') {
+    // 如果是盲盒类型，只显示盲盒
+    return poolData.value.filter(item => item.type === 'BLIND_BOX')
+  } else {
+    // 如果是普通类型，显示除盲盒外的所有类型
+    return poolData.value.filter(item => item.type !== 'BLIND_BOX')
+  }
+})
 
 // 初始化加载数据
 const fetchData = async () => {
@@ -241,6 +255,7 @@ fetchData()
 }
 
 .pool-card {
+  min-width: 1000px;
   margin-top: 80px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.1);

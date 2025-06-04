@@ -19,6 +19,7 @@ const buyLoading = ref(false)
 const handleIconClick = () => {
   if (isAdmin.value) {
     router.push('/pool')
+    sessionStorage.setItem('lotteryType', 'blindbox')
   }
 }
 
