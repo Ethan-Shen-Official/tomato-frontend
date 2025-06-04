@@ -303,8 +303,9 @@ onMounted(() => {
 .cart-container {
   width: 100vw; /* 视口宽度 */
   height: 100vh; /* 视口高度 */
-  margin: 0; /* 去掉外边距 */
+
   padding: 0; /* 去掉内边距 */
+  margin-top: 80px;
 
 }
 

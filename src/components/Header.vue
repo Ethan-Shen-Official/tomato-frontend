@@ -27,7 +27,7 @@
         </router-link>
 
         <!-- 订单图标 -->
-        <router-link to="/order" class="header-icon-link">
+        <router-link to="/order" class="header-icon-link" v-if="role === 'user'">
           <div class="icon-container">
             <el-icon :size="24" color="#333333"><Tickets /></el-icon>
           </div>
@@ -35,7 +35,7 @@
         </router-link>
 
         <!-- 购物车图标 -->
-        <router-link to="/cart" class="header-icon-link">
+        <router-link to="/cart" class="header-icon-link" v-if="role === 'user'">
           <div class="icon-container">
             <el-badge :value="cartCount" :max="99" class="cart-badge" v-if="cartCount > 0">
               <el-icon :size="24" color="#333333"><ShoppingCart /></el-icon>
@@ -77,6 +77,7 @@ import { getCartItems } from '../api/cart'
 // 用户信息
 const avatar_url = ref('')
 const username = sessionStorage.getItem('username')
+const role = sessionStorage.getItem('role')
 
 // 购物车商品数量
 const cartCount = ref(0)

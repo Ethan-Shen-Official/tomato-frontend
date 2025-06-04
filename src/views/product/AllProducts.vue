@@ -3,7 +3,6 @@
     <div class="products-container">
       <!-- 广告轮播部分 -->
       <div class="ad-section">
-        <!-- 新增广告轮播部分 -->
         <el-carousel
             v-if="ads.length > 0"
             :interval="5000"
@@ -32,11 +31,8 @@
         </el-carousel>
       </div>
 
-
       <el-card class="list-card">
         <div>
-
-          <!-- 修改后的创建按钮 -->
           <router-link v-if="role === 'admin'" to="/create">
             <el-button type="primary" size="default" class="create-button">
               创建商品
@@ -52,12 +48,11 @@
                   :key="product.id"
                   :xs="24"
                   :sm="12"
-                  :md="8"
-                  :lg="6"
+                  :md="12"
+                  :lg="8"
                   class="product-col"
               >
                 <div class="product-wrapper">
-                  <!-- 修改后的删除按钮 -->
                   <div v-if="role === 'admin'" class="delete-wrapper">
                     <el-popconfirm
                         title="确认要删除该商品吗？"
@@ -77,56 +72,45 @@
                     </el-popconfirm>
                   </div>
 
-                    <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }"style="text-decoration: none; color: inherit;">
-                      <el-card class="product-card" shadow="hover">
-
-                        <div class="product-content">
-                          <!-- 商品封面 -->
-                          <div class="product-image">
-                            <el-image
-                                v-if="product.cover"
-                                :src="product.cover"
-                                fit="cover"
-                                class="cover-image"
-                            />
-                            <div v-else class="image-placeholder">
-                              <el-icon :size="50"><Picture /></el-icon>
-                            </div>
-                          </div>
-
-                          <!-- 商品基本信息 -->
-                          <div class="product-info">
-                            <h3 class="product-title">{{ product.title }}</h3>
-                            <div class="price-rate">
-
-                              <el-rate
-                                  v-model="product.rate"
-                                  disabled
-                                  :max="10"
-                                  :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                                  class="product-rate"
-                              />
-                            </div>
-
-                            <div class="price-show">
-                              <span class="product-price">¥{{ formatPrice(product.price) }}</span>
-                            </div>
-
-
-
+                  <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }" style="text-decoration: none; color: inherit;">
+                    <el-card class="product-card" shadow="hover">
+                      <div class="product-content">
+                        <!-- 左侧商品图片 - 宽度增加 -->
+                        <div class="product-image">
+                          <el-image
+                              v-if="product.cover"
+                              :src="product.cover"
+                              fit="cover"
+                              class="cover-image"
+                          />
+                          <div v-else class="image-placeholder">
+                            <el-icon :size="50"><Picture /></el-icon>
                           </div>
                         </div>
-                      </el-card>
-                    </router-link>
-                  </div>
 
-
-                </el-col>
-
-
+                        <!-- 右侧商品信息 - 内容居中 -->
+                        <div class="product-info">
+                          <h3 class="product-title">{{ product.title }}</h3>
+                          <div class="price-rate">
+                            <el-rate
+                                v-model="product.rate"
+                                disabled
+                                :max="5"
+                                :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                                class="product-rate"
+                            />
+                          </div>
+                          <div class="price-show">
+                            <span class="product-price">¥{{ formatPrice(product.price) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </el-card>
+                  </router-link>
+                </div>
+              </el-col>
             </el-row>
 
-            <!-- 空状态 -->
             <el-empty
                 v-if="!loading && products.length === 0"
                 description="暂无商品数据"
@@ -143,12 +127,9 @@
 import { ref, onMounted,computed } from 'vue'
 import { getProducts } from '../../api/product.ts'
 import { Picture } from '@element-plus/icons-vue'
-import {routes} from '../../router'
+import { routes } from '../../router'
 import { Delete } from '@element-plus/icons-vue'
 import { deleteProduct } from '../../api/product.ts'
-
-
-// 新增广告相关导入
 import { getAd } from '../../api/advertisement.ts'
 
 // 广告数据
@@ -180,15 +161,12 @@ onMounted(async () => {
   await Promise.all([fetchProducts(), fetchAds()])
 })
 
-
 const role = computed(() => sessionStorage.getItem('role') || '');
-// 在原有代码基础上增加删除逻辑
 const handleDelete = async (id: string) => {
   try {
     const res = await deleteProduct(id)
     if (res.data.code === '200') {
       ElMessage.success('删除成功')
-      // 删除后重新获取列表
       await fetchProducts()
     } else {
       ElMessage.error(res.data.msg || '删除失败')
@@ -205,7 +183,6 @@ interface Product {
   cover?: string
   price?: number | bigint
   rate?: number
-  // 其他字段可按需补充
 }
 
 // 商品列表数据
@@ -215,7 +192,6 @@ const loading = ref(true)
 // 格式化价格显示
 const formatPrice = (price?: number | bigint) => {
   if (!price) return '0.00'
-  // 假设price以分为单位，转换为元
   return (Number(price)).toFixed(2)
 }
 
@@ -233,15 +209,9 @@ const fetchProducts = async () => {
     loading.value = false
   }
 }
-
-onMounted(() => {
-  fetchProducts()
-})
 </script>
 
 <style scoped>
-
-/* 新增样式 */
 .product-wrapper {
   position: relative;
 }
@@ -265,7 +235,7 @@ onMounted(() => {
 /* 调整卡片间距 */
 .product-col {
   margin-bottom: 20px;
-  padding: 8px; /* 增加内边距防止遮挡 */
+  padding: 8px;
 }
 
 .products-page {
@@ -278,14 +248,13 @@ onMounted(() => {
   background-repeat: no-repeat;
   background-attachment: fixed;
   display: block;
-  /* 添加全屏设置 */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  overflow-y: auto; /* 允许内容滚动 */
-  padding: 20px 0 60px; /* 增加底部内边距 */
+  overflow-y: auto;
+  padding: 20px 0 60px;
 }
 
 .products-container {
@@ -293,18 +262,15 @@ onMounted(() => {
   margin: 0 auto;
   flex: 1;
   width: 100%;
-  display: flex; /* 新增 */
-  flex-direction: column; /* 新增 */
+  display: flex;
+  flex-direction: column;
 }
 
-
-
-/* 新增广告容器样式 */
+/* 广告容器样式 */
 .ad-section {
   padding: 90px 0 20px;
   margin-bottom: 20px;
   height: 400px;
-
 }
 
 /* 调整轮播样式 */
@@ -312,10 +278,9 @@ onMounted(() => {
   width: 100%;
   margin: 0 auto;
   height: 100%;
-
 }
 
-/* 新增响应式调整 */
+/* 响应式调整 */
 @media (max-width: 768px) {
   .ad-carousel {
     height: 200px !important;
@@ -339,7 +304,6 @@ onMounted(() => {
 }
 
 .ad-item {
-
   border-radius: 12px;
   overflow: hidden;
   transform: scale(0.85);
@@ -391,11 +355,9 @@ onMounted(() => {
   background-color: rgba(255, 255, 255, 0.75);
   border-radius: 12px;
   overflow: hidden;
-  padding-top: 20px; /* 为顶部留出空间 */
-
+  padding-top: 20px;
   display: flex;
   flex-direction: column;
-
   margin-bottom: 50px;
   flex: 1;
 }
@@ -404,8 +366,12 @@ onMounted(() => {
   min-height: 500px;
 }
 
-.product-col {
-  margin-bottom: 20px;
+/* 调整每行显示数量 */
+@media (min-width: 1200px) {
+  .product-col {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
 }
 
 .product-card {
@@ -417,20 +383,24 @@ onMounted(() => {
   transform: translateY(-5px);
 }
 
+/* 修改布局：左侧图片，右侧信息 */
 .product-content {
   display: flex;
-  flex-direction: column;
-  height: 100%;
+  flex-direction: row;
+  height: 240px;
 }
 
+/* 增加图片宽度 */
 .product-image {
-  height: 200px;
+  width: 50%; /* 从45%增加到50% */
+  height: 100%;
   background-color: #f5f7fa;
   border-radius: 4px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .cover-image {
@@ -444,64 +414,45 @@ onMounted(() => {
 }
 
 .product-info {
-  padding: 15px;
-  flex: 1;
+  width: 50%; /* 从55%减少到50% */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center; /* 添加水平居中 */
 }
 
+/* 右侧内容全部居中 */
 .product-title {
-  margin: 0 0 10px;
-  font-size: 16px;
+  margin: 0 0 15px;
+  font-size: 18px;
   color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  text-align: center; /* 文本居中 */
+  width: 100%; /* 确保宽度100% */
 }
 
 .price-rate {
+  margin-bottom: 15px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
+  justify-content: center; /* 评分居中 */
+  width: 100%; /* 确保宽度100% */
 }
 
 .price-show {
-  text-align: center;
+  text-align: center; /* 价格居中 */
+  width: 100%; /* 确保宽度100% */
 }
 
 .product-price {
-  font-size: 18px;
+  font-size: 22px;
   color: #f56c6c;
   font-weight: bold;
-}
-
-.product-desc {
-  font-size: 12px;
-  color: #909399;
-  line-height: 1.5;
-  margin: 10px 0;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.specifications {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #ebeef5;
-}
-
-.spec-item {
-  font-size: 12px;
-  color: #606266;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-}
-
-.spec-label {
-  color: #909399;
-}
-
-.spec-value {
-  color: #303133;
 }
 
 .empty-tip {

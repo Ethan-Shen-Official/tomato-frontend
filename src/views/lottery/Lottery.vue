@@ -290,12 +290,12 @@ const showComingSoon = () => {
                 <p>{{ item.itemId }}</p>
               </div>
 
-              <!-- 状态显示 -->
-              <div class="status-section">
-                <el-tag :type="statusTypeMap[item.status]">
-                  {{ statusTextMap[item.status] }}
-                </el-tag>
-              </div>
+<!--              &lt;!&ndash; 状态显示 &ndash;&gt;-->
+<!--              <div class="status-section">-->
+<!--                <el-tag :type="statusTypeMap[item.status]">-->
+<!--                  {{ statusTextMap[item.status] }}-->
+<!--                </el-tag>-->
+<!--              </div>-->
             </div>
           </transition-group>
         </div>

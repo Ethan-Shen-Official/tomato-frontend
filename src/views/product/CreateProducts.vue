@@ -14,7 +14,7 @@
             </el-form-item>
 
             <el-form-item label="商品评分" required>
-              <el-input id="rate" v-model.number="rate" required placeholder="请输入评分（0-10）" type="number" step="0.1" min="0" max="10"/>
+              <el-input id="rate" v-model.number="rate" required placeholder="请输入评分（0-5）" type="number" step="0.1" min="0" max="5"/>
             </el-form-item>
 
             <el-form-item label="商品描述">

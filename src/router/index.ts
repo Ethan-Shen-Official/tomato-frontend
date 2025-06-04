@@ -49,7 +49,11 @@ const routes = createRouter({
         path: '/blindbox',
         component: () => import('../views/lottery/BlindBox.vue'),
         meta: { title : 'Blindbox' }
-      }
+      }, {
+            path: '/cart',
+            component: () => import('../views/order/Cart.vue'),
+            meta: { title : 'Cart' }
+        }
       ]
   },
   {
@@ -65,10 +69,6 @@ const routes = createRouter({
       path: '/create',
       component: () => import('../views/product/CreateProducts.vue'),
       meta: { title : 'Create Product' }
-  }, {
-      path: '/cart',
-      component: () => import('../views/order/Cart.vue'),
-      meta: { title : 'Cart' }
   }, {
       path: '/payment',
       component: () => import('../views/order/Payment.vue'),
