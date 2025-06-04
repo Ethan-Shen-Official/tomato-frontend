@@ -191,7 +191,7 @@ const showComingSoon = () => {
                 :loading="drawLoading"
                 :disabled="drawLoading"
             >
-              单抽 (100积分)
+              单抽 (60积分)
             </el-button>
             <el-button
                 type="danger"
@@ -200,45 +200,45 @@ const showComingSoon = () => {
                 :loading="drawLoading"
                 :disabled="drawLoading"
             >
-              十连抽 (900积分)
+              十连抽 (600积分)
               <span class="discount-tag">九折</span>
             </el-button>
           </div>
         </div>
       </el-card>
 
-      <!-- 盲盒抽奖卡 -->
-      <el-card class="lottery-card">
-        <div class="lottery-content">
-          <h1>盲盒抽奖</h1>
-          <div class="lottery-icon" @click="handleIconClick">
-            <el-icon :size="100" color="#d53ce6">
-              <Box />
-            </el-icon>
-          </div>
-          <div class="action-buttons">
-            <el-button
-                type="primary"
-                size="large"
-                @click="handleBlindBoxDraw(1)"
-                :loading="drawLoading"
-                :disabled="drawLoading"
-            >
-              单抽 (100积分)
-            </el-button>
-            <el-button
-                type="danger"
-                size="large"
-                @click="handleBlindBoxDraw(10)"
-                :loading="drawLoading"
-                :disabled="drawLoading"
-            >
-              十连抽 (900积分)
-              <span class="discount-tag">九折</span>
-            </el-button>
-          </div>
-        </div>
-      </el-card>
+<!--      &lt;!&ndash; 盲盒抽奖卡 &ndash;&gt;-->
+<!--      <el-card class="lottery-card">-->
+<!--        <div class="lottery-content">-->
+<!--          <h1>盲盒抽奖</h1>-->
+<!--          <div class="lottery-icon" @click="handleIconClick">-->
+<!--            <el-icon :size="100" color="#d53ce6">-->
+<!--              <Box />-->
+<!--            </el-icon>-->
+<!--          </div>-->
+<!--          <div class="action-buttons">-->
+<!--            <el-button-->
+<!--                type="primary"-->
+<!--                size="large"-->
+<!--                @click="handleBlindBoxDraw(1)"-->
+<!--                :loading="drawLoading"-->
+<!--                :disabled="drawLoading"-->
+<!--            >-->
+<!--              单抽 (100积分)-->
+<!--            </el-button>-->
+<!--            <el-button-->
+<!--                type="danger"-->
+<!--                size="large"-->
+<!--                @click="handleBlindBoxDraw(10)"-->
+<!--                :loading="drawLoading"-->
+<!--                :disabled="drawLoading"-->
+<!--            >-->
+<!--              十连抽 (900积分)-->
+<!--              <span class="discount-tag">九折</span>-->
+<!--            </el-button>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </el-card>-->
 
       <!-- 抽奖结果对话框 -->
       <el-dialog
@@ -263,12 +263,20 @@ const showComingSoon = () => {
                 </el-icon>
               </div>
 
-              <!-- 书籍类奖品 -->
-              <div v-if="item.type === 'BOOK' && item.product" class="detail-section">
 
-                <div class="book-info">
-                  <h4>{{ item.product.title }}</h4>
-                </div>
+              <!-- 书籍类奖品 -->
+              <div v-if="item.type === 'BOOK' && item.product" class="common-info">
+                <el-image
+                    :src="item.product.cover"
+                    fit="contain"
+                    class="image"
+                />
+              </div>
+
+              <!-- 书籍类奖品 -->
+              <div v-if="item.type === 'BOOK' && item.product" class="book-info">
+                <h3>{{ getTypeName(item.type) }}</h3>
+                <p>{{ item.product.title }}</p>
               </div>
 
               <!-- 盲盒类奖品 -->
@@ -277,7 +285,7 @@ const showComingSoon = () => {
               </div>
 
               <!-- 其他类型奖品 -->
-              <div v-else class="common-info">
+              <div v-if="item.type === 'COUPON' || item.type === 'CREDIT'" class="common-info">
                 <h3>{{ getTypeName(item.type) }}</h3>
                 <p>{{ item.itemId }}</p>
               </div>
@@ -455,11 +463,12 @@ const showComingSoon = () => {
 
 .book-info {
   flex: 1;
+  margin-left: -50px;
 }
 
-.book-info h4 {
+.book-info h3 {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .common-info {
@@ -581,4 +590,12 @@ const showComingSoon = () => {
   font-weight: 600;
 }
 
+.image {
+  width: 25%;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: rgba(245, 247, 250, 0.8);
+  padding: 15px;
+}
 </style>

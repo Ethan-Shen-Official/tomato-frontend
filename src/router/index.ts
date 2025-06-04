@@ -45,6 +45,10 @@ const routes = createRouter({
         path: '/all_coupons',
         component: () => import('../views/discount/AllCoupons.vue'),
         meta: { title : 'All Coupons' }
+      }, {
+        path: '/blindbox',
+        component: () => import('../views/lottery/BlindBox.vue'),
+        meta: { title : 'Blindbox' }
       }
       ]
   },

@@ -10,6 +10,14 @@
 
       <!-- 右侧菜单 -->
       <div class="header-right">
+        <!-- 盲盒图标 -->
+        <router-link to="/blindbox" class="header-icon-link" v-if="username">
+          <div class="icon-container">
+            <el-icon :size="24" color="#333333"><Box /></el-icon>
+          </div>
+          <span class="icon-text">盲盒</span>
+        </router-link>
+
         <!-- 抽奖图标 -->
         <router-link to="/lottery" class="header-icon-link" v-if="username">
           <div class="icon-container">
@@ -61,7 +69,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getUserInfo } from '../api/user'
-import { ShoppingCart, User, SwitchButton, Tickets, Present } from '@element-plus/icons-vue'
+import { ShoppingCart, User, SwitchButton, Tickets, Present, Box } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
 //import { routes } from '../router'

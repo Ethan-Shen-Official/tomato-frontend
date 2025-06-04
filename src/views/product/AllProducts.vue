@@ -8,7 +8,7 @@
             v-if="ads.length > 0"
             :interval="5000"
             type="card"
-            height="300px"
+            height="360px"
             class="ad-carousel"
         >
           <el-carousel-item
@@ -303,13 +303,16 @@ onMounted(() => {
 .ad-section {
   padding: 90px 0 20px;
   margin-bottom: 20px;
+  height: 400px;
+
 }
 
 /* 调整轮播样式 */
 .ad-carousel {
   width: 100%;
   margin: 0 auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  height: 100%;
+
 }
 
 /* 新增响应式调整 */
@@ -336,6 +339,7 @@ onMounted(() => {
 }
 
 .ad-item {
+
   border-radius: 12px;
   overflow: hidden;
   transform: scale(0.85);
