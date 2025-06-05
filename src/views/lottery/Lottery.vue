@@ -321,21 +321,153 @@ getMyCredits()
   width: 100%;
 }
 
-.el-button {
-  flex: 1;
-  min-width: 180px;
+/* 单抽按钮样式 */
+.action-buttons .el-button--primary {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border: none;
   padding: 15px 25px;
   font-size: 1.1rem;
-  border-radius: 8px;
-  transition: all 0.3s;
+  border-radius: 25px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.action-buttons .el-button--primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.action-buttons .el-button--primary:hover::before {
+  left: 100%;
+}
+
+.action-buttons .el-button--primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(102, 126, 234, 0.5);
+  background: linear-gradient(45deg, #5a67d8, #6b46c1);
+}
+
+/* 十连抽按钮样式 */
+.action-buttons .el-button--danger {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24, #fd79a8);
+  border: none;
+  padding: 15px 25px;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.action-buttons .el-button--danger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.action-buttons .el-button--danger:hover::before {
+  left: 100%;
+}
+
+.action-buttons .el-button--danger:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(255, 107, 107, 0.6);
+  background: linear-gradient(45deg, #ff5252, #d63031, #e84393);
+}
+
+/* 加载状态样式 */
+.action-buttons .el-button.is-loading {
+  background: linear-gradient(45deg, #a0a0a0, #888888);
+  box-shadow: 0 4px 12px rgba(160, 160, 160, 0.3);
+  transform: none;
+}
+
+/* 禁用状态样式 */
+.action-buttons .el-button.is-disabled {
+  background: linear-gradient(45deg, #c0c0c0, #a0a0a0);
+  box-shadow: 0 2px 8px rgba(192, 192, 192, 0.2);
+  transform: none;
+  opacity: 0.6;
 }
 
 .discount-tag {
   margin-left: 8px;
   font-size: 0.9em;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 3px 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons .el-button:hover {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .action-buttons .el-button--primary,
+  .action-buttons .el-button--danger {
+    width: 100%;
+    min-width: auto;
+    max-width: 300px;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+  }
+  100% {
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.action-buttons .el-button--primary:not(:hover):not(.is-loading):not(.is-disabled) {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse-danger {
+  0% {
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+  }
+  100% {
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+  }
+}
+
+.action-buttons .el-button--danger:not(:hover):not(.is-loading):not(.is-disabled) {
+  animation: pulse-danger 2s infinite;
 }
 
 @media (max-width: 768px) {
@@ -560,6 +692,6 @@ getMyCredits()
 .nav-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  background-color: rgba(165, 158, 158, 0.95);
+  background-color: rgba(244, 161, 161, 0.95);
 }
 </style>
