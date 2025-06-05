@@ -3,8 +3,8 @@ import { ref, computed } from 'vue'
 import { Present, Box, Notebook, Ticket, Coin } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { getCredits } from '../../api/user.ts'
 import { drawLottery } from '../../api/lottery'
-import { drawBlindBox } from '../../api/blindbox.ts'
 import { getProductById } from '../../api/product'
 import { PrizeType } from '../../utils/type.ts'
 
@@ -18,6 +18,7 @@ interface LotteryItem {
   status: 'AVAILABLE' | 'GENERATED' | 'USED'
   product?: {
     title: string
+    cover: string
     // 添加其他产品属性
   }
 }
@@ -30,22 +31,11 @@ const typeIconMap: Record<string, any> = {
   BLIND_BOX: Box
 }
 
-const statusTypeMap: Record<string, 'success' | 'warning' | 'info'> = {
-  AVAILABLE: 'success',
-  GENERATED: 'warning',
-  USED: 'info'
-}
-
-const statusTextMap: Record<string, string> = {
-  AVAILABLE: '未使用',
-  GENERATED: '已生成',
-  USED: '已使用'
-}
-
 // 抽奖相关数据
 const results = ref<LotteryItem[]>([])
 const drawLoading = ref(false)
 const dialogVisible = ref(false)
+const userCredit = ref('')
 
 // 处理抽奖操作
 const handleDraw = async (quantity: number) => {
@@ -95,52 +85,18 @@ const handleDraw = async (quantity: number) => {
   }
 }
 
-const handleBlindBoxDraw = async (quantity: number) => {
-  try {
-    drawLoading.value = true
-    const res = await drawBlindBox({ quantity })
-
+function getMyCredits() {
+  getCredits().then(res => {
     if (res.data.code === '200') {
-      ElMessage.success('抽奖成功！')
-      const items: LotteryItem[] = res.data.data
-
-      // 获取书籍详情
-      const enhancedItems = await Promise.all(
-          items.map(async (item: LotteryItem) => {
-            if (item.type === 'BOOK') {
-              try {
-                const productRes = await getProductById(item.itemId)
-                if (productRes.data.code === '200') {
-                  return { ...item, product: productRes.data.data }
-                }
-              } catch (error) {
-                console.error('获取书籍详情失败:', error)
-              }
-            }
-            return item
-          })
-      )
-
-      // 处理动画显示
-      if (quantity === 10) {
-        results.value = []
-        dialogVisible.value = true
-        for (let i = 0; i < enhancedItems.length; i++) {
-          await new Promise<void>(resolve => setTimeout(resolve, 200))
-          results.value.push(enhancedItems[i])
-        }
-      } else {
-        results.value = enhancedItems
-        dialogVisible.value = true
-      }
+      userCredit.value = res.data.data
+    } else {
+      ElMessage.error('获取积分失败')
     }
-
-  } catch (error: any) {
-    ElMessage.error(error.response?.data?.msg || '抽奖失败')
-  } finally {
-    drawLoading.value = false
-  }
-}
+  }).catch(error => {
+    console.error('获取积分失败:', error)
+    ElMessage.error('获取积分失败')
+  })
+} 
 
 // 类型处理函数
 const getTypeIcon = (type: string) => typeIconMap[type] || Box
@@ -166,10 +122,12 @@ const handleIconClick = () => {
   }
 }
 
-// 模拟抽奖函数
-const showComingSoon = () => {
-  ElMessage.info('功能开发中，敬请期待')
+// 跳转到我的奖品
+const goToMyPrize = () => {
+  router.push('/my_prizes')
 }
+
+getMyCredits()
 </script>
 
 <template>
@@ -207,42 +165,22 @@ const showComingSoon = () => {
           </div>
         </div>
       </el-card>
+    </div>
 
-<!--      &lt;!&ndash; 盲盒抽奖卡 &ndash;&gt;-->
-<!--      <el-card class="lottery-card">-->
-<!--        <div class="lottery-content">-->
-<!--          <h1>盲盒抽奖</h1>-->
-<!--          <div class="lottery-icon" @click="handleIconClick">-->
-<!--            <el-icon :size="100" color="#d53ce6">-->
-<!--              <Box />-->
-<!--            </el-icon>-->
-<!--          </div>-->
-<!--          <div class="action-buttons">-->
-<!--            <el-button-->
-<!--                type="primary"-->
-<!--                size="large"-->
-<!--                @click="handleBlindBoxDraw(1)"-->
-<!--                :loading="drawLoading"-->
-<!--                :disabled="drawLoading"-->
-<!--            >-->
-<!--              单抽 (100积分)-->
-<!--            </el-button>-->
-<!--            <el-button-->
-<!--                type="danger"-->
-<!--                size="large"-->
-<!--                @click="handleBlindBoxDraw(10)"-->
-<!--                :loading="drawLoading"-->
-<!--                :disabled="drawLoading"-->
-<!--            >-->
-<!--              十连抽 (900积分)-->
-<!--              <span class="discount-tag">九折</span>-->
-<!--            </el-button>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </el-card>-->
+    <!-- 悬浮导航按钮 -->
+    <div class="nav-buttons">
+      <el-button 
+        type="info" 
+        size="large" 
+        @click="goToMyPrize"
+        class="nav-button"
+      >
+        我的奖品
+      </el-button>
+    </div>
 
-      <!-- 抽奖结果对话框 -->
-      <el-dialog
+    <!-- 抽奖结果对话框 -->
+    <el-dialog
           v-model="dialogVisible"
           title="抽奖结果"
           width="60%"
@@ -308,7 +246,6 @@ const showComingSoon = () => {
         </template>
       </el-dialog>
     </div>
-  </div>
 
 
 </template>
@@ -335,7 +272,7 @@ const showComingSoon = () => {
   background-attachment: fixed;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 左右分布 */
+  justify-content: center; /* 改回居中对齐 */
 }
 
 .lottery-card {
@@ -598,5 +535,31 @@ const showComingSoon = () => {
   object-fit: contain;
   background: rgba(245, 247, 250, 0.8);
   padding: 15px;
+}
+
+.nav-buttons {
+  position: fixed;
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.nav-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 25px;
+  background-color: rgba(133,13,0);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border: none;
+  min-width: 120px;
+}
+
+.nav-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  background-color: rgba(165, 158, 158, 0.95);
 }
 </style>

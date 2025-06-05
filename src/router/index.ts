@@ -50,6 +50,10 @@ const routes = createRouter({
         component: () => import('../views/lottery/BlindBox.vue'),
         meta: { title : 'Blindbox' }
       }, {
+          path: '/my_prizes',
+          component: () => import('../views/lottery/MyPrizes.vue'),
+          meta: { title : 'My Prizes' }
+      }, {
             path: '/cart',
             component: () => import('../views/order/Cart.vue'),
             meta: { title : 'Cart' }

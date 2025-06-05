@@ -91,7 +91,7 @@ export const updateInfo = (userinfo : UpdateInfo) => {
  * @returns getRes
  */
 export const getCredits = () => {
-    return axios.get(`${API_CREDITS_MODULE_PREFIX}/credits`)
+    return axios.get(`${API_CREDITS_MODULE_PREFIX}`)
     .then(res => {
         return res
     })
