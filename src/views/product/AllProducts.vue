@@ -424,8 +424,8 @@ const fetchProducts = async () => {
 
 /* 右侧内容全部居中 */
 .product-title {
-  margin: 0 0 15px;
-  font-size: 18px;
+  margin: 20px 0 15px;
+  font-size: 25px;
   color: #303133;
   overflow: hidden;
   text-overflow: ellipsis;

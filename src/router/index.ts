@@ -53,7 +53,11 @@ const routes = createRouter({
             path: '/cart',
             component: () => import('../views/order/Cart.vue'),
             meta: { title : 'Cart' }
-        }
+      }, {
+            path: '/blindboxpool',
+            component: () => import('../views/lottery/BlindBoxPool.vue'),
+            meta: { title : 'BlindBoxPool' }
+      }
       ]
   },
   {

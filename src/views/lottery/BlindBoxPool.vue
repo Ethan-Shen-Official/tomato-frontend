@@ -11,7 +11,7 @@
                   返回首页
                 </el-button>
               </router-link>
-              <h1 class="pool-title">我的奖池（{{ filteredPoolData.length }}种奖品）</h1>
+              <h1 class="pool-title">我的盲盒（{{ blindBoxTypesCount }}种）</h1>
             </div>
 
             <!-- 奖品列表 -->
@@ -19,14 +19,14 @@
               <div v-for="item in filteredPoolData" :key="item.id" class="pool-item">
                 <!-- 类型图标 -->
                 <div class="icon-section">
-                  <el-icon :class="getIconClass(item.type)" size="28">
-                    <component :is="getTypeIcon(item.type)" />
+                  <el-icon class="blind_box-icon" size="28">
+                    <Box />
                   </el-icon>
                 </div>
 
                 <!-- 类型名称 -->
                 <div class="type-section">
-                  <h3 class="item-title">{{ getTypeName(item.type) }}</h3>
+                  <h3 class="item-title">盲盒</h3>
                 </div>
 
                 <!-- ID/数值 -->
@@ -62,8 +62,8 @@
 
             <!-- 空奖池提示 -->
             <el-empty
-                v-if="!loading && filteredPoolData.length === 0"
-                description="当前奖池还没有奖品哦～"
+                v-if="!loading && blindBoxTypesCount === 0"
+                description="当前盲盒奖池还没有奖品哦～"
             />
           </div>
         </el-card>
@@ -74,89 +74,46 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import {
-  Notebook,
-  Ticket,
-  Coin,
-  Delete
-} from '@element-plus/icons-vue'
+import { Box, Delete } from '@element-plus/icons-vue'
 import { getLotteryPool, deleteItem, updateQuantity } from '../../api/lottery'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { PrizeType } from '../../utils/type'
 
-// 定义奖池项目的类型
 interface PoolItem {
   id: string
   type: PrizeType
   itemId: string | number
   quantity: number
-  updating?: boolean
 }
 
 const loading = ref(true)
 const poolData = ref<PoolItem[]>([])
 
-// 过滤掉盲盒类型的奖品
+// 计算属性：只返回盲盒类型的奖品
 const filteredPoolData = computed(() => {
-  return poolData.value.filter(item => item.type !== 'BLIND_BOX')
+  return poolData.value.filter(item => item.type === 'BLIND_BOX')
 })
 
-// 初始化加载数据
+// 计算属性：统计不同盲盒类型的数量（基于itemId）
+const blindBoxTypesCount = computed(() => {
+  const blindBoxItems = poolData.value.filter(item => item.type === 'BLIND_BOX')
+  const uniqueIds = new Set(blindBoxItems.map(item => item.itemId))
+  return uniqueIds.size
+})
+
 const fetchData = async () => {
   try {
     const res = await getLotteryPool()
     if (res.data.code === "200") {
-      // 添加排序逻辑（移除BLIND_BOX的排序）
-      poolData.value = res.data.data.sort((a: PoolItem, b: PoolItem) => {
-        return typeOrder[a.type] - typeOrder[b.type]
-      })
+      poolData.value = res.data.data
     }
   } finally {
     loading.value = false
   }
 }
 
-// 定义排序优先级（移除BLIND_BOX）
-const typeOrder: Record<PrizeType, number> = {
-  BOOK: 1,
-  COUPON: 2,
-  CREDIT: 3
-}
-
-// 图标颜色样式（移除BLIND_BOX）
-const getIconClass = (type: PrizeType): string => {
-  const classes: Record<PrizeType, string> = {
-    BOOK: 'book-icon',
-    COUPON: 'coupon-icon',
-    CREDIT: 'credit-icon'
-  }
-  return classes[type] || ''
-}
-
-// 奖品类型图标映射（移除BLIND_BOX）
-const getTypeIcon = (type: PrizeType) => {
-  const icons = {
-    BOOK: Notebook,
-    COUPON: Ticket,
-    CREDIT: Coin
-  }
-  return icons[type] || Notebook
-}
-
-// 类型名称映射（移除BLIND_BOX）
-const getTypeName = (type: PrizeType): string => {
-  const names: Record<PrizeType, string> = {
-    BOOK: '书籍',
-    COUPON: '折扣券',
-    CREDIT: '积分'
-  }
-  return names[type] || '未知奖品'
-}
-
-// 新增状态
 const updatingIds = ref<Set<string>>(new Set())
 
-// 优化后的处理函数
 const handleQuantityChange = async (item: PoolItem) => {
   try {
     updatingIds.value.add(item.id)
@@ -175,34 +132,29 @@ const handleQuantityChange = async (item: PoolItem) => {
 
     ElMessage.success('数量更新成功')
   } catch (error: any) {
-    item.quantity = item.quantity // 恢复原值
+    item.quantity = item.quantity
     ElMessage.error(error.response?.data?.msg || '更新失败')
   } finally {
     updatingIds.value.delete(item.id)
   }
 }
 
-// 添加带确认的删除逻辑
 const handleDelete = async (id: string) => {
   try {
-    // 确认对话框
-    await ElMessageBox.confirm('确定要删除该奖品吗？', '删除确认', {
+    await ElMessageBox.confirm('确定要删除该盲盒吗？', '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
 
-    // 调用删除接口
     const res = await deleteItem(id)
     if (res.data.code === '200') {
-      // 前端过滤已删除项
       poolData.value = poolData.value.filter(item => item.id !== id)
       ElMessage.success('删除成功')
     } else {
       ElMessage.error(res.data.msg || '删除失败')
     }
   } catch (error: any) {
-    // 错误处理（排除用户取消的情况）
     if (error !== 'cancel') {
       ElMessage.error(error.response?.data?.msg || '删除操作失败')
     }
@@ -213,7 +165,7 @@ fetchData()
 </script>
 
 <style scoped>
-/* 原有样式保持不变，移除blind_box-icon相关样式 */
+/* 原有样式保持不变 */
 .page-bg {
   width: 100%;
   height: 100%;
@@ -301,17 +253,8 @@ fetchData()
   justify-content: center;
 }
 
-/* 图标颜色 */
-.book-icon {
-  color: #409eff;
-}
-
-.coupon-icon {
-  color: #f56c6c;
-}
-
-.credit-icon {
-  color: #e6a23c;
+.blind_box-icon {
+  color: #d53ce6;
 }
 
 .item-title {

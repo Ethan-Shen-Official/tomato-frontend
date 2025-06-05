@@ -18,7 +18,7 @@ const buyLoading = ref(false)
 // 图标点击处理
 const handleIconClick = () => {
   if (isAdmin.value) {
-    router.push('/pool')
+    router.push('/blindboxpool')
   }
 }
 
