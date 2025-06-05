@@ -121,7 +121,7 @@ onMounted (() => {
 
 <style scoped>
 .custom-header {
-  background-color: rgba(255, 235, 205, 0.85);
+  background-color:#F2F3F4;
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: fixed;
@@ -155,7 +155,7 @@ onMounted (() => {
 }
 
 .header-text {
-  color: rgb(231, 139, 59);
+  color: #F53636;
   font-size: 3rem;
   font-weight: 600;
   margin: 0;
