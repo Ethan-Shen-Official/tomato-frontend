@@ -143,7 +143,7 @@
 import { ref, onMounted,computed } from 'vue'
 import { getProducts } from '../../api/product.ts'
 import { Picture } from '@element-plus/icons-vue'
-import {routes} from '../../router'
+import routes from '../../router'
 import { Delete } from '@element-plus/icons-vue'
 import { deleteProduct } from '../../api/product.ts'
 

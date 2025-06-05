@@ -4,7 +4,7 @@
 </template>
 
 <script setup lang="ts">
-import { routes } from '../../router';
+import routes from '../../router';
 import { callPayment } from '../../api/order';
 import { onMounted,ref } from 'vue';
 

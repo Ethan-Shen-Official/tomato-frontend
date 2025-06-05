@@ -94,7 +94,7 @@ import {uploadimg} from "../../api/tool.ts";
 
 // 新增导入
 import { Delete } from '@element-plus/icons-vue'
-import {routes} from "../../router";
+import routes from "../../router";
 
 // 在原有响应式变量后添加
 const specifications = ref<Array<{ item: string; value: string }>>([])

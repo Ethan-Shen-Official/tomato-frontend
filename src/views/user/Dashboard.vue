@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { getUserInfo, updateInfo } from '../../api/user.ts';
 import { ElMessage } from 'element-plus';
-import { routes } from '../../router';
+import routes from '../../router';
 import { parseRole } from '../../utils';
 import {addNewItem} from "../../api/lottery.ts";
 import { PrizeType } from '../../utils/type.ts';

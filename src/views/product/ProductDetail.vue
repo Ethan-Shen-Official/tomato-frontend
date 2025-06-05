@@ -370,7 +370,7 @@ import { useRoute } from 'vue-router'
 import { getProductById,updateStockpile,getStockpile } from '../../api/product.ts'
 import { addToCart } from '../../api/cart.ts'
 import { ElMessage } from 'element-plus'
-import {routes} from '../../router'
+import routes from '../../router'
 const route = useRoute()
 const loading = ref(true)
 const product = ref<any>(null)

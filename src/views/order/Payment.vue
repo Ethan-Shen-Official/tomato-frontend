@@ -84,7 +84,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 //import { ElMessage, ElMessageBox } from 'element-plus'
-import { routes } from '../../router'
+import routes from '../../router'
 import { addOrder } from '../../api/order'
 
 interface SelectedItem {

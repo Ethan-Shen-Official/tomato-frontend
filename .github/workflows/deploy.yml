@@ -2,9 +2,9 @@ name: Depoly Front
 
 on:
   push:
-    branches: [master,shen]
+    branches: [master]
   pull_request:
-    branches: master
+    branches: [master]
 
 jobs:
   build-and-deploy:

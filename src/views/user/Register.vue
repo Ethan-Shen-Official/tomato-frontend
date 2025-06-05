@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref,computed} from "vue";
 import {newUser} from "../../api/user.ts";
-import {routes} from '../../router'
+import routes from '../../router'
 
 const username = ref('')
 const name = ref('')

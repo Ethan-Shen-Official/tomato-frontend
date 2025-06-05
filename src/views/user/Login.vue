@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ElForm, ElFormItem} from "element-plus"
 import {ref, computed} from 'vue'
-import {routes} from '../../router'
+import routes from '../../router'
 import {handlelogin, getUserInfo} from "../../api/user.ts"
 
 const username = ref('')

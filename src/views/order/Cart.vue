@@ -97,7 +97,7 @@ import { ElMessage } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import { getCartItems,deleteFromCart,updateCartItem } from '../../api/cart'
 import { getStockpile } from "../../api/product";
-import {routes} from '../../router'
+import routes from '../../router'
 
 
 

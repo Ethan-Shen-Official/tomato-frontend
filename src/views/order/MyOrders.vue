@@ -145,7 +145,7 @@ import { ElMessage } from 'element-plus'
 import { getAllOrders } from '../../api/order';
 import { traslateOrderStatus } from '../../utils';
 import { Refresh } from '@element-plus/icons-vue'
-import { routes } from '../../router'
+import routes from '../../router'
 import { getUserCoupons, useCoupon } from '../../api/discount.ts'
 import dayjs from 'dayjs'
 
