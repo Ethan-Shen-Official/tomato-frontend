@@ -82,12 +82,11 @@ import {
 } from '@element-plus/icons-vue'
 import { getLotteryPool, deleteItem, updateQuantity } from '../../api/lottery'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { PrizeType } from '../../utils/type'
 
 // 定义奖池项目的类型
 interface PoolItem {
   id: string
-  type: PrizeType
+  type: string
   itemId: string | number
   quantity: number
   updating?: boolean
@@ -106,9 +105,11 @@ const fetchData = async () => {
   try {
     const res = await getLotteryPool()
     if (res.data.code === "200") {
-      // 添加排序逻辑（移除BLIND_BOX的排序）
+      // 添加排序逻辑
       poolData.value = res.data.data.sort((a: PoolItem, b: PoolItem) => {
-        return typeOrder[a.type] - typeOrder[b.type]
+        const aOrder = getTypeOrder(a.type)
+        const bOrder = getTypeOrder(b.type)
+        return aOrder - bOrder
       })
     }
   } finally {
@@ -116,16 +117,20 @@ const fetchData = async () => {
   }
 }
 
-// 定义排序优先级（移除BLIND_BOX）
-const typeOrder: Record<PrizeType, number> = {
-  BOOK: 1,
-  COUPON: 2,
-  CREDIT: 3
+// 获取类型排序优先级
+const getTypeOrder = (type: string): number => {
+  const order: { [key: string]: number } = {
+    BOOK: 1,
+    COUPON: 2,
+    CREDIT: 3,
+    BLIND_BOX: 999
+  }
+  return order[type] || 999
 }
 
-// 图标颜色样式（移除BLIND_BOX）
-const getIconClass = (type: PrizeType): string => {
-  const classes: Record<PrizeType, string> = {
+// 图标颜色样式
+const getIconClass = (type: string): string => {
+  const classes: { [key: string]: string } = {
     BOOK: 'book-icon',
     COUPON: 'coupon-icon',
     CREDIT: 'credit-icon'
@@ -133,9 +138,9 @@ const getIconClass = (type: PrizeType): string => {
   return classes[type] || ''
 }
 
-// 奖品类型图标映射（移除BLIND_BOX）
-const getTypeIcon = (type: PrizeType) => {
-  const icons = {
+// 奖品类型图标映射
+const getTypeIcon = (type: string) => {
+  const icons: { [key: string]: any } = {
     BOOK: Notebook,
     COUPON: Ticket,
     CREDIT: Coin
@@ -143,9 +148,9 @@ const getTypeIcon = (type: PrizeType) => {
   return icons[type] || Notebook
 }
 
-// 类型名称映射（移除BLIND_BOX）
-const getTypeName = (type: PrizeType): string => {
-  const names: Record<PrizeType, string> = {
+// 类型名称映射
+const getTypeName = (type: string): string => {
+  const names: { [key: string]: string } = {
     BOOK: '书籍',
     COUPON: '折扣券',
     CREDIT: '积分'
@@ -158,9 +163,9 @@ const updatingIds = ref<Set<string>>(new Set())
 
 // 优化后的处理函数
 const handleQuantityChange = async (item: PoolItem) => {
+  const oldValue = item.quantity
   try {
     updatingIds.value.add(item.id)
-    const oldValue = item.quantity
 
     const res = await updateQuantity({
       id: item.id,
@@ -175,7 +180,7 @@ const handleQuantityChange = async (item: PoolItem) => {
 
     ElMessage.success('数量更新成功')
   } catch (error: any) {
-    item.quantity = item.quantity // 恢复原值
+    item.quantity = oldValue // 恢复原值
     ElMessage.error(error.response?.data?.msg || '更新失败')
   } finally {
     updatingIds.value.delete(item.id)
@@ -213,7 +218,6 @@ fetchData()
 </script>
 
 <style scoped>
-/* 原有样式保持不变，移除blind_box-icon相关样式 */
 .page-bg {
   width: 100%;
   height: 100%;
@@ -275,11 +279,13 @@ fetchData()
 
 .icon-section {
   width: 150px;
+  display: flex;
   justify-content: center;
 }
 
 .type-section {
   width: 150px;
+  display: flex;
   justify-content: center;
 }
 
@@ -287,6 +293,7 @@ fetchData()
   flex: 1;
   color: #666;
   width: 150px;
+  display: flex;
   justify-content: center;
 }
 
