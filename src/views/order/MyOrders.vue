@@ -342,7 +342,6 @@ const applyCoupon = async (couponId: string) => {
   background-color: #f5f7fa;
 }
 
-
 .orders-container {
   max-width: 1200px;
   margin: 120px auto;
@@ -357,9 +356,10 @@ const applyCoupon = async (couponId: string) => {
 }
 
 .orders-header h1 {
-  margin: 0 0 20px 0; /* 合理的边距 */
-  font-size: 28px;
+  margin: 0 0 20px 0;
+  font-size: 32px; 
   color: #333;
+  font-weight: 700;
 }
 
 .filters {
@@ -367,8 +367,21 @@ const applyCoupon = async (couponId: string) => {
   gap: 15px;
 }
 
+.filters :deep(.el-select) {
+  width: 140px;
+}
+
+.filters :deep(.el-input__inner) {
+  font-size: 15px; 
+  padding: 10px 12px;
+}
+
+.filters :deep(.el-date-editor) {
+  font-size: 15px;
+}
+
 .orders-card {
-  margin-bottom: 30px; /* 使用固定像素值 */
+  margin-bottom: 30px;
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.9);
 }
@@ -377,17 +390,121 @@ const applyCoupon = async (couponId: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 18px; 
+  font-weight: 600;
+}
+
+.orders-card :deep(.el-table) {
+  font-size: 15px; 
+}
+
+.orders-card :deep(.el-table th) {
+  font-size: 16px; 
+  font-weight: 600;
+  padding: 14px 0; 
+}
+
+.orders-card :deep(.el-table td) {
+  padding: 16px 0; 
+  font-size: 15px; 
+}
+
+.orders-card :deep(.el-table td:first-child) {
+  font-weight: 500;
+  font-family: 'Monaco', 'Menlo', monospace;
 }
 
 .amount {
-  font-weight: bold;
+  font-weight: 700; /* 从bold改为更粗的700 */
   color: #ff6600;
+  font-size: 16px; /* 金额字体更大 */
+}
+
+.orders-card :deep(.el-tag) {
+  font-size: 14px; /* 增加标签字体 */
+  font-weight: 500; /* 标签字体加粗 */
+  padding: 6px 12px; /* 增加标签内边距 */
+  font-weight: 500;
+}
+
+/* 按钮放大 */
+.orders-card :deep(.el-button) {
+  font-size: 15px; /* 增加按钮字体 */
+  padding: 8px 16px; /* 增加按钮内边距 */
+  font-weight: 500;
+}
+
+.orders-card :deep(.el-button--text) {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.card-header :deep(.el-button--primary) {
+  font-size: 16px;
+  padding: 10px;
+}
+
+/* 优惠券对话框表格放大 */
+.orders-card :deep(.el-dialog) {
+  font-size: 15px;
+}
+
+.orders-card :deep(.el-dialog__title) {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.orders-card :deep(.el-dialog .el-table) {
+  font-size: 15px;
+}
+
+.orders-card :deep(.el-dialog .el-table th) {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 0;
+}
+
+.orders-card :deep(.el-dialog .el-table td) {
+  padding: 16px 0;
+  font-size: 15px;
+}
+
+.orders-card :deep(.el-dialog .el-button) {
+  font-size: 14px;
+  padding: 8px 16px;
+  font-weight: 500;
 }
 
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: center;
+}
+
+.pagination-container :deep(.el-pagination) {
+  font-size: 15px; /* 增加分页字体 */
+}
+
+.pagination-container :deep(.el-pager li) {
+  font-size: 15px;
+  font-weight: 500;
+  min-width: 36px; /* 增加页码按钮大小 */
+  height: 36px;
+  line-height: 36px;
+}
+
+.pagination-container :deep(.btn-prev),
+.pagination-container :deep(.btn-next) {
+  font-size: 15px;
+  min-width: 36px;
+  height: 36px;
+}
+
+.orders-card :deep(.el-table__empty-text) {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
 }
 
 @media (max-width: 800px) {
@@ -397,9 +514,27 @@ const applyCoupon = async (couponId: string) => {
     gap: 15px;
   }
   
+  .orders-header h1 {
+    font-size: 28px; /* 移动端稍小但仍然比原来大 */
+  }
+  
   .filters {
     width: 100%;
     flex-direction: column;
+  }
+  
+  /* 移动端表格字体调整 */
+  .orders-card :deep(.el-table) {
+    font-size: 14px;
+  }
+  
+  .orders-card :deep(.el-table th) {
+    font-size: 15px;
+    padding: 12px 0;
+  }
+  
+  .orders-card :deep(.el-table td) {
+    padding: 14px 0;
   }
 }
 
@@ -418,5 +553,4 @@ const applyCoupon = async (couponId: string) => {
   overflow-y: auto;
   padding-bottom: 20px;
 }
-
 </style>

@@ -8,8 +8,8 @@
         </router-link>
       </div>
 
-      <!-- 右侧菜单 -->
-      <div class="header-right">
+      <!-- 中间导航区域 -->
+      <div class="header-center">
         <!-- 盲盒图标 -->
         <router-link to="/blindbox" class="header-icon-link" v-if="username">
           <div class="icon-container">
@@ -25,7 +25,10 @@
           </div>
           <span class="icon-text">抽奖</span>
         </router-link>
+      </div>
 
+      <!-- 右侧菜单 -->
+      <div class="header-right">
         <!-- 订单图标 -->
         <router-link to="/order" class="header-icon-link" v-if="role === 'user'">
           <div class="icon-container">
@@ -72,7 +75,7 @@ import { getUserInfo } from '../api/user'
 import { ShoppingCart, User, SwitchButton, Tickets, Present, Box } from '@element-plus/icons-vue'
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
-//import { routes } from '../router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 用户信息
 const avatar_url = ref('')
@@ -83,13 +86,36 @@ const role = sessionStorage.getItem('role')
 const cartCount = ref(0)
 
 // 处理登出
-const handleLogout = () => {
-  // 清除token
-  sessionStorage.removeItem('token')
-  sessionStorage.removeItem('username')
-  sessionStorage.removeItem('role')
-  //刷新页面
-  window.location.reload()
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要退出登录吗？',
+      '退出确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        center: true,
+        customClass: 'logout-confirm-dialog'
+      }
+    )
+    
+    // 用户确认后执行退出操作
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('username')
+    sessionStorage.removeItem('role')
+    
+    ElMessage.success('已成功退出登录')
+    
+    // 延迟刷新页面，让用户看到成功提示
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
+    
+  } catch (error) {
+    // 用户取消退出，不做任何操作
+    // ElMessageBox.confirm 在用户取消时会抛出 'cancel' 错误
+  }
 }
 
 // 在组件挂载后获取用户信息
@@ -116,7 +142,6 @@ onMounted (() => {
     })
   }
 })
-
 </script>
 
 <style scoped>
@@ -130,7 +155,7 @@ onMounted (() => {
   right: 0;
   z-index: 1000;
   padding: 0;
-  width: 100%; /* 提示浏览器该属性会变化 */
+  width: 100%;
 }
 
 .header-container {
@@ -146,12 +171,23 @@ onMounted (() => {
 .header-left {
   display: flex;
   align-items: center;
+  flex: 1;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex: 1;
+  justify-content: center;
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .header-text {
@@ -220,17 +256,40 @@ onMounted (() => {
   right: 8px;
 }
 
+/* 退出确认对话框按钮间距样式 */
+:deep(.logout-confirm-dialog .el-message-box__btns) {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 0 20px;
+}
+
+:deep(.logout-confirm-dialog .el-button) {
+  min-width: 80px;
+  padding: 10px 20px;
+}
+
 @media (max-width: 768px) {
   .header-container {
     padding: 0 10px;
   }
   
-  .icon-text, .user-name {
-    display: none;
+  .header-center {
+    gap: 15px;
   }
   
   .header-right {
     gap: 10px;
+  }
+  
+  .icon-text {
+    display: none;
+  }
+  
+  /* 移动端对话框按钮调整 */
+  :deep(.logout-confirm-dialog .el-message-box__btns) {
+    gap: 20px;
+    padding: 0 10px;
   }
 }
 </style>

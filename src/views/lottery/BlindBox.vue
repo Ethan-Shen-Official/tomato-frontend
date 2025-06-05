@@ -36,13 +36,13 @@ const handleBuy = async () => {
     const res = await drawBlindBox({ quantity: quantity.value })
 
     if (res.data.code === '200') {
-      ElMessage.success(`成功购买 ${quantity.value} 个盲盒！`)
+      ElMessage.success(`成功兑换 ${quantity.value} 个盲盒！`)
       buyDialogVisible.value = false
       // 购买成功后刷新积分
       getMyCredits()
     }
   } catch (error: any) {
-    ElMessage.error(error.response?.data?.msg || '购买失败')
+    ElMessage.error(error.response?.data?.msg || '兑换失败')
   } finally {
     buyLoading.value = false
   }
@@ -103,7 +103,7 @@ getMyCredits()
                 @click="openBuyDialog"
                 :disabled="parseInt(userCredit) < 500"
             >
-              购买盲盒 (500积分)
+              兑换盲盒 (500积分)
             </el-button>
           </div>
           
@@ -112,7 +112,7 @@ getMyCredits()
             <el-icon class="warning-icon" :size="16">
               <Warning />
             </el-icon>
-            <span class="warning-text">积分不足，无法购买盲盒</span>
+            <span class="warning-text">积分不足，无法兑换盲盒</span>
           </div>
         </div>
       </el-card>
@@ -141,7 +141,7 @@ getMyCredits()
     >
       <div class="buy-dialog-content">
         <div class="dialog-row">
-          <span class="label">购买数量：</span>
+          <span class="label">兑换数量：</span>
           <el-input-number
               v-model="quantity"
               :min="1"
@@ -153,12 +153,12 @@ getMyCredits()
 
         <div class="dialog-row">
           <span class="label">单价：</span>
-          <span class="value">100 积分</span>
+          <span class="value">500 积分</span>
         </div>
 
         <div class="dialog-row">
           <span class="label">总价：</span>
-          <span class="value total-price">{{ quantity * 100 }} 积分</span>
+          <span class="value total-price">{{ quantity * 500 }} 积分</span>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ getMyCredits()
               :loading="buyLoading"
               class="confirm-button"
           >
-            确认购买
+            确认兑换
           </el-button>
         </div>
       </template>
