@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Present, Box, Notebook, Ticket, Coin } from '@element-plus/icons-vue'
+import { Present, Box, Notebook, Ticket, Coin, Warning } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { getCredits } from '../../api/user.ts'
@@ -137,8 +137,20 @@ getMyCredits()
       <el-card class="lottery-card">
         <div class="lottery-content">
           <h1>普通抽奖</h1>
+          
+          <!-- 积分显示区域 -->
+          <div class="credit-display">
+            <div class="credit-info">
+              <el-icon class="credit-icon" :size="24">
+                <Coin />
+              </el-icon>
+              <span class="credit-text">剩余积分：</span>
+              <span class="credit-amount">{{ userCredit }}</span>
+            </div>
+          </div>
+          
           <div class="lottery-icon" @click="handleIconClick">
-            <el-icon :size="100" color="#ff6b6b">
+            <el-icon :size="80" color="#ff6b6b">
               <Present />
             </el-icon>
           </div>
@@ -148,7 +160,7 @@ getMyCredits()
                 size="large"
                 @click="handleDraw(1)"
                 :loading="drawLoading"
-                :disabled="drawLoading"
+                :disabled="drawLoading || parseInt(userCredit) < 60"
             >
               单抽 (60积分)
             </el-button>
@@ -157,26 +169,34 @@ getMyCredits()
                 size="large"
                 @click="handleDraw(10)"
                 :loading="drawLoading"
-                :disabled="drawLoading"
+                :disabled="drawLoading || parseInt(userCredit) < 600"
             >
               十连抽 (600积分)
               <span class="discount-tag">九折</span>
             </el-button>
           </div>
+          
+          <!-- 积分不足提示 -->
+          <div v-if="parseInt(userCredit) < 60" class="insufficient-credit">
+            <el-icon class="warning-icon" :size="16">
+              <Warning />
+            </el-icon>
+            <span class="warning-text">积分不足，无法进行抽奖</span>
+          </div>
         </div>
       </el-card>
-    </div>
 
-    <!-- 悬浮导航按钮 -->
-    <div class="nav-buttons">
-      <el-button 
-        type="info" 
-        size="large" 
-        @click="goToMyPrize"
-        class="nav-button"
-      >
-        我的奖品
-      </el-button>
+      <!-- 我的奖品按钮 -->
+      <div class="nav-buttons">
+        <el-button 
+          type="info" 
+          size="large" 
+          @click="goToMyPrize"
+          class="nav-button"
+        >
+          我的奖品
+        </el-button>
+      </div>
     </div>
 
     <!-- 抽奖结果对话框 -->
@@ -271,427 +291,251 @@ getMyCredits()
   background-repeat: no-repeat;
   background-attachment: fixed;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center; /* 改回居中对齐 */
+  justify-content: center;
+  gap: 40px;
 }
 
 .lottery-card {
-  width: 550px;
+  width: 750px;
   max-width: 90%;
-  padding: 30px;
-  background-color: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  border-radius: 12px;
-  margin-left: auto;
-  margin-right: auto;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  padding: 0;
 }
 
 .lottery-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
+  gap: 35px;
+  padding: 40px 35px;
 }
 
 .lottery-content h1 {
   color: #333;
-  font-size: 2.2rem;
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  margin: 0;
+  font-weight: 600;
 }
 
 .lottery-icon {
-  position: relative;
   cursor: pointer;
-  margin-bottom: 60px;
+  transition: all 0.3s ease;
   animation: float 3s ease-in-out infinite;
-  transition: all 0.3s;
 }
 
 .lottery-icon:hover {
-  animation-play-state: paused;
-  transform: scale(1.05) translateY(-10px);
-  filter: drop-shadow(0 10px 20px rgba(255,107,107,0.6));
+  transform: scale(1.1);
+  filter: drop-shadow(0 10px 20px rgba(255,107,107,0.4));
+}
+
+/* 简化的积分显示样式 */
+.credit-display {
+  width: 66%;
+  margin-bottom: 15px;
+}
+
+.credit-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+  padding: 16px 25px;
+  border-radius: 15px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.credit-icon {
+  color: #ffc107;
+}
+
+.credit-text {
+  font-size: 1.2rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+.credit-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #484848;
+  background: rgb(255, 255, 255);
+  padding: 6px 16px;
+  border-radius: 10px;
+  border: 1px solid #d1e7dd;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* 简化的积分不足提示 */
+.insufficient-credit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #f8d7da;
+  color: #721c24;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 20px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: 1px solid #f5c6cb;
+}
+
+.warning-icon {
+  color: #dc3545;
+}
+
+.warning-text {
+  font-weight: 500;
 }
 
 .action-buttons {
   display: flex;
-  flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
   width: 100%;
 }
 
-/* 单抽按钮样式 */
+/* 按钮样式保持之前的设计但稍微调大 */
+.action-buttons .el-button--primary,
+.action-buttons .el-button--danger {
+  padding: 16px 28px;
+  font-size: 1.2rem;
+  border-radius: 25px;
+  font-weight: 600;
+  min-width: 190px;
+  transition: all 0.3s ease;
+}
+
+/* 我的奖品按钮样式 */
+.nav-buttons {
+  margin-top: 25px;
+}
+
+.nav-button {
+  padding: 16px 35px;
+  font-size: 1.2rem;
+  border-radius: 25px;
+  background: linear-gradient(45deg, #6c757d, #495057);
+  color: white;
+  border: none;
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+  background: linear-gradient(45deg, #ed994f, #b03d03);
+}
+
+/* 保持原有的按钮渐变效果 */
 .action-buttons .el-button--primary {
   background: linear-gradient(45deg, #667eea, #764ba2);
   border: none;
-  padding: 15px 25px;
-  font-size: 1.1rem;
-  border-radius: 25px;
   color: white;
-  font-weight: 600;
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  min-width: 180px;
-}
-
-.action-buttons .el-button--primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
-}
-
-.action-buttons .el-button--primary:hover::before {
-  left: 100%;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
 .action-buttons .el-button--primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(102, 126, 234, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
   background: linear-gradient(45deg, #5a67d8, #6b46c1);
 }
 
-/* 十连抽按钮样式 */
 .action-buttons .el-button--danger {
-  background: linear-gradient(45deg, #ff6b6b, #ee5a24, #fd79a8);
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
   border: none;
-  padding: 15px 25px;
-  font-size: 1.1rem;
-  border-radius: 25px;
   color: white;
-  font-weight: 600;
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  min-width: 180px;
-}
-
-.action-buttons .el-button--danger::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
-}
-
-.action-buttons .el-button--danger:hover::before {
-  left: 100%;
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
 }
 
 .action-buttons .el-button--danger:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(255, 107, 107, 0.6);
-  background: linear-gradient(45deg, #ff5252, #d63031, #e84393);
-}
-
-/* 加载状态样式 */
-.action-buttons .el-button.is-loading {
-  background: linear-gradient(45deg, #a0a0a0, #888888);
-  box-shadow: 0 4px 12px rgba(160, 160, 160, 0.3);
-  transform: none;
-}
-
-/* 禁用状态样式 */
-.action-buttons .el-button.is-disabled {
-  background: linear-gradient(45deg, #c0c0c0, #a0a0a0);
-  box-shadow: 0 2px 8px rgba(192, 192, 192, 0.2);
-  transform: none;
-  opacity: 0.6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(45deg, #ff5252, #d63031);
 }
 
 .discount-tag {
   margin-left: 8px;
-  font-size: 0.9em;
+  font-size: 0.85em;
   background: rgba(255, 255, 255, 0.3);
   padding: 3px 8px;
-  border-radius: 12px;
-  backdrop-filter: blur(5px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 }
 
-.action-buttons .el-button:hover {
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+/* 禁用状态 */
+.action-buttons .el-button.is-disabled {
+  background: linear-gradient(45deg, #bdc3c7, #95a5a6) !important;
+  box-shadow: 0 3px 8px rgba(189, 195, 199, 0.2) !important;
+  transform: none !important;
+  opacity: 0.6 !important;
 }
 
+/* 浮动动画简化 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* 移动端适配 */
 @media (max-width: 768px) {
+  .lottery-card {
+    width: 95%;
+    margin: 0 auto;
+  }
+  
+  .lottery-content {
+    padding: 30px 25px;
+    gap: 25px;
+  }
+  
+  .lottery-content h1 {
+    font-size: 2.2rem;
+  }
+  
   .action-buttons {
     flex-direction: column;
     align-items: center;
+    gap: 15px;
   }
   
   .action-buttons .el-button--primary,
   .action-buttons .el-button--danger {
     width: 100%;
     min-width: auto;
-    max-width: 300px;
+    max-width: 320px;
   }
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  
+  .credit-info {
+    padding: 14px 20px;
   }
-  50% {
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+  
+  .credit-text {
+    font-size: 1.1rem;
   }
-  100% {
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  
+  .credit-amount {
+    font-size: 1.3rem;
+    padding: 5px 14px;
   }
-}
-
-.action-buttons .el-button--primary:not(:hover):not(.is-loading):not(.is-disabled) {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse-danger {
-  0% {
-    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
-  }
-  50% {
-    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
-  }
-  100% {
-    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
-  }
-}
-
-.action-buttons .el-button--danger:not(:hover):not(.is-loading):not(.is-disabled) {
-  animation: pulse-danger 2s infinite;
-}
-
-@media (max-width: 768px) {
-  .lottery-card {
-    padding: 20px;
-  }
-
-  .lottery-content h1 {
-    font-size: 1.8rem;
-  }
-
-  .el-button {
-    width: 100%;
-    min-width: auto;
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-    filter: drop-shadow(0 5px 15px rgba(255,107,107,0.3));
-  }
-  50% {
-    transform: translateY(-20px);
-    filter: drop-shadow(0 15px 25px rgba(255,107,107,0.5));
-  }
-}
-
-@keyframes sparkle {
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-.result-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.result-item {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-
-.icon-section {
-  margin-right: 15px;
-}
-
-.book-cover {
-  width: 60px;
-  height: 80px;
-  object-fit: cover;
-  margin-right: 15px;
-  border-radius: 4px;
-}
-
-.book-info {
-  flex: 1;
-  margin-left: -50px;
-}
-
-.book-info h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
-
-.common-info {
-  flex: 1;
-}
-
-.blind-box--info {
-  flex: 1;
-  min-height: 80px;
-  display: flex;
-  align-items: center;
-}
-
-.blind_context {
-  margin-left: 150px;
-  font-size: 16px;
-}
-
-.common-info h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
-
-.status-section {
-  margin-left: auto;
-}
-
-/* 图标颜色 */
-.book-icon { color: #409eff; }
-.coupon-icon { color: #f56c6c; }
-.credit-icon { color: #e6a23c; }
-.blind_box-icon { color: #d53ce6; }
-
-.discount-tag {
-  margin-left: 8px;
-  font-size: 0.9em;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-/* 抽奖结果样式 */
-.result-container {
-  max-height: 60vh;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 改为两列布局 */
-  gap: 20px;
-  padding: 10px;
-}
-
-.result-item {
-  background: white;
-  border-radius: 12px;
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
-}
-
-.result-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.icon-section {
-  margin-right: 15px;
-}
-
-.book-cover {
-  width: 80px;
-  height: 110px;
-  border-radius: 6px;
-  margin-right: 15px;
-  object-fit: cover;
-}
-
-.book-info h4 {
-  margin: 0 0 8px;
-  font-size: 16px;
-  color: #333;
-}
-
-.book-info p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.common-info h3 {
-  margin: 0 0 8px;
-  color: #2c3e50;
-}
-
-.status-section {
-  margin-left: auto;
-}
-
-/* 入场动画 */
-.list-enter-active {
-  transition: all 0.5s ease;
-}
-.list-enter-from {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-/* 对话框标题样式 */
-:deep(.el-dialog__header) {
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
-  margin-bottom: 15px;
-}
-
-:deep(.el-dialog__title) {
-  color: #2c3e50;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.image {
-  width: 25%;
-  height: 50px;
-  border-radius: 8px;
-  object-fit: contain;
-  background: rgba(245, 247, 250, 0.8);
-  padding: 15px;
-}
-
-.nav-buttons {
-  position: fixed;
-  bottom: 200px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-}
-
-.nav-button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  border-radius: 25px;
-  background-color: rgba(133,13,0);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  border: none;
-  min-width: 120px;
 }
 
 .nav-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
   background-color: rgba(244, 161, 161, 0.95);
 }
 </style>
