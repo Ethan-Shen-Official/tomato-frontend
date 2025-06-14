@@ -68,7 +68,6 @@
                 <!-- 奖品信息 -->
                 <div class="info-section">
                   <h3 class="item-title">{{ getDisplayName(item) }}</h3>
-                  <p class="item-subtitle">{{ getTypeName(item.type) }}</p>
                 </div>
 
                 <!-- 奖品值/ID -->
@@ -554,7 +553,7 @@ onMounted(() => {
 }
 
 .item-value {
-  font-size: 14px;
+  font-size: 16px;
   color: #666;
   font-weight: 500;
 }
