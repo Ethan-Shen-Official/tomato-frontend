@@ -6,23 +6,34 @@
           <div v-loading="loading">
             <!-- 头部 -->
             <div class="header-section">
-              <router-link to="/lottery" v-slot="{ navigate }">
-                <el-button @click="navigate" type="primary" plain>
-                  返回抽奖
-                </el-button>
-              </router-link>
-              <h1 class="prizes-title">我的奖品（{{ prizes.length }}件）</h1>
+              <!-- 左侧区域 -->
+              <div class="header-left">
+                <router-link to="/lottery" v-slot="{ navigate }">
+                  <el-button @click="navigate" type="primary" plain>
+                    返回抽奖
+                  </el-button>
+                </router-link>
+              </div>
               
-              <!-- 批量操作按钮 -->
-              <div class="batch-actions" v-if="selectedPrizes.length > 0">
-                <el-button 
-                  type="success" 
-                  @click="showOrderDialog = true"
-                  :disabled="!hasAvailableSelection"
-                >
-                  生成订单 ({{ selectedAvailableCount }}件)
-                </el-button>
-                <el-button @click="clearSelection">清空选择</el-button>
+              <!-- 中间标题区域 -->
+              <div class="header-center">
+                <h1 class="prizes-title">我的奖品（{{ prizes.length }}件）</h1>
+              </div>
+              
+              <!-- 右侧操作区域 -->
+              <div class="header-right">
+                <div class="batch-actions" v-if="selectedPrizes.length > 0">
+                  <el-button 
+                    type="success" 
+                    @click="showOrderDialog = true"
+                    :disabled="!hasAvailableSelection"
+                  >
+                    生成订单 ({{ selectedAvailableCount }}件)
+                  </el-button>
+                  <el-button @click="clearSelection">清空选择</el-button>
+                </div>
+                <!-- 占位元素，保持右侧区域宽度一致 -->
+                <div class="placeholder" v-else></div>
               </div>
             </div>
 
@@ -327,7 +338,8 @@ const getItemValue = (item: PrizeItemExtended): string => {
   if (item.type === PrizeType.coupon) {
     return `${item.itemId}% 折扣`
   }
-  return item.itemId
+  
+  return ''
 }
 
 // 状态标签类型（只有AVAILABLE和GENERATED两种）
@@ -433,14 +445,35 @@ onMounted(() => {
   min-height: calc(90vh - 120px);
 }
 
+/* 修改头部布局 */
 .header-section {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
   padding: 0 20px;
-  flex-wrap: wrap;
-  gap: 20px;
+  min-height: 60px; /* 固定高度，防止跳动 */
+}
+
+.header-left {
+  flex: 0 0 auto; /* 不伸缩，保持原有大小 */
+  display: flex;
+  align-items: center;
+}
+
+.header-center {
+  flex: 1; /* 占据剩余空间 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-right {
+  flex: 0 0 auto; /* 不伸缩，保持原有大小 */
+  display: flex;
+  align-items: center;
+  min-width: 200px; /* 设置最小宽度，确保右侧区域宽度一致 */
+  justify-content: flex-end;
 }
 
 .prizes-title {
@@ -448,11 +481,18 @@ onMounted(() => {
   font-size: 24px;
   color: #333;
   font-weight: 600;
+  text-align: center; /* 确保标题居中 */
 }
 
 .batch-actions {
   display: flex;
   gap: 12px;
+}
+
+/* 占位元素，与批量操作按钮占用相同空间 */
+.placeholder {
+  min-height: 32px; /* 与按钮高度一致 */
+  width: 100%; /* 占满右侧区域 */
 }
 
 .filter-section {
@@ -585,7 +625,25 @@ onMounted(() => {
   
   .header-section {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    gap: 15px;
+    min-height: auto;
+  }
+  
+  .header-left,
+  .header-center,
+  .header-right {
+    flex: none;
+    width: 100%;
+  }
+  
+  .header-center {
+    order: -1; /* 在移动端让标题排在最前面 */
+  }
+  
+  .header-right {
+    min-width: auto;
+    justify-content: center;
   }
   
   .prize-item {
