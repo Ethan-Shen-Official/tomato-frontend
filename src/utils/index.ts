@@ -7,6 +7,14 @@ export function parseRole(role: string | null) {
     }
 }
 
+export function parseStatus(status: string | null) {
+    if (status === "AVAILABLE") {
+        return '可兑换';
+    } else if (status === "GENERATED") {
+        return '已兑换';
+    }
+}
+
 export function isLogin() {
     const token = sessionStorage.getItem('token');
     if (token) {

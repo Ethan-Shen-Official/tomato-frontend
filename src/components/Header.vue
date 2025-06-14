@@ -76,6 +76,7 @@ import { ShoppingCart, User, SwitchButton, Tickets, Present, Box } from '@elemen
 import { isLogin } from '../utils'
 import { getCartItems } from '../api/cart'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import routes from '../router'
 
 // 用户信息
 const avatar_url = ref('')
@@ -106,12 +107,12 @@ const handleLogout = async () => {
     sessionStorage.removeItem('role')
     
     ElMessage.success('已成功退出登录')
-    
-    // 延迟刷新页面，让用户看到成功提示
+    routes.push('/home')
+        
     setTimeout(() => {
       window.location.reload()
     }, 1000)
-    
+
   } catch (error) {
     // 用户取消退出，不做任何操作
     // ElMessageBox.confirm 在用户取消时会抛出 'cancel' 错误

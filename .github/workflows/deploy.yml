@@ -1,4 +1,4 @@
-name: Depoly Front
+name: depoly-front
 
 on:
   push:

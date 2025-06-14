@@ -1,50 +1,52 @@
 <template>
   <div class="error-page">
-    <div class="error-container">
-      <div class="error-content">
-        <div class="error-icon">
-          <el-icon :size="180" color="#f56c6c">
-            <Warning />
+    <div class="error-content">
+      <!-- 404图标 -->
+      <div class="error-icon">
+        <el-icon :size="120" color="#e91e63">
+          <Warning />
+        </el-icon>
+      </div>
+      
+      <!-- 404文字 -->
+      <h1 class="error-title">404</h1>
+      <p class="error-message">页面不存在</p>
+      
+      <!-- 导航按钮 -->
+      <div class="nav-buttons">
+        <router-link to="/home" class="nav-button primary-button">
+          <el-icon :size="20">
+            <House />
           </el-icon>
-        </div>
+          <span>返回首页</span>
+        </router-link>
         
-        <h1 class="error-title">404</h1>
-        <h2 class="error-subtitle">页面未找到</h2>
-        <p class="error-description">
-          抱歉，您访问的页面不存在或已被移除
-        </p>
-        
-        <div class="error-actions">
-          <el-button 
-            type="primary" 
-            size="large" 
-            @click="goHome"
-            class="home-button"
-          >
-            返回首页
-          </el-button>
-          <el-button 
-            size="large" 
-            @click="goBack"
-            class="back-button"
-          >
-            返回上页
-          </el-button>
+        <div class="nav-button secondary-button" @click="goBack">
+          <el-icon :size="20">
+            <Back />
+          </el-icon>
+          <span>返回上一页</span>
         </div>
+      </div>
+      
+      <!-- 其他导航图标 -->
+      <div class="other-nav">
+        <router-link to="/dashboard" class="icon-nav">
+          <el-icon :size="30" color="#4caf50">
+            <User />
+          </el-icon>
+          <span>个人中心</span>
+        </router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Warning } from '@element-plus/icons-vue'
+import { Warning, House, User, Back } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
-const goHome = () => {
-  router.push('/')
-}
 
 const goBack = () => {
   router.go(-1)
@@ -53,126 +55,143 @@ const goBack = () => {
 
 <style scoped>
 .error-page {
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
-.error-container {
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 80px 50px;
-  border-radius: 25px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeIn 0.8s ease-in-out;
 }
 
 .error-icon {
-  margin-bottom: 40px;
   animation: bounce 2s infinite;
-  filter: drop-shadow(0 10px 20px rgba(245, 108, 108, 0.3));
 }
 
 .error-title {
-  font-size: 7rem;
-  font-weight: bold;
-  color: #f56c6c;
-  margin: 0 0 25px;
-  text-shadow: 0 5px 10px rgba(245, 108, 108, 0.3);
+  font-size: 4rem;
+  font-weight: 700;
+  color: #fb74a5;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(216, 27, 96, 0.2);
 }
 
-.error-subtitle {
-  font-size: 2.2rem;
-  color: #333;
-  margin: 0 0 20px;
+.error-message {
+  font-size: 1.5rem;
+  color: #87043d;
+  margin: 0;
+  font-weight: 500;
 }
 
-.error-description {
-  font-size: 1.3rem;
-  color: #666;
-  margin: 0 0 50px;
-  line-height: 1.6;
-}
-
-.error-actions {
+/* 主要导航按钮区域 */
+.nav-buttons {
   display: flex;
-  gap: 25px;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 160px;
   justify-content: center;
+  box-shadow: 0 4px 15px rgba(216, 27, 96, 0.2);
+  border: 2px solid transparent;
 }
 
-/* 首页按钮样式 */
-.home-button {
-  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-  border: none;
-  padding: 15px 30px;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
+/* 主要按钮 - 返回首页 */
+.primary-button {
+  background: linear-gradient(45deg, #fb74a5, #f06292);
   color: white;
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
 }
 
-.home-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
-}
-
-.home-button:hover::before {
-  left: 100%;
-}
-
-.home-button:hover {
+.primary-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(255, 107, 107, 0.5);
-  background: linear-gradient(45deg, #ff5252, #d63031);
+  box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+  background: linear-gradient(45deg, #d81b60, #ec407a);
 }
 
-/* 返回按钮样式 */
-.back-button {
-  background: linear-gradient(45deg, #74b9ff, #0984e3);
-  border: none;
-  padding: 15px 30px;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: white;
-  box-shadow: 0 8px 20px rgba(116, 185, 255, 0.4);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+/* 次要按钮 - 返回上一页 */
+.secondary-button {
+  background: rgba(255, 255, 255, 0.8);
+  color: #d81b60;
+  border: 2px solid #f48fb1;
+  backdrop-filter: blur(10px);
 }
 
-.back-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
-}
-
-.back-button:hover::before {
-  left: 100%;
-}
-
-.back-button:hover {
+.secondary-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(116, 185, 255, 0.5);
-  background: linear-gradient(45deg, #5dade2, #2980b9);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #e91e63;
+  box-shadow: 0 8px 25px rgba(244, 143, 177, 0.4);
+  color: #ad1457;
+}
+
+/* 其他导航区域 */
+.other-nav {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(216, 27, 96, 0.2);
+}
+
+.icon-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 143, 177, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: #ad1457;
+  min-width: 70px;
+}
+
+.icon-nav:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(233, 30, 99, 0.4);
+}
+
+.icon-nav span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ad1457;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes bounce {
@@ -180,39 +199,48 @@ const goBack = () => {
     transform: translateY(0);
   }
   40% {
-    transform: translateY(-25px);
+    transform: translateY(-10px);
   }
   60% {
-    transform: translateY(-15px);
+    transform: translateY(-5px);
   }
 }
 
+/* 移动端适配 */
 @media (max-width: 768px) {
-  .error-container {
-    padding: 60px 30px;
-  }
-  
-  .error-icon {
-    margin-bottom: 30px;
-  }
-  
   .error-title {
-    font-size: 5rem;
+    font-size: 3rem;
   }
   
-  .error-subtitle {
-    font-size: 1.8rem;
+  .error-message {
+    font-size: 1.2rem;
   }
   
-  .error-actions {
+  .nav-buttons {
     flex-direction: column;
-    align-items: center;
-    gap: 15px;
+    gap: 20px;
+    width: 100%;
+    max-width: 280px;
   }
   
-  .home-button,
-  .back-button {
-    width: 200px;
+  .nav-button {
+    padding: 14px 24px;
+    font-size: 1rem;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .other-nav {
+    justify-content: center;
+  }
+  
+  .icon-nav {
+    padding: 12px;
+    min-width: 60px;
+  }
+  
+  .icon-nav span {
+    font-size: 0.8rem;
   }
 }
 </style>

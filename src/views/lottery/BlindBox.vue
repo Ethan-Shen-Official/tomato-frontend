@@ -40,9 +40,11 @@ const handleBuy = async () => {
       buyDialogVisible.value = false
       // 购买成功后刷新积分
       getMyCredits()
+    } else if (res.data.code === '400') {
+        if (res.data.msg === 'Insufficient pool') {
+          ElMessage.error('盲盒不足，请联系管理员')
+        }
     }
-  } catch (error: any) {
-    ElMessage.error(error.response?.data?.msg || '兑换失败')
   } finally {
     buyLoading.value = false
   }

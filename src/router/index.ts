@@ -123,7 +123,7 @@ const routeConfigs = [
     meta: { title: 'Create Coupon' }
   },
   {
-    path: '/:pathMatch(.*)*/:pathMatch(.*)*',
+    path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('../views/NotFound.vue'),
     meta: { title: 'Not Found' }

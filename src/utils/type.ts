@@ -5,6 +5,8 @@ export enum PrizeType {
     blindbox = 'BLIND_BOX',
 }
 
+export type PrizeStatus = 'AVAILABLE' | 'GENERATED'
+
 export type Recipient = {
     name: string;
     telephone: string;

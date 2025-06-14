@@ -73,7 +73,7 @@ import { ElMessage } from 'element-plus'
 import { newAd } from '../../api/advertisement.ts' // 请确认路径是否正确
 import { uploadimg } from "../../api/tool.ts";
 import { useRoute } from 'vue-router'; // 从 vue-router 导入 useRoute
-import {routes} from "../../router";
+import routes from "../../router";
 
 // 创建路由实例以访问查询参数
 const route = useRoute();

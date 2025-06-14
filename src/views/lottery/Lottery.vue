@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Present, Box, Notebook, Ticket, Coin, Warning } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { getCredits } from '../../api/user.ts'
 import { drawLottery } from '../../api/lottery'
@@ -46,8 +45,6 @@ const handleDraw = async (quantity: number) => {
     if (res.data.code === '200') {
       ElMessage.success('抽奖成功！')
       const items: LotteryItem[] = res.data.data
-
-      // 获取书籍详情
       const enhancedItems = await Promise.all(
           items.map(async (item: LotteryItem) => {
             if (item.type === 'BOOK') {
@@ -63,7 +60,6 @@ const handleDraw = async (quantity: number) => {
             return item
           })
       )
-
       // 处理动画显示
       if (quantity === 10) {
         results.value = []
@@ -76,10 +72,12 @@ const handleDraw = async (quantity: number) => {
         results.value = enhancedItems
         dialogVisible.value = true
       }
+      getMyCredits()
+    } else if (res.data.code === '400') {
+      if (res.data.msg === 'Insufficient pool') {
+          ElMessage.error('奖池已空，请联系管理员补充奖池')
+      } 
     }
-
-  } catch (error: any) {
-    ElMessage.error(error.response?.data?.msg || '抽奖失败')
   } finally {
     drawLoading.value = false
   }
@@ -162,7 +160,7 @@ getMyCredits()
                 :loading="drawLoading"
                 :disabled="drawLoading || parseInt(userCredit) < 60"
             >
-              单抽 (60积分)
+              单抽 (100积分)
             </el-button>
             <el-button
                 type="danger"
@@ -171,7 +169,7 @@ getMyCredits()
                 :loading="drawLoading"
                 :disabled="drawLoading || parseInt(userCredit) < 600"
             >
-              十连抽 (600积分)
+              十连抽 (900积分)
               <span class="discount-tag">九折</span>
             </el-button>
           </div>
@@ -249,12 +247,6 @@ getMyCredits()
                 <p>{{ item.itemId }}</p>
               </div>
 
-<!--              &lt;!&ndash; 状态显示 &ndash;&gt;-->
-<!--              <div class="status-section">-->
-<!--                <el-tag :type="statusTypeMap[item.status]">-->
-<!--                  {{ statusTextMap[item.status] }}-->
-<!--                </el-tag>-->
-<!--              </div>-->
             </div>
           </transition-group>
         </div>
@@ -266,8 +258,6 @@ getMyCredits()
         </template>
       </el-dialog>
     </div>
-
-
 </template>
 
 <style scoped>
