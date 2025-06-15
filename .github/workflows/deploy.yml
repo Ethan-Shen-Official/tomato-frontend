@@ -29,7 +29,7 @@ jobs:
         echo "Build completed. Files in dist:"
         ls -la dist/
         
-    - name: Prepare deployment directory
+    - name: Prepare staging directory
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
@@ -37,25 +37,13 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          echo "Preparing deployment directory..."
+          echo "Preparing staging directory in user home..."
+          # 清理并创建暂存目录
+          rm -rf ~/frontend-staging
+          mkdir -p ~/frontend-staging
+          echo "Staging directory created: $(ls -la ~ | grep frontend-staging)"
           
-          # 备份现有文件
-          if [ -d "/var/www/html/frontend" ]; then
-            sudo cp -r /var/www/html/frontend /var/www/html/frontend_backup_$(date +%Y%m%d_%H%M%S)
-          fi
-          
-          # 删除旧目录并重新创建
-          sudo rm -rf /var/www/html/frontend
-          sudo mkdir -p /var/www/html/frontend
-          
-          # 将目录所有权给当前用户，便于上传文件
-          sudo chown -R shen:shen /var/www/html/frontend
-          sudo chmod -R 755 /var/www/html/frontend
-          
-          echo "Directory prepared with user ownership"
-          ls -la /var/www/html/
-          
-    - name: Deploy files
+    - name: Deploy to staging directory
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.HOST }}
@@ -63,10 +51,10 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         source: "dist/*"
-        target: "/var/www/html/frontend/"
+        target: "~/frontend-staging/"
         strip_components: 1
         
-    - name: Set final permissions
+    - name: Move to final location and set permissions
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
@@ -74,14 +62,37 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          echo "Files deployed successfully:"
-          ls -la /var/www/html/frontend/
+          echo "Files uploaded to staging:"
+          ls -la ~/frontend-staging/
           
-          # 将所有权改回nginx用户
+          # 备份现有文件（如果存在）
+          if [ -d "/var/www/html/frontend" ]; then
+            echo "Backing up existing files..."
+            sudo cp -r /var/www/html/frontend /var/www/html/frontend_backup_$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # 删除旧目录并重新创建
+          echo "Preparing target directory..."
+          sudo rm -rf /var/www/html/frontend
+          sudo mkdir -p /var/www/html/frontend
+          
+          # 复制文件到最终位置
+          echo "Copying files to target location..."
+          sudo cp -r ~/frontend-staging/* /var/www/html/frontend/
+          
+          # 设置正确的权限
+          echo "Setting permissions..."
           sudo chown -R nginx:nginx /var/www/html/frontend
           sudo chmod -R 755 /var/www/html/frontend
+          
+          # 验证部署
+          echo "Final deployment structure:"
+          ls -la /var/www/html/frontend/
+          
+          # 清理暂存目录
+          rm -rf ~/frontend-staging
           
           # 重新加载Nginx
           sudo systemctl reload nginx
           
-          echo "Deployment completed and permissions set!"
+          echo "Deployment completed successfully!"
