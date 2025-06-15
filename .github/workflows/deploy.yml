@@ -1,4 +1,4 @@
-name: depoly-front
+name: deploy-front
 
 on:
   push:
@@ -29,9 +29,60 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/shen'
+    - name: Deploy to Server
+      if: github.ref == 'refs/heads/master'
+      uses: appleboy/ssh-action@v1.0.0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          # 创建临时目录
+          mkdir -p /tmp/frontend-deploy
+          cd /tmp/frontend-deploy
+          
+          # 清理旧文件
+          rm -rf *
+          
+    - name: Copy files to server
+      if: github.ref == 'refs/heads/master'
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        port: ${{ secrets.PORT }}
+        source: "dist/*"
+        target: "/tmp/frontend-deploy/"
+        strip_components: 1
+        
+    - name: Deploy and restart services
+      if: github.ref == 'refs/heads/master'
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          # 备份当前版本
+          if [ -d "/var/www/html/frontend" ]; then
+            sudo cp -r /var/www/html/frontend /var/www/html/frontend_backup_$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # 创建目标目录
+          sudo mkdir -p /var/www/html/frontend
+          
+          # 复制新文件
+          sudo cp -r /tmp/frontend-deploy/* /var/www/html/frontend/
+          
+          # 设置权限
+          sudo chown -R www-data:www-data /var/www/html/frontend
+          sudo chmod -R 755 /var/www/html/frontend
+          
+          # 重启Nginx
+          sudo systemctl reload nginx
+          
+          # 清理临时文件
+          rm -rf /tmp/frontend-deploy
