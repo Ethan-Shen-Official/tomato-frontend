@@ -2,7 +2,7 @@ name: deploy-front
 
 on:
   push:
-    branches: [master]
+    branches: [master,shen]
   pull_request:
     branches: [master]
 
