@@ -24,6 +24,18 @@ jobs:
     - name: Build project
       run: npm run build
       
+    - name: Test SSH connection
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          echo "SSH connection successful!"
+          whoami
+          pwd
+          
     - name: Deploy files directly
       uses: appleboy/scp-action@v0.1.4
       with:
@@ -43,9 +55,12 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          
           echo "Files deployed:"
           ls -la /var/www/html/frontend/
+          
+          # 设置权限
+          sudo chown -R nginx:nginx /var/www/html/frontend
+          sudo chmod -R 755 /var/www/html/frontend
           
           # 重新加载Nginx
           sudo systemctl reload nginx
