@@ -24,7 +24,12 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Test SSH connection
+    - name: List build files
+      run: |
+        echo "Build completed. Files in dist:"
+        ls -la dist/
+        
+    - name: Prepare deployment directory
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
@@ -32,11 +37,25 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          echo "SSH connection successful!"
-          whoami
-          pwd
+          echo "Preparing deployment directory..."
           
-    - name: Deploy files directly
+          # 备份现有文件
+          if [ -d "/var/www/html/frontend" ]; then
+            sudo cp -r /var/www/html/frontend /var/www/html/frontend_backup_$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # 删除旧目录并重新创建
+          sudo rm -rf /var/www/html/frontend
+          sudo mkdir -p /var/www/html/frontend
+          
+          # 将目录所有权给当前用户，便于上传文件
+          sudo chown -R shen:shen /var/www/html/frontend
+          sudo chmod -R 755 /var/www/html/frontend
+          
+          echo "Directory prepared with user ownership"
+          ls -la /var/www/html/
+          
+    - name: Deploy files
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.HOST }}
@@ -47,7 +66,7 @@ jobs:
         target: "/var/www/html/frontend/"
         strip_components: 1
         
-    - name: Set permissions
+    - name: Set final permissions
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
@@ -55,14 +74,14 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          echo "Files deployed:"
+          echo "Files deployed successfully:"
           ls -la /var/www/html/frontend/
           
-          # 设置权限
+          # 将所有权改回nginx用户
           sudo chown -R nginx:nginx /var/www/html/frontend
           sudo chmod -R 755 /var/www/html/frontend
           
           # 重新加载Nginx
           sudo systemctl reload nginx
           
-          echo "Deployment completed!"
+          echo "Deployment completed and permissions set!"
