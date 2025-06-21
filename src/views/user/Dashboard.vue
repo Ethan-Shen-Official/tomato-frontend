@@ -6,6 +6,7 @@ import routes from '../../router';
 import { parseRole } from '../../utils';
 import {addNewItem} from "../../api/lottery.ts";
 import { PrizeType } from '../../utils/type.ts';
+import { UserFilled } from '@element-plus/icons-vue'
 
 // 登录状态
 const isLoggedIn = ref(true);
@@ -46,7 +47,7 @@ const emailLegal = computed(() => {
 });
 
 // 控制右侧显示内容value 为{'profile', 'updateInfo'}中的一个, 默认为'profile'
-const activePanel = ref('profile'); 
+const activePanel = ref('profile');
 
 // 统一更新表单
 const updateForm = ref({
@@ -77,18 +78,18 @@ onMounted(async () => {
   try {
     checkLogin();
     if (isLoggedIn.value === true) {
-        getCurUser();
-        // 初始化更新表单
-        updateForm.value = {
-          name: name.value,
-          tele: tele.value,
-          email: email.value,
-          location: location.value,
-          avatar: avatar_url.value,
-          oldPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        };
+      getCurUser();
+      // 初始化更新表单
+      updateForm.value = {
+        name: name.value,
+        tele: tele.value,
+        email: email.value,
+        location: location.value,
+        avatar: avatar_url.value,
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      };
     }
   } catch (error) {
     console.error('获取用户信息失败', error);
@@ -98,17 +99,17 @@ onMounted(async () => {
 
 function getCurUser() {
   getUserInfo(username || '').then(res => {
-      if (res.data.code === '200') {
-        name.value = res.data.data.name;
-        tele.value = res.data.data.tele;
-        email.value = res.data.data.email;
-        location.value = res.data.data.location;
-        avatar_url.value = res.data.data.avatar;
-        role.value = res.data.data.role;
-      } else if (res.data.code === '400') {
-        ElMessage.error(res.data.msg);
-      }
-    });
+    if (res.data.code === '200') {
+      name.value = res.data.data.name;
+      tele.value = res.data.data.tele;
+      email.value = res.data.data.email;
+      location.value = res.data.data.location;
+      avatar_url.value = res.data.data.avatar;
+      role.value = res.data.data.role;
+    } else if (res.data.code === '400') {
+      ElMessage.error(res.data.msg);
+    }
+  });
 }
 
 const handleUpdate = async () => {
@@ -134,12 +135,12 @@ const handleUpdate = async () => {
 
     // 如果没有更改任何内容，则提示用户
     if (
-      updateData.name === name.value &&
-      updateData.telephone === tele.value &&
-      updateData.email === email.value &&
-      updateData.location === location.value &&
-      updateData.avatar === avatar_url.value &&
-      !updateData.password
+        updateData.name === name.value &&
+        updateData.telephone === tele.value &&
+        updateData.email === email.value &&
+        updateData.location === location.value &&
+        updateData.avatar === avatar_url.value &&
+        !updateData.password
     ) {
       ElMessage({
         message: "未检测到任何修改",
@@ -150,15 +151,15 @@ const handleUpdate = async () => {
     }
 
     updateInfo({
-        username: username || '',
-        name: updateData.name,
-        role: role.value,
-        telephone: updateData.telephone,
-        email: updateData.email,
-        location: updateData.location,
-        avatar: updateData.avatar,
-        password: updateData.password,
-      }
+          username: username || '',
+          name: updateData.name,
+          role: role.value,
+          telephone: updateData.telephone,
+          email: updateData.email,
+          location: updateData.location,
+          avatar: updateData.avatar,
+          password: updateData.password,
+        }
     ).then(res => {
       if (res.data.code === '200') {
         ElMessage({
@@ -166,7 +167,7 @@ const handleUpdate = async () => {
           type: 'success',
           center: true,
         });
-        
+
         getUserInfo(username || '').then(res => {
           if (res.data.code === '200') {
             name.value = res.data.data.name;
@@ -174,7 +175,7 @@ const handleUpdate = async () => {
             email.value = res.data.data.email;
             location.value = res.data.data.location;
             avatar_url.value = res.data.data.avatar;
-            
+
             updateForm.value.oldPassword = '';
             updateForm.value.newPassword = '';
             updateForm.value.confirmPassword = '';
@@ -182,7 +183,7 @@ const handleUpdate = async () => {
             ElMessage.error(res.data.msg);
           }
         });
-        
+
         activePanel.value = 'profile';
       } else if (res.data.code === '400') {
         ElMessage({
@@ -249,300 +250,321 @@ const handleAddToPool = async () => {
 </script>
 
 <template>
-  <div class="dashboard-container">
-    <!-- 左侧用户信息卡片 -->
-    <div class="sidecard">
-      <!-- 已登录状态 -->
-      <template v-if="isLoggedIn">
-        <div class="user-profile">
-          <div class="avatar-container">
-            <img :src="avatar_url" alt="用户头像" class="user-avatar">
-          </div>
-          <h2>{{ name }}</h2>
-          <div class="user-info">
-            <p><strong>用户名:</strong> {{ username }}</p>
-            <p><strong>身份:</strong> {{ formatRole(role || '') }}</p>
-            <p v-if="email"><strong>邮箱:</strong> {{ email }}</p>
-            <p v-if="tele"><strong>电话:</strong> {{ tele }}</p>
-            <p v-if="location"><strong>地址:</strong> {{ location }}</p>
-          </div>
-        </div>
-        
-        <div class="action-buttons">
-          <el-row>
-            <el-button 
-              type="primary" 
-              @click="activePanel = 'updateInfo'"
-              :class="{ active: activePanel === 'updateInfo' }">
-              更新个人信息
-            </el-button>
-
-            <div v-if="role === 'admin'">
-              <el-button
-                  type="primary"
-                  @click="$router.push('/create_coupon')"
-                  style="margin-top: 10px">
-                创建折扣券
-              </el-button>
-
-              <el-button
-                  type="primary"
-                  @click="$router.push('/all_coupons')"
-                  style="margin-top: 10px">
-                查看全部折扣券
-              </el-button>
-
-              <el-button
-                  type="primary"
-                  @click="openAddDialog()"
-                  style="margin-top: 10px">
-                积分奖池
-              </el-button>
+  <div class="page">
+    <div class="container">
+      <div class="dashboard-container">
+        <!-- 左侧用户信息卡片 -->
+        <div class="sidecard">
+          <!-- 已登录状态 -->
+          <template v-if="isLoggedIn">
+            <div class="user-profile">
+              <div class="avatar-container">
+                <img :src="avatar_url" alt="用户头像" class="user-avatar">
+              </div>
+              <h2>{{ name }}</h2>
+              <div class="user-info">
+                <p><strong>用户名:</strong> {{ username }}</p>
+                <p><strong>身份:</strong> {{ formatRole(role || '') }}</p>
+                <p v-if="tele"><strong>电话:</strong> {{ tele }}</p>
+              </div>
             </div>
-          </el-row>
-        </div>
 
-        <el-dialog
-            v-model="showAddDialog"
-            title="加入奖池"
-            width="400px"
-            :align-center="true"
-            class="custom-dialog"
-        >
-          <div class="add-dialog-content">
-            <el-form label-width="auto">
-              <el-form-item
-                  label="积分："
-                  label-width="80px"
-                  class="form-item-custom"
-              >
-                <el-input-number
-                    v-model="addForm.couponId"
-                    :min="1"
-                    :precision="0"
-                    controls-position="right"
-                    class="full-width-input"
-                />
-              </el-form-item>
+            <div class="action-buttons">
+              <el-row>
+                <div v-if="role === 'admin'">
+                  <el-button
+                      type="primary"
+                      @click="$router.push('/create_coupon')"
+                      style="margin-top: 10px"
+                      class="admin-button">
+                    创建折扣券
+                  </el-button>
 
-              <el-form-item
-                  label="数量："
-                  label-width="80px"
-                  class="form-item-custom"
-              >
-                <el-input-number
-                    v-model="addForm.quantity"
-                    :min="1"
-                    :precision="0"
-                    controls-position="right"
-                    class="full-width-input"
-                />
-              </el-form-item>
-            </el-form>
-          </div>
+                  <el-button
+                      type="primary"
+                      @click="$router.push('/all_coupons')"
+                      style="margin-top: 35px"
+                      class="admin-button">
+                    查看全部折扣券
+                  </el-button>
 
-          <template #footer>
-            <div class="dialog-footer-btns">
-              <el-button @click="showAddDialog = false" size="default">取消</el-button>
+                  <el-button
+                      type="primary"
+                      @click="openAddDialog()"
+                      style="margin-top: 35px"
+                      class="admin-button">
+                    积分奖池
+                  </el-button>
+                </div>
+              </el-row>
+            </div>
+
+            <el-dialog
+                v-model="showAddDialog"
+                title="加入奖池"
+                width="400px"
+                :align-center="true"
+                class="custom-dialog"
+            >
+              <div class="add-dialog-content">
+                <el-form label-width="auto">
+                  <el-form-item
+                      label="积分："
+                      label-width="80px"
+                      class="form-item-custom"
+                  >
+                    <el-input-number
+                        v-model="addForm.couponId"
+                        :min="1"
+                        :precision="0"
+                        controls-position="right"
+                        class="full-width-input"
+                    />
+                  </el-form-item>
+
+                  <el-form-item
+                      label="数量："
+                      label-width="80px"
+                      class="form-item-custom"
+                  >
+                    <el-input-number
+                        v-model="addForm.quantity"
+                        :min="1"
+                        :precision="0"
+                        controls-position="right"
+                        class="full-width-input"
+                    />
+                  </el-form-item>
+                </el-form>
+              </div>
+
+              <template #footer>
+                <div class="dialog-footer-btns">
+                  <el-button @click="showAddDialog = false" size="default">取消</el-button>
+                  <el-button
+                      type="primary"
+                      :loading="adding"
+                      @click="handleAddToPool"
+                      size="default"
+                  >
+                    确认添加
+                  </el-button>
+                </div>
+              </template>
+            </el-dialog>
+          </template>
+
+          <!-- 未登录状态 -->
+          <template v-else>
+            <div class="not-logged-in">
+              <el-icon class="login-icon"><UserFilled /></el-icon>
+              <h2>未登录</h2>
+              <p>请登录后查看个人信息</p>
+
+
+              <!-- 新增查看全部商品按钮 -->
               <el-button
-                  type="primary"
-                  :loading="adding"
-                  @click="handleAddToPool"
-                  size="default"
-              >
-                确认添加
+                  type="success"
+                  @click="$router.push('/all')"
+                  style="margin-top: 10px"
+                  class="login-button">
+                查看全部商品
               </el-button>
             </div>
           </template>
-        </el-dialog>
-      </template>
-
-
-
-      <!-- 未登录状态 -->
-      <template v-else>
-        <div class="not-logged-in">
-          <el-icon class="login-icon"><UserFilled /></el-icon>
-          <h2>未登录</h2>
-          <p>请登录后查看个人信息</p>
-          <el-button type="primary" @click="ToLogin" class="login-button">
-            前往登录
-          </el-button>
-
-          <!-- 新增查看全部商品按钮 -->
-          <el-button
-              type="success"
-              @click="$router.push('/all')"
-              style="margin-top: 10px">
-            查看全部商品
-          </el-button>
         </div>
-      </template>
-    </div>
-    
-    <!-- 右侧内容区域 -->
-    <div class="content-area">
-      <!-- 未登录状态提示 -->
-      <div v-if="!isLoggedIn" class="welcome-panel">
-        <h1>欢迎来到TomaTo书城</h1>
-        <p>登录后可以享受更多功能和个性化服务</p>
-        
-        <div class="login-benefits">
-          <el-card class="box-card">
-            <el-header class="card-header">
-                <span>会员特权</span>
-            </el-header>
-            <div class="text-item">
-              <ul>
-                <li>购买中意的图书</li>
-                <li>查看订单状态</li>
-                <li>查看购物车</li>
-                <li>更多个性化推荐</li>
-              </ul>
+
+        <!-- 右侧内容区域 -->
+        <div class="content-area">
+          <!-- 未登录状态提示 -->
+          <div v-if="!isLoggedIn" class="welcome-panel">
+            <h1>欢迎来到TomaTo书城</h1>
+            <p>登录后可以享受更多功能和个性化服务</p>
+
+            <div class="login-benefits">
+              <el-card class="box-card">
+                <el-header class="card-header">
+                  <span>会员特权</span>
+                </el-header>
+                <div class="text-item">
+                  <ul>
+                    <li>购买中意的图书</li>
+                    <li>查看订单状态</li>
+                    <li>查看购物车</li>
+                    <li>更多个性化推荐</li>
+                  </ul>
+                </div>
+              </el-card>
+
+              <el-card class="box-card">
+                <el-header class="card-header">
+                  <span>快速登录</span>
+                </el-header>
+                <ul class="text-item">
+                  <li>
+                    请
+                    <span class="text-link" @click="ToLogin">登录</span>
+                    以享受更多功能
+                  </li>
+                  <li>
+                    如果您还没有账号，可以点击此处
+                    <span class="text-link" @click="ToRegister">注册</span>
+                    新账户。
+                  </li>
+                </ul>
+              </el-card>
             </div>
-          </el-card>
-          
-          <el-card class="box-card">
-            <el-header class="card-header">
-                <span>快速登录</span>
-            </el-header>
-            <ul class="text-item">
-                <li>
-              请
-              <span class="text-link" @click="ToLogin">登录</span>
-              以享受更多功能
-            </li>
-                <li>
-                如果您还没有账号，可以点击此处
-              <span class="text-link" @click="ToRegister">注册</span>
-              新账户。
-            </li>
-        </ul>
-          </el-card>
-        </div>
-      </div>
-      
-      <!-- 以下内容只在已登录状态显示 -->
-      <template v-else>
-        <!-- 默认页面 - 欢迎信息 -->
-        <div v-if="activePanel === 'profile'" class="welcome-panel">
-          <h1>欢迎回来，{{ name }}！</h1>
-          <p>您可以在左侧选择操作来更新您的个人信息。</p>
-          
-          <div class="feature-cards">
-            <el-card class="box-card">
-              <el-header class="card-header">
-                  <span>账户管理</span>
-              </el-header>
-              <ul class="text-item">
-                <li>您可以更新您的基本信息，如姓名、电话、邮箱等。</li>
-                <li>定期更改您的密码可以提高账户安全性。</li>
-              </ul>
-              <div class="button-area">
-                <el-button type="primary" plain @click="activePanel = 'updateInfo'">
+          </div>
+
+          <!-- 以下内容只在已登录状态显示 -->
+          <template v-else>
+            <!-- 默认页面 - 欢迎信息 -->
+            <div v-if="activePanel === 'profile'" class="welcome-panel">
+              <div class="panel-header">
+                <h1>欢迎回来，{{ name }}！</h1>
+                <el-button
+                    type="primary"
+                    @click="activePanel = 'updateInfo'">
                   更新个人信息
                 </el-button>
-
-                <!-- 新增查看全部商品按钮 -->
-                <el-button
-                    type="success"
-                    @click="$router.push('/all')"
-                    style="margin-top: 10px">
-                  查看全部商品
-                </el-button>
-
-
               </div>
-            </el-card>
-          </div>
-        </div>
-        
-        <!-- 统一的更新信息表单 -->
-        <div v-if="activePanel === 'updateInfo'" class="form-panel">
-          <h2>个人信息管理</h2>
-          <el-form label-position="top">
-            <h3>基本信息</h3>
-            <el-form-item label="用户名">
-              <el-input v-model="username" disabled />
-              <div class="form-tip">用户名不可更改</div>
-            </el-form-item>
-            
-            <el-form-item label="姓名">
-              <el-input v-model="updateForm.name" placeholder="请输入您的真实姓名" />
-              <div class="form-tip">不填写则保持当前值: {{ name }}</div>
-            </el-form-item>
-            
-            <el-form-item label="电话号码">
-              <label v-if="!hasTeleInput">电话号码</label>
-              <label v-else-if="!telLegal" class="error">电话号码不合法（请输入1开头的11位数字）</label>
-              <label v-else>电话号码</label>
-              <el-input 
-                v-model="updateForm.tele" 
-                :class="{'error-input': (hasTeleInput && !telLegal)}"
-                placeholder="请输入您的电话号码" />
-              <div class="form-tip">不填写则保持当前值: {{ tele || '暂无' }}</div>
-            </el-form-item>
 
-            <el-form-item label="邮箱">
-              <label v-if="!hasEmailInput">邮箱</label>
-              <label v-else-if="!emailLegal" class="error">邮箱格式不正确</label>
-              <label v-else>邮箱</label>
-              <el-input 
-                v-model="updateForm.email" 
-                :class="{'error-input': (hasEmailInput && !emailLegal)}"
-                placeholder="请输入您的邮箱地址" />
-              <div class="form-tip">不填写则保持当前值: {{ email || '暂无' }}</div>
-            </el-form-item>
-            
-            <el-form-item label="地址">
-              <el-input v-model="updateForm.location" placeholder="请输入您的地址" />
-              <div class="form-tip">不填写则保持当前值: {{ location || '暂无' }}</div>
-            </el-form-item>
-            
-            <el-form-item label="头像URL">
-              <el-input v-model="updateForm.avatar" placeholder="请输入头像图片URL" />
-              <div class="form-tip">不填写则保持当前头像</div>
-            </el-form-item>
-            
-            <el-divider>密码管理</el-divider>
-            
-            <h3>修改密码 (可选)</h3>
-            <div class="form-tip password-tip">修改密码，如不想修改请填写原本密码，不得留空</div>
-            
-            <el-form-item label="当前密码">
-              <el-input v-model="updateForm.oldPassword" type="password" placeholder="请输入当前密码" show-password />
-            </el-form-item>
-            
-            <el-form-item label="新密码">
-              <el-input v-model="updateForm.newPassword" type="password" placeholder="请输入新密码" show-password />
-            </el-form-item>
-            
-            <el-form-item label="确认新密码" :error="!passwordsMatch ? '两次输入的密码不一致' : ''">
-              <el-input 
-                v-model="updateForm.confirmPassword" 
-                type="password" 
-                placeholder="请再次输入新密码" 
-                show-password
-                @input="passwordsMatch = updateForm.newPassword === updateForm.confirmPassword" />
-            </el-form-item>
-            
-            <el-form-item>
-              <el-button 
-                type="primary" 
-                @click="handleUpdate"
-                :disabled="!!((hasTeleInput && !telLegal) || (hasEmailInput && !emailLegal) || (updateForm.newPassword && !passwordsMatch))">
-                保存更改
+              <el-card class="info-card">
+                <div class="info-item">
+                  <strong>地址:</strong> {{ location || '暂无' }}
+                </div>
+                <div class="info-item">
+                  <strong>邮箱:</strong> {{ email || '暂无' }}
+                </div>
+              </el-card>
+
+              <!-- 新增查看全部商品按钮 -->
+              <el-button
+                  type="success"
+                  @click="$router.push('/all')"
+                  style="margin-top: 20px; width: 200px;">
+                查看全部商品
               </el-button>
-              <el-button @click="activePanel = 'profile'">取消</el-button>
-            </el-form-item>
-          </el-form>
+            </div>
+
+            <!-- 统一的更新信息表单 -->
+            <div v-if="activePanel === 'updateInfo'" class="form-panel">
+              <h2>个人信息管理</h2>
+              <el-form label-position="top">
+                <h3>基本信息</h3>
+                <el-form-item label="用户名">
+                  <el-input v-model="username" disabled />
+                  <div class="form-tip">用户名不可更改</div>
+                </el-form-item>
+
+                <el-form-item label="姓名">
+                  <el-input v-model="updateForm.name" placeholder="请输入您的真实姓名" />
+                  <div class="form-tip">不填写则保持当前值: {{ name }}</div>
+                </el-form-item>
+
+                <el-form-item label="电话号码">
+                  <label v-if="!hasTeleInput">电话号码</label>
+                  <label v-else-if="!telLegal" class="error">电话号码不合法（请输入1开头的11位数字）</label>
+                  <label v-else>电话号码</label>
+                  <el-input
+                      v-model="updateForm.tele"
+                      :class="{'error-input': (hasTeleInput && !telLegal)}"
+                      placeholder="请输入您的电话号码" />
+                  <div class="form-tip">不填写则保持当前值: {{ tele || '暂无' }}</div>
+                </el-form-item>
+
+                <el-form-item label="邮箱">
+                  <label v-if="!hasEmailInput">邮箱</label>
+                  <label v-else-if="!emailLegal" class="error">邮箱格式不正确</label>
+                  <label v-else>邮箱</label>
+                  <el-input
+                      v-model="updateForm.email"
+                      :class="{'error-input': (hasEmailInput && !emailLegal)}"
+                      placeholder="请输入您的邮箱地址" />
+                  <div class="form-tip">不填写则保持当前值: {{ email || '暂无' }}</div>
+                </el-form-item>
+
+                <el-form-item label="地址">
+                  <el-input v-model="updateForm.location" placeholder="请输入您的地址" />
+                  <div class="form-tip">不填写则保持当前值: {{ location || '暂无' }}</div>
+                </el-form-item>
+
+                <el-form-item label="头像URL">
+                  <el-input v-model="updateForm.avatar" placeholder="请输入头像图片URL" />
+                  <div class="form-tip">不填写则保持当前头像</div>
+                </el-form-item>
+
+                <el-divider>密码管理</el-divider>
+
+                <h3>修改密码 (可选)</h3>
+                <div class="form-tip password-tip">修改密码，如不想修改请填写原本密码，不得留空</div>
+
+                <el-form-item label="当前密码">
+                  <el-input v-model="updateForm.oldPassword" type="password" placeholder="请输入当前密码" show-password />
+                </el-form-item>
+
+                <el-form-item label="新密码">
+                  <el-input v-model="updateForm.newPassword" type="password" placeholder="请输入新密码" show-password />
+                </el-form-item>
+
+                <el-form-item label="确认新密码" :error="!passwordsMatch ? '两次输入的密码不一致' : ''">
+                  <el-input
+                      v-model="updateForm.confirmPassword"
+                      type="password"
+                      placeholder="请再次输入新密码"
+                      show-password
+                      @input="passwordsMatch = updateForm.newPassword === updateForm.confirmPassword" />
+                </el-form-item>
+
+                <el-form-item>
+                  <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 10px;">
+                    <el-button
+                        type="primary"
+                        @click="handleUpdate"
+                        :disabled="!!((hasTeleInput && !telLegal) || (hasEmailInput && !emailLegal) || (updateForm.newPassword && !passwordsMatch))"
+                        class="update-button">
+                      保存更改
+                    </el-button>
+                    <el-button @click="activePanel = 'profile'" class="update-button">取消</el-button>
+                  </div>
+
+                </el-form-item>
+              </el-form>
+            </div>
+          </template>
         </div>
-      </template>
+      </div>
     </div>
   </div>
+
+
 </template>
 
 <style scoped>
+.page {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/OIP-C.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .dashboard-container {
   display: flex;
   height: calc(95vh - 60px);
@@ -554,18 +576,19 @@ const handleAddToPool = async () => {
   width: 300px;
   background-color: white;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #e6e6e6;
 }
 
 .user-profile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 20px;
+  padding-bottom: 30px;
+  margin-bottom: 30px;
   border-bottom: 1px solid #eee;
-  margin-bottom: 20px;
 }
 
 .avatar-container {
@@ -573,7 +596,7 @@ const handleAddToPool = async () => {
   height: 100px;
   border-radius: 50%;
   overflow: hidden;
-  margin-bottom: 15px;
+  margin-bottom: 50px;
 }
 
 .user-avatar {
@@ -583,17 +606,18 @@ const handleAddToPool = async () => {
 }
 
 .user-profile h2 {
-  margin: 10px 0;
+  margin: 15px 0;
   font-size: 1.5rem;
   color: #303133;
 }
 
 .user-info {
   width: 100%;
+  text-align: center;
 }
 
 .user-info p {
-  margin: 8px 0;
+  margin: 50px 0;
   color: #606266;
   word-break: break-word;
 }
@@ -601,85 +625,73 @@ const handleAddToPool = async () => {
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 20px;
-  align-items: center; 
+  align-items: center;
+  justify-content: center;
   width: 100%;
+
 }
 
-.action-buttons .el-button {
-  width: 80%; 
-  max-width: 200px;
-}
+.admin-button {
+  width: 100%;
+  max-width: 180px;
 
-.action-buttons .active {
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 .content-area {
   flex: 1;
-  padding: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  width: calc(100% - 340px); 
-  min-height: calc(95vh - 60px); 
+  width: 900px;
+  min-height: calc(95vh - 60px);
   box-sizing: border-box;
   display: flex;
-  justify-content: center; 
+  background-color: white;
+
 }
 
-.welcome-panel, .form-panel {
-  width: 800px; 
-  max-width: 90%;
-  margin: 0;  
+
+
+.welcome-panel {
+  width: 100%;
+  margin: 0;
   padding: 30px;
   background-color: white;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
-  min-height: calc(95vh - 120px); 
+  min-height: calc(95vh - 120px);
 }
 
-.feature-cards {
+.form-panel {
+  width: 100%;
+  margin: 0;
+  padding: 30px;
+  background-color: white;
+  border-radius: 4px;
+
+  min-height: calc(95vh - 120px);
+}
+
+.panel-header {
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
-  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
-.box-card {
-  width: 45%; 
-  max-width: 320px;
+.info-card {
+  margin-top: 20px;
+  padding: 20px;
+  box-shadow: none !important; /* 添加这行来移除阴影 */
+  border: none !important;
 }
 
-/* 修复表单元素宽度 */
-.el-form-item {
-  width: 100%;
-}
-
-.el-input {
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  .dashboard-container {
-    flex-direction: column;
-  }
-
-  .sidecard {
-    width: 100%;
-    margin-bottom: 20px;
-  }
-
-  .content-area {
-    width: 100%; 
-    min-height: 500px; 
-  }
-
-  .feature-cards {
-    flex-direction: column;
-    align-items: center;
-  }
+.info-item {
+  margin: 15px 0 50px;
+  font-size: 16px;
+  text-align: left;
 }
 
 .not-logged-in {
@@ -710,8 +722,11 @@ const handleAddToPool = async () => {
 }
 
 .login-button {
-  width: 80%;
-  max-width: 200px;
+  width: 100%;
+  max-width: 180px;
+  margin-bottom: 20px;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 .login-benefits {
@@ -737,18 +752,6 @@ const handleAddToPool = async () => {
   color: #606266;
 }
 
-.welcome-panel, .form-panel {
-  width: 800px; /* 固定宽度，确保一致性 */
-  max-width: 90%;
-  margin: 0;  /* 移除外边距，由content-area的flex居中控制 */
-  padding: 30px;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  min-height: calc(95vh - 120px); 
-}
-
 .text-link {
   color: #409EFF;
   font-weight: 500;
@@ -760,40 +763,6 @@ const handleAddToPool = async () => {
 .text-link:hover {
   color: #66b1ff;
   text-decoration: underline;
-}
-
-.button-area {
-  margin-top: 15px;
-  text-align: right;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 22px;
-  font-style: normal;
-  font-weight: 500;
-}
-
-.text-item {
-  margin-bottom: 12px;
-  color: #606266;
-  line-height: 1.6;
-}
-
-.text-item:last-child {
-  margin-bottom: 0;
-}
-
-.text-item ul {
-  padding-left: 20px;
-  margin: 10px 0;
-}
-
-.text-item li {
-  text-align: left;
-  margin-bottom: 8px;
 }
 
 .form-tip {
@@ -833,5 +802,42 @@ h3 {
 
 .form-item-custom {
   margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidecard {
+    width: 100%;
+    margin-bottom: 20px;
+    border-right: none;
+    border-bottom: 1px solid #e6e6e6;
+  }
+
+  .content-area {
+    width: 100%;
+    min-height: 500px;
+  }
+
+  .login-benefits {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .panel-header .el-button {
+    margin-top: 15px;
+    width: 100%;
+  }
+}
+
+.update-button {
+  margin: 20px 0 30px;
 }
 </style>
