@@ -3,7 +3,6 @@
     <div class="products-container">
       <!-- 广告轮播部分 -->
       <div class="ad-section">
-        <!-- 新增广告轮播部分 -->
         <el-carousel
             v-if="ads.length > 0"
             :interval="5000"
@@ -32,9 +31,113 @@
         </el-carousel>
       </div>
 
-
       <el-card class="list-card">
         <div>
+          <!-- 搜索表单 -->
+          <el-form :model="searchForm" label-width="80px" class="search-form">
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="关键词">
+                  <el-input
+                      v-model="searchForm.query"
+                      placeholder="商品名称/描述"
+                      clearable
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="价格范围">
+                  <el-input-number
+                      v-model="searchForm.minPrice"
+                      :min="0"
+                      :precision="2"
+                      placeholder="最低价"
+                      controls-position="right"
+                  />
+                  <span class="range-separator">-</span>
+                  <el-input-number
+                      v-model="searchForm.maxPrice"
+                      :min="searchForm.minPrice || 0"
+                      :precision="2"
+                      placeholder="最高价"
+                      controls-position="right"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="评分范围">
+                  <el-input-number
+                      v-model="searchForm.minRate"
+                      :min="0"
+                      :max="5"
+                      :precision="1"
+                      placeholder="最低分"
+                      controls-position="right"
+                  />
+                  <span class="range-separator">-</span>
+                  <el-input-number
+                      v-model="searchForm.maxRate"
+                      :min="searchForm.minRate || 0"
+                      :max="5"
+                      :precision="1"
+                      placeholder="最高分"
+                      controls-position="right"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="评论数">
+                  <el-input-number
+                      v-model="searchForm.minComment"
+                      :min="0"
+                      placeholder="最少"
+                      controls-position="right"
+                  />
+                  <span class="range-separator">-</span>
+                  <el-input-number
+                      v-model="searchForm.maxComment"
+                      :min="searchForm.minComment || 0"
+                      placeholder="最多"
+                      controls-position="right"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="库存状态">
+                  <el-checkbox
+                      v-model="searchForm.excludeOutOfStock"
+                      label="仅显示有库存"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="折扣">
+                  <el-checkbox
+                      v-model="searchForm.hasDiscount"
+                      label="仅显示有折扣"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24" style="text-align: right;">
+                <el-button
+                    type="primary"
+                    @click="handleSearch"
+                    :loading="loading"
+                >
+                  搜索
+                </el-button>
+                <el-button
+                    @click="resetSearch"
+                >
+                  重置
+                </el-button>
+              </el-col>
+            </el-row>
+          </el-form>
 
           <!-- 修改后的创建按钮 -->
           <router-link v-if="role === 'admin'" to="/create">
@@ -77,9 +180,8 @@
                     </el-popconfirm>
                   </div>
 
-                  <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }"style="text-decoration: none; color: inherit;">
+                  <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }" style="text-decoration: none; color: inherit;">
                     <el-card class="product-card" shadow="hover">
-
                       <div class="product-content">
                         <!-- 商品封面 -->
                         <div class="product-image">
@@ -98,7 +200,6 @@
                         <div class="product-info">
                           <h3 class="product-title">{{ product.title }}</h3>
                           <div class="price-rate">
-
                             <el-rate
                                 v-model="product.rate"
                                 disabled
@@ -111,19 +212,12 @@
                           <div class="price-show">
                             <span class="product-price">¥{{ formatPrice(product.price) }}</span>
                           </div>
-
-
-
                         </div>
                       </div>
                     </el-card>
                   </router-link>
                 </div>
-
-
               </el-col>
-
-
             </el-row>
 
             <!-- 空状态 -->
@@ -140,16 +234,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted,computed } from 'vue'
-import { getProducts } from '../../api/product.ts'
-import { Picture } from '@element-plus/icons-vue'
+import { ref, onMounted, computed } from 'vue'
+import { getProducts, deleteProduct } from '../../api/product.ts'
+import { searchProducts } from '../../api/product.ts' // 新增搜索API
+import { Picture, Delete } from '@element-plus/icons-vue'
 import routes from '../../router'
-import { Delete } from '@element-plus/icons-vue'
-import { deleteProduct } from '../../api/product.ts'
-
-
-// 新增广告相关导入
 import { getAd } from '../../api/advertisement.ts'
+import { ElMessage } from 'element-plus'
 
 // 广告数据
 const ads = ref<any[]>([])
@@ -166,6 +257,66 @@ const fetchAds = async () => {
   }
 }
 
+// 搜索表单
+const searchForm = ref({
+  query: '',
+  minPrice: undefined as number | undefined,
+  maxPrice: undefined as number | undefined,
+  minRate: undefined as number | undefined,
+  maxRate: undefined as number | undefined,
+  minComment: undefined as number | undefined,
+  maxComment: undefined as number | undefined,
+  excludeOutOfStock: false,
+  hasDiscount: false
+})
+
+// 处理搜索
+const handleSearch = async () => {
+  try {
+    loading.value = true
+    // 构建搜索参数，过滤掉undefined/null/空字符串的值
+
+    const params = Object.fromEntries(
+        Object.entries(searchForm.value)
+            .filter(([_, value]) =>
+                value !== undefined &&
+                value !== null &&
+                (typeof value !== 'string' || value.trim() !== '')
+            )
+    )
+    const res = await searchProducts(params)
+    if (res.data.code === '200') {
+
+      products.value = res.data.data
+
+    } else {
+      ElMessage.error(res.data.msg || '搜索失败')
+    }
+  } catch (error) {
+    ElMessage.error('搜索请求失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 重置搜索
+const resetSearch = () => {
+  searchForm.value = {
+    query: '',
+    minPrice: undefined,
+    maxPrice: undefined,
+    minRate: undefined,
+    maxRate: undefined,
+    minComment: undefined,
+    maxComment: undefined,
+    excludeOutOfStock: false,
+    hasDiscount: false
+  }
+  fetchProducts() // 重置后重新获取全部商品
+}
+
+const role = computed(() => sessionStorage.getItem('role') || '')
+
 // 修改原来的goToProduct方法
 const goToProduct = (productId: string, adId: string) => {
   const role = sessionStorage.getItem('role')
@@ -176,28 +327,6 @@ const goToProduct = (productId: string, adId: string) => {
   }
 }
 
-onMounted(async () => {
-  await Promise.all([fetchProducts(), fetchAds()])
-})
-
-
-const role = computed(() => sessionStorage.getItem('role') || '');
-// 在原有代码基础上增加删除逻辑
-const handleDelete = async (id: string) => {
-  try {
-    const res = await deleteProduct(id)
-    if (res.data.code === '200') {
-      ElMessage.success('删除成功')
-      // 删除后重新获取列表
-      await fetchProducts()
-    } else {
-      ElMessage.error(res.data.msg || '删除失败')
-    }
-  } catch (error) {
-    ElMessage.error('删除操作失败')
-  }
-}
-
 // 商品类型定义
 interface Product {
   id: string | number
@@ -205,6 +334,9 @@ interface Product {
   cover?: string
   price?: number | bigint
   rate?: number
+  stock?: number
+  commentCount?: number
+  hasDiscount?: boolean
   // 其他字段可按需补充
 }
 
@@ -215,7 +347,6 @@ const loading = ref(true)
 // 格式化价格显示
 const formatPrice = (price?: number | bigint) => {
   if (!price) return '0.00'
-  // 假设price以分为单位，转换为元
   return (Number(price)).toFixed(2)
 }
 
@@ -234,14 +365,47 @@ const fetchProducts = async () => {
   }
 }
 
-onMounted(() => {
-  fetchProducts()
+// 删除商品
+const handleDelete = async (id: string) => {
+  try {
+    const res = await deleteProduct(id)
+    if (res.data.code === '200') {
+      ElMessage.success('删除成功')
+      await handleSearch() // 删除后重新搜索
+    } else {
+      ElMessage.error(res.data.msg || '删除失败')
+    }
+  } catch (error) {
+    ElMessage.error('删除操作失败')
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([fetchProducts(), fetchAds()])
 })
 </script>
 
 <style scoped>
+/* 新增搜索表单样式 */
+.search-form {
+  margin-bottom: 20px;
+  padding: 20px;
 
-/* 新增样式 */
+  border-radius: 8px;
+
+}
+
+.range-separator {
+  margin: 0 10px;
+  color: #999;
+}
+
+/* 调整输入框间距 */
+.el-input-number {
+  width: 120px;
+}
+
+/* 其他原有样式保持不变 */
 .product-wrapper {
   position: relative;
 }
@@ -262,30 +426,28 @@ onMounted(() => {
   transform: scale(1.1) rotate(90deg);
 }
 
-/* 调整卡片间距 */
 .product-col {
   margin-bottom: 20px;
-  padding: 8px; /* 增加内边距防止遮挡 */
+  padding: 8px;
 }
 
 .products-page {
   width: 100%;
   height: 100%;
-  margin: 0 ;
+  margin: 0;
   background-image: url('../../assets/OIP-C.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   display: block;
-  /* 添加全屏设置 */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  overflow-y: auto; /* 允许内容滚动 */
-  padding: 20px 0 60px; /* 增加底部内边距 */
+  overflow-y: auto;
+  padding: 20px 0 60px;
 }
 
 .products-container {
@@ -293,29 +455,22 @@ onMounted(() => {
   margin: 0 auto;
   flex: 1;
   width: 100%;
-  display: flex; /* 新增 */
-  flex-direction: column; /* 新增 */
+  display: flex;
+  flex-direction: column;
 }
 
-
-
-/* 新增广告容器样式 */
 .ad-section {
   padding: 90px 0 20px;
   margin-bottom: 20px;
   height: 400px;
-
 }
 
-/* 调整轮播样式 */
 .ad-carousel {
   width: 100%;
   margin: 0 auto;
   height: 100%;
-
 }
 
-/* 新增响应式调整 */
 @media (max-width: 768px) {
   .ad-carousel {
     height: 200px !important;
@@ -339,7 +494,6 @@ onMounted(() => {
 }
 
 .ad-item {
-
   border-radius: 12px;
   overflow: hidden;
   transform: scale(0.85);
@@ -386,26 +540,19 @@ onMounted(() => {
   }
 }
 
-/* 调整列表卡片样式 */
 .list-card {
   background-color: rgba(255, 255, 255, 0.75);
   border-radius: 12px;
   overflow: hidden;
-  padding-top: 20px; /* 为顶部留出空间 */
-
+  padding-top: 20px;
   display: flex;
   flex-direction: column;
-
   margin-bottom: 50px;
   flex: 1;
 }
 
 .products-list {
   min-height: 500px;
-}
-
-.product-col {
-  margin-bottom: 20px;
 }
 
 .product-card {
@@ -469,39 +616,6 @@ onMounted(() => {
   font-size: 18px;
   color: #f56c6c;
   font-weight: bold;
-}
-
-.product-desc {
-  font-size: 12px;
-  color: #909399;
-  line-height: 1.5;
-  margin: 10px 0;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.specifications {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #ebeef5;
-}
-
-.spec-item {
-  font-size: 12px;
-  color: #606266;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-}
-
-.spec-label {
-  color: #909399;
-}
-
-.spec-value {
-  color: #303133;
 }
 
 .empty-tip {
