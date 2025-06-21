@@ -2,8 +2,6 @@ name: deploy-front
 
 on:
   push:
-    branches: [master,shen]
-  pull_request:
     branches: [master]
 
 jobs:
@@ -23,14 +21,15 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Run tests (if you have any)
-      run: npm test --if-present
-      
     - name: Build project
       run: npm run build
       
-    - name: Deploy to Server
-      if: github.ref == 'refs/heads/master'
+    - name: List build files
+      run: |
+        echo "Build completed. Files in dist:"
+        ls -la dist/
+        
+    - name: Prepare staging directory
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
@@ -38,15 +37,13 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          # 创建临时目录
-          mkdir -p /tmp/frontend-deploy
-          cd /tmp/frontend-deploy
+          echo "Preparing staging directory in user home..."
+          # 清理并创建暂存目录
+          rm -rf ~/frontend-staging
+          mkdir -p ~/frontend-staging
+          echo "Staging directory created: $(ls -la ~ | grep frontend-staging)"
           
-          # 清理旧文件
-          rm -rf *
-          
-    - name: Copy files to server
-      if: github.ref == 'refs/heads/master'
+    - name: Deploy to staging directory
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.HOST }}
@@ -54,11 +51,10 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         source: "dist/*"
-        target: "/tmp/frontend-deploy/"
+        target: "~/frontend-staging/"
         strip_components: 1
         
-    - name: Deploy and restart services
-      if: github.ref == 'refs/heads/master'
+    - name: Move to final location and set permissions
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
@@ -66,23 +62,37 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          # 备份当前版本
+          echo "Files uploaded to staging:"
+          ls -la ~/frontend-staging/
+          
+          # 备份现有文件（如果存在）
           if [ -d "/var/www/html/frontend" ]; then
+            echo "Backing up existing files..."
             sudo cp -r /var/www/html/frontend /var/www/html/frontend_backup_$(date +%Y%m%d_%H%M%S)
           fi
           
-          # 创建目标目录
+          # 删除旧目录并重新创建
+          echo "Preparing target directory..."
+          sudo rm -rf /var/www/html/frontend
           sudo mkdir -p /var/www/html/frontend
           
-          # 复制新文件
-          sudo cp -r /tmp/frontend-deploy/* /var/www/html/frontend/
+          # 复制文件到最终位置
+          echo "Copying files to target location..."
+          sudo cp -r ~/frontend-staging/* /var/www/html/frontend/
           
-          # 设置权限
-          sudo chown -R www-data:www-data /var/www/html/frontend
+          # 设置正确的权限
+          echo "Setting permissions..."
+          sudo chown -R nginx:nginx /var/www/html/frontend
           sudo chmod -R 755 /var/www/html/frontend
           
-          # 重启Nginx
+          # 验证部署
+          echo "Final deployment structure:"
+          ls -la /var/www/html/frontend/
+          
+          # 清理暂存目录
+          rm -rf ~/frontend-staging
+          
+          # 重新加载Nginx
           sudo systemctl reload nginx
           
-          # 清理临时文件
-          rm -rf /tmp/frontend-deploy
+          echo "Deployment completed successfully!"

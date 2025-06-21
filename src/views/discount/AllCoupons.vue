@@ -218,6 +218,7 @@ fetchData()
 
 .coupon-card {
   margin-top: 80px;
+  min-width: 1000px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.1);
   min-height: calc(90vh - 120px);

@@ -158,7 +158,7 @@ getMyCredits()
                 size="large"
                 @click="handleDraw(1)"
                 :loading="drawLoading"
-                :disabled="drawLoading || parseInt(userCredit) < 60"
+                :disabled="drawLoading || parseInt(userCredit) < 100"
             >
               单抽 (100积分)
             </el-button>
@@ -167,7 +167,7 @@ getMyCredits()
                 size="large"
                 @click="handleDraw(10)"
                 :loading="drawLoading"
-                :disabled="drawLoading || parseInt(userCredit) < 600"
+                :disabled="drawLoading || parseInt(userCredit) < 900"
             >
               十连抽 (900积分)
               <span class="discount-tag">九折</span>
@@ -175,7 +175,7 @@ getMyCredits()
           </div>
           
           <!-- 积分不足提示 -->
-          <div v-if="parseInt(userCredit) < 60" class="insufficient-credit">
+          <div v-if="parseInt(userCredit) < 100" class="insufficient-credit">
             <el-icon class="warning-icon" :size="16">
               <Warning />
             </el-icon>

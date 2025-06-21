@@ -17,7 +17,7 @@ export default defineConfig({
         port: 3000,
         open: true,
     },
-    base: process.env.NODE_ENV === 'production' ? '/tomato-frontend/' : '/',
+    base: process.env.NODE_ENV === 'production' ? '' : '/',
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
