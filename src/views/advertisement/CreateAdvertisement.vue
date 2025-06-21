@@ -31,22 +31,19 @@
             </el-form-item>
 
             <el-form-item label="广告图片">
-              <el-upload
-                  v-model:file-list="imageFileList"
-                  :limit="1"
-                  :on-change="handleImageChange"
-                  :on-exceed="handleExceed"
-                  class="upload-demo"
-                  list-type="picture"
-                  :http-request="uploadHttpRequest"
-                  drag>
-                <el-icon class="el-icon--upload">
-                  <upload-filled/>
-                </el-icon>
-                <div class="el-upload__text">
-                  将图片拖到此处或<em>单击此处</em>上传。仅允许上传一份文件。
-                </div>
-              </el-upload>
+              <el-input
+                  v-model="adData.imgUrl"
+                  placeholder="请输入图片URL"
+                  clearable
+              />
+              <div class="image-preview" v-if="adData.imgUrl">
+                <el-image
+                    :src="adData.imgUrl"
+                    fit="contain"
+                    style="width: 200px; height: 200px; margin-top: 10px;"
+                />
+                <div class="preview-text">图片预览</div>
+              </div>
             </el-form-item>
 
             <span class="button-group">
@@ -68,11 +65,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { UploadFilled } from "@element-plus/icons-vue"
 import { ElMessage } from 'element-plus'
-import { newAd } from '../../api/advertisement.ts' // 请确认路径是否正确
-import { uploadimg } from "../../api/tool.ts";
-import { useRoute } from 'vue-router'; // 从 vue-router 导入 useRoute
+import { newAd } from '../../api/advertisement.ts'
+import { useRoute } from 'vue-router'
 import routes from "../../router";
 
 // 创建路由实例以访问查询参数
@@ -82,22 +77,18 @@ const route = useRoute();
 const adData = ref({
   title: '',
   content: '',
-  imgUrl: 'https://example.com/ad2.jpg',
+  imgUrl: '',
   productId: route.query.productId?.toString() || '' // 初始化时直接获取
 })
-
-// 图片上传相关
-const imageFileList = ref<any[]>([])
 
 // 表单验证计算属性
 const createDisabled = computed(() => {
   return !(
       adData.value.title.trim() &&
       adData.value.productId.trim() &&
-      adData.value.imgUrl
+      adData.value.imgUrl.trim()
   )
 })
-
 
 const goBack = () => {
   routes.go(-1)
@@ -110,7 +101,6 @@ const handleCreateAd = async () => {
     if (response.data.code === '200') {
       ElMessage.success('广告创建成功！')
       resetForm()
-      // 这里可以添加路由跳转逻辑
       routes.push({
         path: '/all',
       })
@@ -122,42 +112,18 @@ const handleCreateAd = async () => {
   }
 }
 
-// 图片上传处理
-const handleImageChange = (file: any) => {
-  imageFileList.value = [file]
-  const formData = new FormData()
-  formData.append('file', file.raw)
-  uploadimg(formData).then((res:any) => {
-    adData.value.imgUrl = res.data.result
-  })
-}
-
 // 重置表单
 const resetForm = () => {
   adData.value = {
     title: '',
     content: '',
     imgUrl: '',
-    productId: ''
+    productId: route.query.productId?.toString() || ''
   }
-  imageFileList.value = []
 }
-
-const handleExceed = () => {
-  ElMessage.warning('仅可上传 1 个文件')
-}
-
-const uploadHttpRequest = () => {
-  return new XMLHttpRequest()
-}
-
-
-
-
 </script>
 
 <style scoped>
-/* 保持原有样式不变 */
 .create-page {
   margin: 0;
   padding: 0;
@@ -198,5 +164,17 @@ const uploadHttpRequest = () => {
   gap: 30px;
   align-items: center;
   justify-content: right;
+}
+
+.image-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.preview-text {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
 }
 </style>

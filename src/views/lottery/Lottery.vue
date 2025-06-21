@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { getCredits } from '../../api/user.ts'
 import { drawLottery } from '../../api/lottery'
 import { getProductById } from '../../api/product'
+import { getCouponType } from '../../api/discount.ts'
 import { PrizeType } from '../../utils/type.ts'
 
 const router = useRouter()
@@ -19,6 +20,13 @@ interface LotteryItem {
     title: string
     cover: string
     // 添加其他产品属性
+  }
+  coupon?: {
+    title: string
+    description: string
+    trigger: number
+    discount: number
+    lastHour: number
   }
 }
 
@@ -35,15 +43,17 @@ const results = ref<LotteryItem[]>([])
 const drawLoading = ref(false)
 const dialogVisible = ref(false)
 const userCredit = ref('')
+const isSingleDraw = ref(false) // 新增：标记是否为单抽
 
 // 处理抽奖操作
 const handleDraw = async (quantity: number) => {
   try {
     drawLoading.value = true
+    isSingleDraw.value = quantity === 1 // 设置是否为单抽
     const res = await drawLottery({ quantity })
 
     if (res.data.code === '200') {
-      ElMessage.success('抽奖成功！')
+      ElMessage.success(quantity === 1 ? '抽奖成功！' : '十连抽成功！')
       const items: LotteryItem[] = res.data.data
       const enhancedItems = await Promise.all(
           items.map(async (item: LotteryItem) => {
@@ -56,12 +66,22 @@ const handleDraw = async (quantity: number) => {
               } catch (error) {
                 console.error('获取书籍详情失败:', error)
               }
+            } else if (item.type === 'COUPON') {
+              try {
+                const couponRes = await getCouponType(item.itemId)
+                if (couponRes.data.code === '200') {
+                  return { ...item, coupon: couponRes.data.data }
+                }
+              } catch (error) {
+                console.error('获取优惠券详情失败:', error)
+              }
             }
             return item
           })
       )
-      // 处理动画显示
+
       if (quantity === 10) {
+        // 十连抽动画效果
         results.value = []
         dialogVisible.value = true
         for (let i = 0; i < enhancedItems.length; i++) {
@@ -69,6 +89,7 @@ const handleDraw = async (quantity: number) => {
           results.value.push(enhancedItems[i])
         }
       } else {
+        // 单抽直接显示
         results.value = enhancedItems
         dialogVisible.value = true
       }
@@ -131,12 +152,10 @@ getMyCredits()
 <template>
   <div class="lottery-page">
     <div class="lottery-container">
-      <!-- 普通抽奖卡 -->
       <el-card class="lottery-card">
         <div class="lottery-content">
           <h1>普通抽奖</h1>
 
-          <!-- 积分显示区域 -->
           <div class="credit-display">
             <div class="credit-info">
               <el-icon class="credit-icon" :size="24">
@@ -174,7 +193,6 @@ getMyCredits()
             </el-button>
           </div>
 
-          <!-- 积分不足提示 -->
           <div v-if="parseInt(userCredit) < 100" class="insufficient-credit">
             <el-icon class="warning-icon" :size="16">
               <Warning />
@@ -184,7 +202,6 @@ getMyCredits()
         </div>
       </el-card>
 
-      <!-- 我的奖品按钮 -->
       <div class="nav-buttons">
         <el-button
             type="info"
@@ -200,52 +217,89 @@ getMyCredits()
     <!-- 抽奖结果对话框 -->
     <el-dialog
         v-model="dialogVisible"
-        title="抽奖结果"
-        width="70%"
+        :title="isSingleDraw ? '抽奖结果' : '十连抽结果'"
+        :width="isSingleDraw ? '40%' : '70%'"
         align-center
         class="result-dialog"
+        :class="{'single-draw-dialog': isSingleDraw, 'multi-draw-dialog': !isSingleDraw}"
         :close-on-click-modal="false"
-        style="margin-top: 100px; margin-bottom: 5vh; max-height: 80vh;"
     >
-      <div class="result-container">
-        <transition-group name="list">
-          <div class="result-row" v-for="(row, rowIndex) in Math.ceil(results.length / 2)" :key="rowIndex">
-            <div
-                v-for="(item, index) in results.slice((rowIndex * 2), (rowIndex * 2) + 2)"
-                :key="item.id"
-                class="result-item"
-            >
-              <div class="item-content">
-                <div class="icon-section">
-                  <el-icon :class="getIconClass(item.type)" size="36">
-                    <component :is="getTypeIcon(item.type)" />
-                  </el-icon>
-                  <span class="type-name">{{ getTypeName(item.type) }}</span>
-                </div>
+      <div class="result-scroll-container" :class="{'single-scroll': isSingleDraw}">
+        <div class="result-container" :class="{'single-container': isSingleDraw}">
+          <transition-group name="list">
+            <!-- 单抽显示 -->
+            <template v-if="isSingleDraw">
+              <div class="single-result-item" v-for="item in results" :key="item.id">
+                <div class="prize-vertical">
+                  <div class="prize-icon-type">
+                    <el-icon :class="getIconClass(item.type)" size="48">
+                      <component :is="getTypeIcon(item.type)" />
+                    </el-icon>
+                    <span class="type-name-">{{ getTypeName(item.type) }}</span>
+                  </div>
 
-                <!-- 书籍类奖品 -->
-                <div v-if="item.type === 'BOOK' && item.product" class="book-info">
                   <el-image
+                      v-if="item.type === 'BOOK' && item.product"
                       :src="item.product.cover"
                       fit="contain"
-                      class="image"
+                      class="single-image"
                   />
-                  <p>{{ item.product.title }}</p>
-                </div>
 
-                <!-- 盲盒类奖品 -->
-                <div v-if="item.type === 'BLIND_BOX'" class="blind-box--info">
-                  <p class="blind_context">神秘盲盒</p>
-                </div>
-
-                <!-- 其他类型奖品 -->
-                <div v-if="item.type === 'COUPON' || item.type === 'CREDIT'" class="common-info">
-                  <p>{{ item.itemId }}</p>
+                  <div class="prize-info-center">
+                    <span v-if="item.type === 'BOOK' && item.product">
+                      {{ item.product.title }}
+                    </span>
+                    <span v-else-if="item.type === 'COUPON' && item.coupon">
+                      {{ item.coupon.title }}
+                    </span>
+                    <span v-else>
+                      {{ item.itemId }}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </transition-group>
+            </template>
+
+            <!-- 十连抽显示 -->
+            <template v-else>
+              <div class="result-row" v-for="(row, rowIndex) in Math.ceil(results.length / 2)" :key="rowIndex">
+                <div
+                    v-for="(item, index) in results.slice((rowIndex * 2), (rowIndex * 2) + 2)"
+                    :key="item.id"
+                    class="result-item"
+                >
+                  <div class="prize-horizontal">
+                    <div class="prize-icon-type">
+                      <el-icon :class="getIconClass(item.type)" size="36">
+                        <component :is="getTypeIcon(item.type)" />
+                      </el-icon>
+                      <span class="type-name">{{ getTypeName(item.type) }}</span>
+                    </div>
+
+                    <el-image
+                        v-if="item.type === 'BOOK' && item.product"
+                        :src="item.product.cover"
+                        fit="contain"
+                        class="image"
+                    />
+
+                    <div class="prize-info">
+                      <span v-if="item.type === 'BOOK' && item.product">
+                        {{ item.product.title }}
+                      </span>
+                      <span v-else-if="item.type === 'COUPON' && item.coupon">
+                        {{ item.coupon.title }}
+                      </span>
+                      <span v-else>
+                        {{ item.itemId }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </transition-group>
+        </div>
       </div>
 
       <template #footer>
@@ -500,7 +554,8 @@ getMyCredits()
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
-  max-height: 60vh;
+  max-height: 80vh;
+
 }
 
 .result-row {
@@ -535,6 +590,13 @@ getMyCredits()
 }
 
 .type-name {
+  margin-left: 100px;
+  font-weight: bold;
+  color: #333;
+}
+
+.type-name- {
+  margin-left: 150px;
   font-weight: bold;
   color: #333;
 }
@@ -558,14 +620,6 @@ getMyCredits()
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-}
-
-.image {
-  width: 80px;
-  height: 110px;
-  margin-bottom: 8px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .blind_context {
@@ -647,5 +701,140 @@ getMyCredits()
 }
 .list-move {
   transition: transform 0.5s ease;
+}
+
+/* 新增的滚动容器样式 */
+.result-scroll-container {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* 奖品水平排列样式 */
+.prize-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  min-height: 70px;
+}
+
+.prize-icon-type {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+  margin-left: 60px;
+}
+
+.prize-info {
+  flex: 1;
+  color: #666;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.image {
+  width: 60px;
+  height: 80px;
+  margin-left: 60px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .prize-horizontal {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .prize-info {
+    padding-left: 46px;
+    white-space: normal;
+  }
+
+  .result-row {
+    flex-direction: column;
+  }
+
+  .result-dialog {
+    width: 90% !important;
+    margin-top: 10vh !important;
+    margin-bottom: 10vh !important;
+  }
+}
+
+/* 原有样式保持不变... */
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.result-item {
+  flex: 1;
+  min-width: 0;
+  padding: 15px;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.5s ease;
+}
+
+/* 单抽对话框样式 */
+.single-draw-dialog {
+  margin-top: 15vh !important;
+}
+
+.single-scroll {
+  max-height: 50vh;
+}
+
+.single-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.single-result-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.prize-vertical {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+
+
+.single-image {
+  width: 100px;
+  height: 140px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.prize-info-center {
+  text-align: center;
+
+  color: #333;
+  font-weight: 500;
+  margin-left: 150px;
 }
 </style>

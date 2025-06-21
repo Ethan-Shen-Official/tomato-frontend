@@ -22,22 +22,19 @@
             </el-form-item>
 
             <el-form-item label="商品封面">
-              <el-upload
-                  v-model:file-list="imageFileList"
-                  :limit="1"
-                  :on-change="handleChange"
-                  :on-exceed="handleExceed"
-                  class="upload-demo"
-                  list-type="picture"
-                  :http-request="uploadHttpRequest"
-                  drag>
-                <el-icon class="el-icon--upload">
-                  <upload-filled/>
-                </el-icon>
-                <div class="el-upload__text">
-                  将文件拖到此处或<em>单击此处</em>上传。仅允许上传一份文件。
-                </div>
-              </el-upload>
+              <el-input
+                  v-model="image"
+                  placeholder="请输入图片URL"
+                  clearable
+              />
+              <div class="image-preview" v-if="image">
+                <el-image
+                    :src="image"
+                    fit="contain"
+                    style="width: 200px; height: 200px; margin-top: 10px;"
+                />
+                <div class="preview-text">图片预览</div>
+              </div>
             </el-form-item>
 
             <!-- 添加规格部分 -->
@@ -88,20 +85,16 @@
 
 <script setup lang="ts">
 import {computed, ref} from 'vue'
-import {UploadFilled} from "@element-plus/icons-vue"
-import {addProduct,updateStockpile} from "../../api/product.ts";
-import {uploadimg} from "../../api/tool.ts";
-
-// 新增导入
-import { Delete } from '@element-plus/icons-vue'
+import {Delete} from '@element-plus/icons-vue'
+import {addProduct, updateStockpile} from "../../api/product.ts";
 import routes from "../../router";
 
-// 在原有响应式变量后添加
+// 规格相关
 const specifications = ref<Array<{ item: string; value: string }>>([])
 
 // 添加规格方法
 const addSpec = () => {
-  specifications.value.push({ item: '', value: '' })
+  specifications.value.push({item: '', value: ''})
 }
 
 // 删除规格方法
@@ -114,19 +107,14 @@ const title = ref('')
 const price = ref('')
 const rate = ref(0)
 const description = ref('')
-const imageFileList = ref([])
 const image = ref('')
 
 const hasTitleInput = computed(() => title.value !== '')
 const hasPriceInput = computed(() => price.value !== '')
 const hasRateInput = computed(() => rate.value >= 0 && rate.value <= 10)
-// const hasImageFile = computed(() => image.value !== '')
 const createDisabled = computed(() => {
   return !(hasTitleInput.value && hasPriceInput.value && hasRateInput.value)
 })
-
-// const id = ref("");
-// const amount = ref(0);
 
 // 创建商品按钮触发
 function handleCreateProduct() {
@@ -156,7 +144,6 @@ function handleCreateProduct() {
       rate.value = 0
       description.value = ''
       image.value = ''
-      imageFileList.value.splice(0)
       specifications.value.splice(0)
       routes.push({path: "/all"})
     } else if (res.data.code === '400') {
@@ -168,24 +155,6 @@ function handleCreateProduct() {
     }
   })
 }
-
-function handleChange(file: any, fileList: any) {
-  imageFileList.value = fileList
-  let formData = new FormData()
-  formData.append('file', file.raw)
-  uploadimg(formData).then((res: any) => {
-    image.value = res.data.data.url
-  })
-}
-
-function handleExceed() {
-  ElMessage.warning(`仅可上传 1 个文件`);
-}
-
-function uploadHttpRequest() {
-  return new XMLHttpRequest()
-}
-
 </script>
 
 <style scoped>
@@ -241,5 +210,17 @@ function uploadHttpRequest() {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.image-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.preview-text {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
 }
 </style>

@@ -28,9 +28,6 @@ const hasUsernameInput = computed(() => username.value != '')
 // 真实姓名是否为空
 const hasNameInput = computed(() => name.value != '')
 
-
-
-
 // 电话号码格式为1开头的11位数字
 const teleNumberRegex = /^1\d{10}$/;
 const telLegal = computed(() => teleNumberRegex.test(tele.value))
@@ -41,61 +38,41 @@ const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const emailLegal = computed(() => emailRegex.test(email.value))
 
 const registerDisabled = computed(() => {
-  return !(hasUsernameInput.value && hasNameInput.value && hasIdentityChosen.value && hasPasswordInput.value && hasConfirmPasswordInput.value && isPasswordIdentical.value && (!hasEmail.value || emailLegal.value) && (!hasTelInput.value || telLegal.value))
+  return !(hasUsernameInput.value && hasNameInput.value && hasIdentityChosen.value &&
+      hasPasswordInput.value && hasConfirmPasswordInput.value &&
+      isPasswordIdentical.value && (!hasEmail.value || emailLegal.value) &&
+      (!hasTelInput.value || telLegal.value))
 })
-
-
-// 处理文件上传
-function beforeUpload(file: any) {
-  const isImage = file.type.startsWith('image/');
-  const isLt2M = file.size / 1024 / 1024 < 2; // 限制文件大小为2MB
-
-  if (!isImage) {
-    alert('只能上传图片文件！');
-  }
-  if (!isLt2M) {
-    alert('上传头像图片大小不能超过 2MB!');
-  }
-  return isImage && isLt2M;
-}
-
-function handleUploadChange(file: any) {
-  avatar.value = URL.createObjectURL(file.raw); // 创建预览
-}
-
-function handleHttpRequest() {
-  return new XMLHttpRequest();
-}
 
 // 注册按钮触发
 function handleRegister() {
   try {
-  newUser({
-    role: role.value,
-    name: name.value,
-    telephone: tele.value,
-    password: password.value,
-    location: location.value,
-    username: username.value,
-    email: email.value,
-    avatar: '',
-  }).then(res => {
-    if (res.data.code === '200') {  
-      ElMessage({
-        message: "注册成功！请登录账号",
-        type: 'success',
-        center: true,
-      })
-      routes.push({path: "/login"})
-    } else if (res.data.code === '400') {
-      ElMessage({
-        message: res.data.msg,
-        type: 'error',
-        center: true,
-      })
-    }
-  })
-} catch (error) {
+    newUser({
+      role: role.value,
+      name: name.value,
+      telephone: tele.value,
+      password: password.value,
+      location: location.value,
+      username: username.value,
+      email: email.value,
+      avatar: avatar.value, // 使用直接输入的URL
+    }).then(res => {
+      if (res.data.code === '200') {
+        ElMessage({
+          message: "注册成功！请登录账号",
+          type: 'success',
+          center: true,
+        })
+        routes.push({path: "/login"})
+      } else if (res.data.code === '400') {
+        ElMessage({
+          message: res.data.msg,
+          type: 'error',
+          center: true,
+        })
+      }
+    })
+  } catch (error) {
     ElMessage({
       message: "出现网络问题！",
       type: 'error',
@@ -111,7 +88,7 @@ function handleRegister() {
       <el-card class="box-card">
         <div>
           <h1>注册</h1>
-          
+
           <el-form>
             <el-row>
               <el-col :span="7">
@@ -155,19 +132,20 @@ function handleRegister() {
               </el-col>
               <el-col :span="1"></el-col>
               <el-col :span="8">
-                <el-form-item label="头像上传">
-                  <el-upload
-                      class="avatar-uploader"
-                      action="#"
-                      :show-file-list="false"
-                      accept="image/*"
-                      :before-upload="beforeUpload"
-                      :http-request="handleHttpRequest"
-                      @change="handleUploadChange"
-                  >
-                    <img v-if="avatar" :src="avatar" alt="Avatar Preview" class="avatar-preview" />
-                    <el-button v-if="!avatar">选择头像</el-button>
-                  </el-upload>
+                <el-form-item label="头像URL">
+                  <el-input
+                      v-model="avatar"
+                      placeholder="请输入头像图片URL"
+                      clearable
+                  />
+                  <div class="avatar-preview-container" v-if="avatar">
+                    <div class="preview-text">头像预览：</div>
+                    <el-image
+                        :src="avatar"
+                        fit="cover"
+                        class="avatar-preview"
+                    />
+                  </div>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -206,8 +184,8 @@ function handleRegister() {
 
             <span class="button-group">
               <el-button @click.prevent="handleRegister"
-                        :disabled="registerDisabled"
-                        type="primary">
+                         :disabled="registerDisabled"
+                         type="primary">
                 创建账户
               </el-button>
 
@@ -258,23 +236,24 @@ function handleRegister() {
   border-radius: 8px;
 }
 
-.avatar-uploader {
+.avatar-preview-container {
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100px;
-  height: 100px;
-  border: 1px dashed #d9d9d9;
-  border-radius: 50%;
-  cursor: pointer;
 }
 
 .avatar-preview {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  margin-top: 10px;
+  border: 1px solid #eee;
+}
+
+.preview-text {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
 }
 
 .error {
@@ -299,6 +278,15 @@ function handleRegister() {
   .box-card {
     width: 90%;
     padding: 15px;
+  }
+
+  .el-col {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .el-col:empty {
+    display: none;
   }
 }
 </style>
