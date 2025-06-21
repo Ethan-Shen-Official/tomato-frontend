@@ -501,9 +501,7 @@ const handleAddToPool = async () => {
                 <h3>修改密码 (可选)</h3>
                 <div class="form-tip password-tip">修改密码，如不想修改请填写原本密码，不得留空</div>
 
-                <el-form-item label="当前密码">
-                  <el-input v-model="updateForm.oldPassword"   show-password />
-                </el-form-item>
+
 
                 <el-form-item label="新密码">
                   <el-input v-model="updateForm.newPassword" type="password" placeholder="请输入新密码" show-password />
