@@ -31,28 +31,19 @@
             </el-form-item>
 
             <el-form-item label="广告图片" required>
-              <el-upload
-                  v-model:file-list="imageFileList"
-                  :limit="1"
-                  :on-change="handleImageChange"
-                  :on-exceed="handleExceed"
-                  class="upload-demo"
-                  list-type="picture"
-                  :http-request="uploadHttpRequest"
-                  drag
-              >
-                <el-icon class="el-icon--upload">
-                  <upload-filled />
-                </el-icon>
-                <div class="el-upload__text">
-                  当前图片：
-                  <el-image
-                      :src="currentAd.imgUrl"
-                      style="width: 100px; margin-right: 10px"
-                  />
-                  将新图片拖到此处或<em>单击此处</em>上传
-                </div>
-              </el-upload>
+              <el-input
+                  v-model="currentAd.imgUrl"
+                  placeholder="请输入图片URL"
+                  clearable
+              />
+              <div class="image-preview">
+                <div class="preview-text">当前图片：</div>
+                <el-image
+                    :src="currentAd.imgUrl"
+                    style="width: 200px; height: 200px; margin-top: 10px;"
+                    fit="contain"
+                />
+              </div>
             </el-form-item>
 
             <span class="button-group">
@@ -63,7 +54,6 @@
               >
                 提交更新
               </el-button>
-              <!-- 添加删除按钮 -->
               <el-button
                   type="danger"
                   @click="handleDelete"
@@ -82,14 +72,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { UploadFilled } from '@element-plus/icons-vue'
-import { ElMessage,ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
-import { getAd } from '../../api/advertisement'
-import { updateAd } from '../../api/advertisement'
-import { uploadimg } from '../../api/tool'
-import { deleteAd } from '../../api/advertisement' // 添加删除API导入
-
+import { getAd, updateAd, deleteAd } from '../../api/advertisement'
 
 const route = useRoute()
 const router = useRouter()
@@ -102,8 +87,62 @@ interface Ad {
   productId: string
 }
 
+// 广告数据
+const ads = ref<Ad[]>([])
+const currentAd = ref<Ad | null>(null)
+const loading = ref(true)
 
-// 添加删除处理方法
+// 从所有广告中匹配当前广告
+const findCurrentAd = () => {
+  const adId = route.params.id
+  currentAd.value = ads.value.find(ad => ad.id === adId) || null
+}
+
+// 获取广告列表
+const fetchAds = async () => {
+  try {
+    const res = await getAd()
+    if (res.data.code === '200') {
+      ads.value = res.data.data
+      findCurrentAd()
+    }
+  } catch (error) {
+    ElMessage.error('获取广告数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 表单验证
+const formValid = computed(() => {
+  return currentAd.value?.title?.trim() &&
+      currentAd.value?.content?.trim() &&
+      currentAd.value?.imgUrl?.trim()
+})
+
+// 更新广告
+const handleUpdate = async () => {
+  if (!currentAd.value) return
+
+  try {
+    const res = await updateAd({
+      id: currentAd.value.id,
+      title: currentAd.value.title,
+      content: currentAd.value.content,
+      imgUrl: currentAd.value.imgUrl,
+      productId: currentAd.value.productId
+    })
+
+    if (res.data.code === '200') {
+      ElMessage.success('广告更新成功')
+      router.push('/all')
+    }
+  } catch (error) {
+    ElMessage.error('更新失败')
+  }
+}
+
+// 删除广告
 const handleDelete = async () => {
   if (!currentAd.value) return
 
@@ -130,86 +169,6 @@ const handleDelete = async () => {
   }
 }
 
-// 广告数据
-const ads = ref<Ad[]>([])
-const currentAd = ref<Ad | null>(null)
-const loading = ref(true)
-
-// 图片上传相关
-const imageFileList = ref<any[]>([])
-
-// 从所有广告中匹配当前广告
-const findCurrentAd = () => {
-  const adId = route.params.id
-  currentAd.value = ads.value.find(ad =>
-      ad.id === adId
-  ) || null
-}
-
-// 获取广告列表
-const fetchAds = async () => {
-  try {
-    const res = await getAd()
-    if (res.data.code === '200') {
-      ads.value = res.data.data
-      findCurrentAd()
-    }
-  } catch (error) {
-    ElMessage.error('获取广告数据失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-// 表单验证
-const formValid = computed(() => {
-  return currentAd.value?.title?.trim() &&
-      currentAd.value?.content?.trim() &&
-      currentAd.value?.imgUrl
-})
-
-// 更新广告
-const handleUpdate = async () => {
-  if (!currentAd.value) return
-
-  try {
-    const res = await updateAd({
-      id: currentAd.value.id,
-      title: currentAd.value.title,
-      content: currentAd.value.content,
-      imgUrl: currentAd.value.imgUrl,
-      productId: currentAd.value.productId
-    })
-
-    if (res.data.code === '200') {
-      ElMessage.success('广告更新成功')
-      router.push('/all')
-    }
-  } catch (error) {
-    ElMessage.error('更新失败')
-  }
-}
-
-// 图片上传处理
-const handleImageChange = (file: any) => {
-  imageFileList.value = [file]
-  const formData = new FormData()
-  formData.append('file', file.raw)
-  uploadimg(formData).then((res: any) => {
-    if (currentAd.value) {
-      currentAd.value.imgUrl = res.data.result
-    }
-  })
-}
-
-const handleExceed = () => {
-  ElMessage.warning('只能上传一张图片')
-}
-
-const uploadHttpRequest = () => {
-  return new XMLHttpRequest()
-}
-
 const goBack = () => {
   router.go(-1)
 }
@@ -220,7 +179,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 复用创建广告的样式 */
 .update-page {
   margin: 0;
   padding: 0;
@@ -261,5 +219,18 @@ onMounted(() => {
   gap: 30px;
   align-items: center;
   justify-content: right;
+}
+
+.image-preview {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.preview-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
 }
 </style>

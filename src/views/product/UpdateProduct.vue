@@ -37,28 +37,22 @@
             </el-form-item>
 
             <el-form-item label="商品封面">
-              <el-upload
-                  v-model:file-list="imageFileList"
-                  :limit="1"
-                  :on-change="handleChange"
-                  :on-exceed="handleExceed"
-                  class="upload-demo"
-                  list-type="picture"
-                  :http-request="uploadHttpRequest"
-                  drag
-              >
-                <el-icon class="el-icon--upload">
-                  <upload-filled/>
-                </el-icon>
-                <div class="el-upload__text">
-                  将文件拖到此处或<em>单击此处</em>上传。仅允许上传一份文件。
+              <el-input
+                  v-model="formData.cover"
+                  placeholder="请输入图片URL"
+                  clearable
+              />
+              <div class="image-preview">
+                <div class="preview-text">当前封面：</div>
+                <el-image
+                    :src="formData.cover"
+                    style="width: 200px; height: 200px; margin-top: 10px;"
+                    fit="contain"
+                />
+                <div class="preview-link" v-if="formData.cover">
+                  <a :href="formData.cover" target="_blank">查看原图</a>
                 </div>
-                <template #tip>
-                  <div class="el-upload__tip" v-if="formData.cover">
-                    当前封面：<a :href="formData.cover" target="_blank">{{ formData.cover }}</a>
-                  </div>
-                </template>
-              </el-upload>
+              </div>
             </el-form-item>
 
             <!-- 规格编辑部分 -->
@@ -112,10 +106,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { UploadFilled } from '@element-plus/icons-vue'
 import { Delete } from '@element-plus/icons-vue'
 import { getProductById, updateProduct } from '../../api/product'
-import { uploadimg } from '../../api/tool'
 import { ElMessage } from 'element-plus'
 import type { UpdateInfo } from '../../api/product'
 
@@ -133,9 +125,6 @@ const formData = ref<UpdateInfo>({
   specifications: []
 })
 
-// 图片上传相关
-const imageFileList = ref<Array<{ name: string; url?: string }>>([])
-
 // 初始化加载商品数据
 onMounted(async () => {
   try {
@@ -152,14 +141,6 @@ onMounted(async () => {
         description: product.description,
         cover: product.cover,
         specifications: product.specifications || []
-      }
-
-      // 初始化图片显示
-      if (product.cover) {
-        imageFileList.value = [{
-          name: '商品封面',
-          url: product.cover
-        }]
       }
     }
   } catch (error) {
@@ -186,25 +167,6 @@ const addSpec = () => {
 const removeSpec = (index: number) => {
   formData.value.specifications?.splice(index, 1)
 }
-
-// 图片上传处理
-const handleChange = (file: any) => {
-  const imageFormData = new FormData()
-  imageFormData.append('file', file.raw)
-
-  uploadimg(imageFormData).then((res: any) => {
-    formData.value.cover = res.data.data.url
-    ElMessage.success('图片上传成功')
-  }).catch(() => {
-    ElMessage.error('图片上传失败')
-  })
-}
-
-const handleExceed = () => {
-  ElMessage.warning('最多只能上传一张图片')
-}
-
-const uploadHttpRequest = () => new XMLHttpRequest()
 
 // 提交更新
 const handleUpdateProduct = async () => {
@@ -271,6 +233,7 @@ const handleUpdateProduct = async () => {
   background-color: rgba(255, 255, 255, 0.95);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
+  margin-top: 200px;
 }
 
 .button-group {
@@ -297,18 +260,30 @@ const handleUpdateProduct = async () => {
   gap: 10px;
 }
 
-.el-upload__tip {
+.image-preview {
   margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.preview-text {
+  font-size: 14px;
   color: #666;
+  margin-bottom: 5px;
+}
+
+.preview-link {
+  margin-top: 5px;
+}
+
+.preview-link a {
+  color: #409eff;
+  text-decoration: none;
   font-size: 12px;
 }
 
-.el-upload__tip a {
-  color: #409eff;
-  text-decoration: none;
-}
-
-/* 新增适配背景的样式 */
+/* 表单元素样式 */
 .update-form :deep(.el-form-item__label) {
   color: #333;
   font-weight: 500;
