@@ -34,7 +34,17 @@ type productAmount = {
     amount: number;
 }
 
-
+type searchQuery = {
+    query?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    minRate?: number;
+    maxRate?: number;
+    minComment?: number;
+    maxComment?: number;
+    excludeOutOfStock?: boolean;
+    hasDiscount?: boolean;
+}
 
 
 /**
@@ -46,23 +56,6 @@ type productAmount = {
  */
 export const getProducts = () => {
     return axios.get(`${API_PRODUCT_MODULE_PREFIX}`,
-    )
-    .then(res => {
-        return res
-    })
-}
-
-/**
- * 请求方式
-    方法: GET
-    路径: /api/products/{id}
-    config: none
-    params: id: string
- * @param id
- * @returns product
- */
-export const getProduct = (id: String) => {
-    return axios.get(`${API_PRODUCT_MODULE_PREFIX}/${id}`,
     )
     .then(res => {
         return res
@@ -157,6 +150,15 @@ export const updateStockpile = (productinfo : productAmount) => {
  * */
 export const getStockpile = (id: string) => {
     return axios.get(`${API_PRODUCT_MODULE_PREFIX}/stockpile/${id}`)
+    .then(res => {
+        return res
+    })
+}
+
+export const searchProducts = (query: searchQuery) => {
+    return axios.get(`${API_PRODUCT_MODULE_PREFIX}/search`, {
+        params: query
+    })
     .then(res => {
         return res
     })
