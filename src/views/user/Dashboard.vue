@@ -517,7 +517,7 @@ const handleAddToPool = async () => {
                 </el-form-item>
 
                 <el-form-item>
-                  <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 10px;">
+                  <div style="display: flex; justify-content: flex-end; align-items: flex-end; gap: 20px; margin-top: 10px; width: 100%; position: relative; bottom: 0; right: 0;">
                     <el-button
                         type="primary"
                         @click="handleUpdate"
@@ -527,7 +527,6 @@ const handleAddToPool = async () => {
                     </el-button>
                     <el-button @click="activePanel = 'profile'" class="update-button">取消</el-button>
                   </div>
-
                 </el-form-item>
               </el-form>
             </div>
