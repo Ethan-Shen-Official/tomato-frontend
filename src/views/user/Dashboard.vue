@@ -26,6 +26,7 @@ const tele = ref('');
 const location = ref('');
 const email = ref('');
 const avatar_url = ref('');
+const password = ref('');
 
 const teleNumberRegex = /^1\d{10}$/;
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -86,7 +87,7 @@ onMounted(async () => {
         email: email.value,
         location: location.value,
         avatar: avatar_url.value,
-        oldPassword: '',
+        oldPassword: password.value,
         newPassword: '',
         confirmPassword: ''
       };
@@ -106,6 +107,7 @@ function getCurUser() {
       location.value = res.data.data.location;
       avatar_url.value = res.data.data.avatar;
       role.value = res.data.data.role;
+      password.value = res.data.data.password;
     } else if (res.data.code === '400') {
       ElMessage.error(res.data.msg);
     }
@@ -130,7 +132,7 @@ const handleUpdate = async () => {
       email: updateForm.value.email || email.value,
       location: updateForm.value.location || location.value,
       avatar: updateForm.value.avatar || avatar_url.value,
-      password: updateForm.value.newPassword || '123456'
+      password: updateForm.value.newPassword || ''
     };
 
     // 如果没有更改任何内容，则提示用户
@@ -175,8 +177,8 @@ const handleUpdate = async () => {
             email.value = res.data.data.email;
             location.value = res.data.data.location;
             avatar_url.value = res.data.data.avatar;
-
-            updateForm.value.oldPassword = '';
+            password.value = res.data.data.password;
+            updateForm.value.oldPassword = password.value;
             updateForm.value.newPassword = '';
             updateForm.value.confirmPassword = '';
           } else if (res.data.code === '400') {
@@ -284,7 +286,7 @@ const handleAddToPool = async () => {
                       type="primary"
                       @click="$router.push('/all_coupons')"
                       style="margin-top: 35px"
-                      class="admin-button">
+                      class="admin-button-red">
                     查看全部折扣券
                   </el-button>
 
@@ -292,7 +294,7 @@ const handleAddToPool = async () => {
                       type="primary"
                       @click="openAddDialog()"
                       style="margin-top: 35px"
-                      class="admin-button">
+                      class="admin-button-yellow">
                     积分奖池
                   </el-button>
                 </div>
@@ -500,7 +502,7 @@ const handleAddToPool = async () => {
                 <div class="form-tip password-tip">修改密码，如不想修改请填写原本密码，不得留空</div>
 
                 <el-form-item label="当前密码">
-                  <el-input v-model="updateForm.oldPassword" type="password" placeholder="请输入当前密码" show-password />
+                  <el-input v-model="updateForm.oldPassword"   show-password />
                 </el-form-item>
 
                 <el-form-item label="新密码">
@@ -639,6 +641,22 @@ const handleAddToPool = async () => {
   margin-right: 0 !important;
 }
 
+
+.admin-button-red {
+  width: 100%;
+  max-width: 180px;
+  background-color: #f56c6c;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.admin-button-yellow {
+  width: 100%;
+  max-width: 180px;
+  background-color: #e6a23c;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
 .content-area {
   flex: 1;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
