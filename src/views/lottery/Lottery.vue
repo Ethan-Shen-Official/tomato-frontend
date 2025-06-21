@@ -262,9 +262,9 @@ getMyCredits()
 
             <!-- 十连抽显示 -->
             <template v-else>
-              <div class="result-row" v-for="(row, rowIndex) in Math.ceil(results.length / 2)" :key="rowIndex">
+              <div class="result-row" v-for="(_, rowIndex) in Math.ceil(results.length / 2)" :key="rowIndex">
                 <div
-                    v-for="(item, index) in results.slice((rowIndex * 2), (rowIndex * 2) + 2)"
+                    v-for="(item, _) in results.slice((rowIndex * 2), (rowIndex * 2) + 2)"
                     :key="item.id"
                     class="result-item"
                 >
