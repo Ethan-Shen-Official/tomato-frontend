@@ -110,6 +110,7 @@ import { Delete } from '@element-plus/icons-vue'
 import { getProductById, updateProduct } from '../../api/product'
 import { ElMessage } from 'element-plus'
 import type { UpdateInfo } from '../../api/product'
+import routes from '../../router'
 
 const route = useRoute()
 const submitting = ref(false)
@@ -188,7 +189,7 @@ const handleUpdateProduct = async () => {
     if (res.data.code === '200') {
       ElMessage.success('商品更新成功')
       setTimeout(() => {
-        window.location.href = `/products/${formData.value.id}`
+        routes.push('/all')
       }, 1500)
     } else {
       ElMessage.error(res.data.msg || '更新失败')
