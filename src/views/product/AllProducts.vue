@@ -390,9 +390,7 @@ onMounted(async () => {
 .search-form {
   margin-bottom: 20px;
   padding: 20px;
-
   border-radius: 8px;
-
 }
 
 .range-separator {
@@ -478,14 +476,14 @@ onMounted(async () => {
 
   .ad-overlay {
     padding: 12px;
+  }
 
-    .ad-title {
-      font-size: 1.2em;
-    }
+  .ad-overlay .ad-title {
+    font-size: 1.2em;
+  }
 
-    .ad-description {
-      display: none;
-    }
+  .ad-overlay .ad-description {
+    display: none;
   }
 
   .products-page {
@@ -499,11 +497,11 @@ onMounted(async () => {
   transform: scale(0.85);
   transition: transform 0.3s;
   cursor: pointer;
+}
 
-  &.is-active {
-    transform: scale(1);
-    z-index: 3;
-  }
+.ad-item.is-active {
+  transform: scale(1);
+  z-index: 3;
 }
 
 .ad-content {
@@ -525,19 +523,19 @@ onMounted(async () => {
   padding: 20px;
   background: linear-gradient(transparent, rgba(0,0,0,0.7));
   color: white;
+}
 
-  .ad-title {
-    margin: 0;
-    font-size: 1.5em;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  }
+.ad-overlay .ad-title {
+  margin: 0;
+  font-size: 1.5em;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
 
-  .ad-description {
-    margin: 10px 0 0;
-    font-size: 0.9em;
-    line-height: 1.4;
-    opacity: 0.9;
-  }
+.ad-overlay .ad-description {
+  margin: 10px 0 0;
+  font-size: 0.9em;
+  line-height: 1.4;
+  opacity: 0.9;
 }
 
 .list-card {
@@ -555,9 +553,13 @@ onMounted(async () => {
   min-height: 500px;
 }
 
+/* 修改后的商品卡片样式 - 增加高度 */
 .product-card {
   height: 100%;
+  min-height: 600px; /* 增加卡片整体高度 */
   transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
 }
 
 .product-card:hover {
@@ -568,16 +570,19 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  flex-grow: 1;
 }
 
+/* 增加图片高度 */
 .product-image {
-  height: 200px;
+  height: 450px; /* 从200px增加到280px */
   background-color: #f5f7fa;
   border-radius: 4px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0; /* 防止被压缩 */
 }
 
 .cover-image {
@@ -593,12 +598,15 @@ onMounted(async () => {
 .product-info {
   padding: 15px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .product-title {
   margin: 0 0 10px;
   font-size: 16px;
   color: #303133;
+  flex-shrink: 0;
 }
 
 .price-rate {
@@ -606,10 +614,12 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .price-show {
   text-align: center;
+  margin-top: auto; /* 使价格部分靠底部 */
 }
 
 .product-price {
