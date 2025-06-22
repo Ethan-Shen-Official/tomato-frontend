@@ -32,7 +32,7 @@
                   <el-rate
                       v-model="product.rate"
                       disabled
-                      :max="10"
+                      :max="5"
                       :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
                       class="product-rating"
                   />
